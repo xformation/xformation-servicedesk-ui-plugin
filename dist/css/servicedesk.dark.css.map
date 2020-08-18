@@ -1,0 +1,14 @@
+{
+	"version": 3,
+	"file": "servicedesk.dark.css",
+	"sources": [
+		"../sass/servicedesk.dark.scss",
+		"../sass/variables.dark.scss",
+		"../sass/servicedesk.scss",
+		"../sass/custom.scss",
+		"../sass/components/breadcrumbs.scss",
+		"../sass/pages/dashboard.scss"
+	],
+	"names": [],
+	"mappings": "AIAA,AAEE,2BAFyB,CAEzB,sBAAsB,CAAC;EACrB,gBAAgB,EHHW,OAAO;EGIlC,OAAO,EAAE,cAAc;EACvB,SAAS,EAAE,IAAI,GAwBhB;EA7BH,AAOI,2BAPuB,CAEzB,sBAAsB,CAKpB,WAAW,CAAC;IACV,KAAK,EHPQ,OAAO;IGQpB,OAAO,EAAE,YAAY,GACtB;EAVL,AAYI,2BAZuB,CAEzB,sBAAsB,CAUpB,YAAY,CAAC;IACX,KAAK,EAAE,KAAK,GACb;EAdL,AAgBI,2BAhBuB,CAEzB,sBAAsB,CAcpB,CAAC,AAAA,iBAAiB,CAAC;IACjB,KAAK,EHfc,OAAO,GGgB3B;EAlBL,AAoBI,2BApBuB,CAEzB,sBAAsB,CAkBpB,aAAa,CAAC;IACZ,KAAK,EHlB2B,OAAO,GGmBxC;EAtBL,AAwBI,2BAxBuB,CAEzB,sBAAsB,CAsBpB,UAAU,CAAC;IACT,KAAK,EHvBc,OAAO;IGwB1B,OAAO,EAAE,YAAY;IACrB,OAAO,EAAE,MAAM,GAChB;;AAIL,MAAM,EAAE,SAAS,EAAE,KAAK;EACtB,AAAA,sBAAsB,CAAC,YAAY,CAAC;IAClC,KAAK,EAAE,IAAI;IACX,WAAW,EAAE,GAAG,GACjB"
+}

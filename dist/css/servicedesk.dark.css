@@ -1,0 +1,24 @@
+#servicedesk-main-container .breadcrumbs-container {
+  background-color: #3b4859;
+  padding: 14px 20px 15px;
+  font-size: 13px; }
+  #servicedesk-main-container .breadcrumbs-container .page-title {
+    color: #ffffff;
+    display: inline-block; }
+  #servicedesk-main-container .breadcrumbs-container .breadcrumbs {
+    float: right; }
+  #servicedesk-main-container .breadcrumbs-container a.breadcrumbs-link {
+    color: #fcfcfc; }
+  #servicedesk-main-container .breadcrumbs-container .current-page {
+    color: #fcfcfc; }
+  #servicedesk-main-container .breadcrumbs-container .separator {
+    color: #fcfcfc;
+    display: inline-block;
+    padding: 0 10px; }
+
+@media (max-width: 768px) {
+  .breadcrumbs-container .breadcrumbs {
+    float: none;
+    padding-top: 5px; } }
+
+/*# sourceMappingURL=servicedesk.dark.css.map */
