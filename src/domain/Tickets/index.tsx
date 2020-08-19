@@ -5,7 +5,101 @@ export class Tickets extends React.Component<any, any> {
     breadCrumbs: any;
     constructor(props: any) {
         super(props);
-        this.state = {};
+        this.state = {
+            totalPages: '',
+            currentPage: 0,
+            perPageLimit: 3,
+            TicketsData: [
+                {
+                    index: '#27',
+                    requesterName: 'Rodney Artichoke',
+                    subject: 'I need help with aading a New Contact....',
+                    status: 'Open',
+                    priority: 'Low',
+                    Assignee: 'Fergus Douchebag',
+                    createDate: '10 July 2020',
+                    agents: 'Jacob Jones',
+                    groups: 'Billings'
+                },
+                {
+                    index: '#39',
+                    requesterName: 'Chaplain Mondover',
+                    subject: 'I need help with aading a New Contact data to be pre...',
+                    status: 'Closed',
+                    priority: 'Medium',
+                    Assignee: 'Bodrum Salvador',
+                    createDate: '12 July 2020',
+                    agents: 'Jacob Jones',
+                    groups: 'Billings'
+                },
+                {
+                    index: '#47',
+                    requesterName: 'Rodney Artichoke',
+                    subject: 'Mobile Campaign',
+                    status: 'Pending',
+                    priority: 'Low',
+                    Assignee: 'Inverness McKenzie',
+                    createDate: '15 July 2020',
+                    agents: 'Jacob Jones',
+                    groups: 'Billings'
+                },
+                {
+                    index: '#52',
+                    requesterName: 'Inverness McKenzie',
+                    subject: 'Service related announcements',
+                    status: 'Open',
+                    priority: 'Hign',
+                    Assignee: 'Abraham Pigeon',
+                    createDate: '16 July 2020',
+                    agents: 'Jacob Jones',
+                    groups: 'Billings'
+                },
+                {
+                    index: '#87',
+                    requesterName: 'Douglas Lyphe',
+                    subject: 'I need help with aading a New Contact....',
+                    status: 'Closed',
+                    priority: 'Low',
+                    Assignee: 'Fergus Douchebag',
+                    createDate: '19 July 2020',
+                    agents: 'Jacob Jones',
+                    groups: 'Billings'
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Low',
+                    Assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    agents: 'Jacob Jones',
+                    groups: 'Billings'
+                },
+                {
+                    index: '#27',
+                    requesterName: 'Rodney Artichoke',
+                    subject: 'I need help with aading a New Contact....',
+                    status: 'Open',
+                    priority: 'Low',
+                    Assignee: 'Fergus Douchebag',
+                    createDate: '10 July 2020',
+                    agents: 'Jacob Jones',
+                    groups: 'Billings'
+                },
+                {
+                    index: '#27',
+                    requesterName: 'Rodney Artichoke',
+                    subject: 'I need help with aading a New Contact....',
+                    status: 'Open',
+                    priority: 'Low',
+                    Assignee: 'Fergus Douchebag',
+                    createDate: '10 July 2020',
+                    agents: 'Jacob Jones',
+                    groups: 'Billings'
+                }
+            ]
+        };
         this.breadCrumbs = [
             {
                 label: "Home",
@@ -17,9 +111,95 @@ export class Tickets extends React.Component<any, any> {
             }
         ];
     }
+    componentDidMount() {
+        this.calculateTotalPages(this.state.TicketsData);
+    };
+
+    calculateTotalPages = (displayData: any) => {
+        const { perPageLimit } = this.state;
+        let indexOfLastData = Math.ceil(displayData.length / perPageLimit);
+        this.setState({
+            totalPages: indexOfLastData,
+        });
+    };
+
+    _displayTableData() {
+        const { TicketsData, perPageLimit, currentPage } = this.state;
+        const retuData = [];
+        const length = TicketsData.length;
+        if (length > 0) {
+            for (let i = 0; i < this.state.TicketsData.length; i++) {
+                if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
+                    const Ticketdata = this.state.TicketsData[i];
+                    retuData.push(
+                        <tr>
+                            <td>{Ticketdata.index}</td>
+                            <td><span className="image"></span>{Ticketdata.requesterName}</td>
+                            <td className="subjects">{Ticketdata.subject}</td>
+                            <td><span className={Ticketdata.status == 'Open' ? "yellow-green" : Ticketdata.status == 'Closed' ? "red" : "orange"}>{Ticketdata.status}</span></td>
+                            <td><span className="priority">{Ticketdata.priority}</span></td>
+                            <td>{Ticketdata.Assignee}</td>
+                            <td className="date">{Ticketdata.createDate}</td>
+                            <td>{Ticketdata.agents}</td>
+                            <td>{Ticketdata.groups}</td>
+                        </tr>
+                    );
+                }
+            }
+        } else {
+            retuData.push(<div className="d-block width-100 there-no-data">There is no data</div>);
+        }
+        return retuData;
+    }
+
+    peginationOfTable() {
+        const { currentPage, totalPages } = this.state;
+        let rows = [];
+        for (let i = 0; i < totalPages; i++) {
+            console.log(currentPage);
+            rows.push(<li className="" key={i}><a className={currentPage === i ? 'active' : 'deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
+        }
+        return (
+            <ul>
+                <li className="previous">
+                    <a className={currentPage === 0 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
+                </li>
+                {rows}
+                <li className="next">
+                    <a className={currentPage === this.state.totalPages - 1 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
+                </li>
+            </ul>
+        );
+    }
+
+    navigatePage(target: any, e: any, i: any) {
+        const { totalPages, currentPage } = this.state;
+        e.preventDefault();
+        switch (target) {
+            case 'pre':
+                if (currentPage !== 0) {
+                    this.setState({
+                        currentPage: currentPage - 1,
+                    });
+                }
+                break;
+            case 'next':
+                if (currentPage !== totalPages - 1) {
+                    this.setState({
+                        currentPage: currentPage + 1,
+                    });
+                }
+                break;
+            case 'btn-click':
+                this.setState({
+                    currentPage: i
+                });
+                break;
+        }
+    }
 
     render() {
-        const state = this.state;
+        const { TicketsData, perPageLimit } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -195,20 +375,73 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                         </div>
-                        <div className="row">
-                            <div className="col-lg-8 col-md-8 col-sm-12">
-                                <div className="page-heading">
-                                    <h1>All Support Tickets</h1>
-                                    <span>List of ticket opened by Customer</span>
+                        {/* <div className="common-container border-bottom-0"> */}
+                        <div className="d-block p-t-20 all-ticket-tabel">
+                            <div className="d-block p-b-10 heading">
+                                <h2 className="d-block m-b-0">All Support Tickets</h2>
+                                <span className="d-block">List of ticket opened by Customer</span>
+                            </div>
+                            <div className="row">
+                                <div className="col-lg-6 col-md-6 col-sm-12">
+                                    <div className="showing">Latest Tickets (Showing {TicketsData.length} of {perPageLimit} Tickets)</div>
+                                </div>
+                                <div className="col-lg-6 col-md-6 col-sm-12 text-right">
+                                    <div className="sortby">
+                                        <label className="d-inline-block">Sort By:</label>
+                                        <select className="form-control">
+                                            <option>Created Date</option>
+                                            <option>Created Date</option>
+                                            <option>Created Date</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-lg-8 col-md-8 col-sm-12">
-                                <span>Latest Tickets (Showing 01 to 12 of 144 Tickets)</span>
+                            <div className="d-block p-t-5 tickets-tabel">
+                                <table className="ticket-tabel">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Requester Name</th>
+                                            <th>Subjects</th>
+                                            <th>Status</th>
+                                            <th>Priority</th>
+                                            <th>Assignee</th>
+                                            <th>Create Date</th>
+                                            <th>Agents</th>
+                                            <th>Groups</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this._displayTableData()}
+                                        {/* <tr>
+                                            <td>#92</td>
+                                            <td><span className="image"></span> Theodore Handle</td>
+                                            <td className="subjects">Adding a payment methods</td>
+                                            <td><span className="orange">Pending</span></td>
+                                            <td><span className="priority">Low</span></td>
+                                            <td>Jarvis Pepperspray</td>
+                                            <td className="date">22 July 2020</td>
+                                            <td>Jacob Jones</td>
+                                            <td>Billings</td>
+                                        </tr> */}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="d-block width-100 p-t-15 text-right pagination">
+                                {this.peginationOfTable()}
+                                {/* <ul>
+                                    <li className="previous"><a className="desable" href="#">Previous</a></li>
+                                    <li className=""><a className="active" href="#">1</a></li>
+                                    <li className=""><a className="deactive" href="#">2</a></li>
+                                    <li className=""><a className="deactive" href="#">3</a></li>
+                                    <li className=""><a className="deactive" href="#">4</a></li>
+                                    <li className=""><a className="deactive" href="#">5</a></li>
+                                    <li className="next"><a className="enable" href="#">Next</a></li>
+                                </ul> */}
                             </div>
                         </div>
                     </div>
+                    {/* </div> */}
                 </div>
             </div>
         );
