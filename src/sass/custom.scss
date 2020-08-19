@@ -21,6 +21,17 @@
         flex: 0 0 20%;
         max-width: 20%;
     }
+    .col-xl-7{
+        position: relative;
+        min-height: 1px;
+        padding-right: 15px;
+        padding-left: 15px;
+        -webkit-box-flex: 0;
+        -webkit-flex: 0 0 58.33333%;
+        -ms-flex: 0 0 58.33333%;
+        flex: 0 0 58.33333%;
+        max-width: 58.33333%; 
+    }
     .col-xl-8{
         position: relative;
         min-height: 1px;
@@ -113,7 +124,16 @@ a {
 }
 .text-right{
     text-align: right;
+    
 }
+
+.v-a-top{
+    vertical-align: top;
+}
+.v-a-middle{
+    vertical-align: middle;
+}
+
 
 .d-flex {
     display: flex;

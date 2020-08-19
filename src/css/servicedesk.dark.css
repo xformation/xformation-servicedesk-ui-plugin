@@ -21,6 +21,17 @@
     flex: 0 0 20%;
     max-width: 20%;
   }
+  .col-xl-7 {
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 58.33333%;
+    -ms-flex: 0 0 58.33333%;
+    flex: 0 0 58.33333%;
+    max-width: 58.33333%;
+  }
   .col-xl-8 {
     position: relative;
     min-height: 1px;
@@ -113,6 +124,14 @@ a:hover {
 
 .text-right {
   text-align: right;
+}
+
+.v-a-top {
+  vertical-align: top;
+}
+
+.v-a-middle {
+  vertical-align: middle;
 }
 
 .d-flex {
@@ -378,6 +397,7 @@ a:hover {
   border-radius: 5px;
   padding-top: 15px;
   padding-bottom: 10px;
+  margin-bottom: 30px;
 }
 .ticketing-box .image {
   padding-bottom: 10px;
@@ -401,8 +421,57 @@ a:hover {
   box-shadow: 0px 1px 5px #00000029;
   border-radius: 5px;
   padding-top: 15px;
-  padding-bottom: 10px;
+  padding-bottom: 15px;
+  padding-left: 15px;
+  padding-right: 15px;
   min-height: 345px;
+}
+.ticket-trends .heading h3 {
+  font-size: 16px;
+  line-height: 20px;
+  color: #323c47;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.ticket-trends .heading span {
+  font-size: 12px;
+  line-height: 15px;
+  color: #3b4859;
+  font-weight: 400;
+}
+.ticket-trends .days-box .form-check {
+  margin-right: 25px;
+}
+.ticket-trends .days-box .form-check .form-check-input {
+  display: inline-block;
+  vertical-align: top;
+  margin-top: 4px;
+}
+.ticket-trends .days-box .form-check .form-check-label {
+  font-size: 12px;
+  line-height: 21px;
+  color: #3b4859;
+  font-weight: 400;
+  display: inline-block;
+  padding-left: 8px;
+  vertical-align: top;
+}
+.ticket-trends .calendar-box .fa {
+  font-size: 12px;
+  line-height: 15px;
+  color: #3b4859;
+  font-weight: 400;
+  padding: 0 4px;
+}
+.ticket-trends .calendar-box span {
+  font-size: 12px;
+  line-height: 15px;
+  color: #3b4859;
+  font-weight: 400;
+  padding: 0 4px;
+}
+.ticket-trends .ticket-graphs {
+  min-height: 275px;
 }
 
 .performer-agents {
@@ -425,7 +494,7 @@ a:hover {
 .performer-agents .performer-agents-table {
   width: 100%;
 }
-.performer-agents .performer-agents-table thead tr td {
+.performer-agents .performer-agents-table thead tr th {
   border-bottom: 1px solid #a9b9c6;
   color: #a9b9c6;
   font-size: 12px;
@@ -433,7 +502,7 @@ a:hover {
   font-weight: 600;
   padding: 10px 10px 10px 0;
 }
-.performer-agents .performer-agents-table thead tr td:last-child {
+.performer-agents .performer-agents-table thead tr th:last-child {
   padding-right: 0;
 }
 .performer-agents .performer-agents-table tbody tr td {
@@ -456,6 +525,191 @@ a:hover {
   margin-right: 10px;
   display: inline-block;
   vertical-align: top;
+}
+
+.all-ticket-tabel {
+  display: grid;
+  width: 100%;
+}
+.all-ticket-tabel .heading h2 {
+  font-size: 18px;
+  line-height: 24px;
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.all-ticket-tabel .heading span {
+  font-size: 13px;
+  line-height: 16px;
+  color: #a9b9c6;
+  font-weight: 400;
+}
+.all-ticket-tabel .showing {
+  font-size: 13px;
+  line-height: 40px;
+  color: #ffffff;
+  font-weight: 500;
+}
+.all-ticket-tabel .sortby label {
+  font-size: 15px;
+  line-height: 40px;
+  color: #ffffff;
+  font-weight: 500;
+  padding-right: 15px;
+}
+.all-ticket-tabel .sortby .form-control {
+  display: inline-block;
+  width: 175px;
+  border-radius: 25px;
+}
+.all-ticket-tabel .tickets-tabel {
+  overflow-x: scroll;
+}
+.all-ticket-tabel .tickets-tabel .ticket-tabel {
+  width: 1200px;
+}
+.all-ticket-tabel .tickets-tabel .ticket-tabel thead tr th {
+  color: #a9b9c6;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  padding: 15px;
+}
+.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr {
+  border-bottom: 7px solid #3b4859;
+}
+.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td {
+  background-color: #f0f3f7;
+  color: #323c47;
+  font-size: 12px;
+  line-height: 32px;
+  font-weight: 600;
+  padding: 15px;
+}
+.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.subjects {
+  font-size: 11px;
+}
+.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.date {
+  font-size: 11px;
+}
+.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .image {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #a9b9c6;
+  margin-right: 10px;
+  display: inline-block;
+  vertical-align: top;
+}
+.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .priority {
+  background-color: rgba(169, 185, 198, 0.3);
+  padding: 4px 10px;
+  color: #a9b9c6;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  border-radius: 3px;
+  display: inline-block;
+  min-width: 70px;
+  text-align: center;
+}
+.all-ticket-tabel .pagination ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.all-ticket-tabel .pagination ul li {
+  display: inline-block;
+}
+.all-ticket-tabel .pagination ul li a {
+  display: block;
+  padding: 5px 10px;
+  font-size: 11px;
+  color: #868f9b;
+  line-height: 16px;
+  border: 1px solid #cbcfd4;
+  border-right: none;
+}
+.all-ticket-tabel .pagination ul li a:hover {
+  background-color: #cbcfd4;
+}
+.all-ticket-tabel .pagination ul li a.active {
+  background-color: #cbcfd4;
+  color: black;
+}
+.all-ticket-tabel .pagination ul li a.deactive {
+  background-color: white;
+  color: black;
+}
+.all-ticket-tabel .pagination ul li a.desable {
+  background-color: #5e5757;
+  color: white;
+}
+.all-ticket-tabel .pagination ul li a.enable {
+  background-color: #3b4859;
+  color: #ffffff;
+}
+.all-ticket-tabel .pagination ul li.previous a {
+  padding-left: 20px;
+  padding-right: 20px;
+  -webkit-border-top-left-radius: 5px;
+  -webkit-border-bottom-left-radius: 5px;
+  -moz-border-radius-topleft: 5px;
+  -moz-border-radius-bottomleft: 5px;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+.all-ticket-tabel .pagination ul li.next a {
+  padding-left: 20px;
+  padding-right: 20px;
+  border-right: 1px solid #cbcfd4;
+  -webkit-border-top-right-radius: 5px;
+  -webkit-border-bottom-right-radius: 5px;
+  -moz-border-radius-topright: 5px;
+  -moz-border-radius-bottomright: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+@media only screen and (max-width: 1200px) and (min-width: 992px) {
+  .ticket-trends-main {
+    -webkit-flex: 0 0 100%;
+    -ms-flex: 0 0 100%;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .performer-agents-main {
+    -webkit-flex: 0 0 100%;
+    -ms-flex: 0 0 100%;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .performer-agents-main .performer-agents {
+    margin-top: 30px;
+  }
+}
+
+@media (max-width: 992px) {
+  .performer-agents {
+    margin-top: 30px;
+  }
+  .create-button {
+    float: left;
+    margin-top: 15px;
+  }
+  .sortby {
+    float: left;
+    margin-top: 10px;
+  }
+  .days-box {
+    float: left;
+    margin-top: 10px;
+  }
+  .calendar-box {
+    float: left;
+    margin-top: 10px;
+  }
 }
 
 /*# sourceMappingURL=servicedesk.dark.css.map */
