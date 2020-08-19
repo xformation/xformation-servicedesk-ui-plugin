@@ -1,0 +1,93 @@
+.ticketing-box{
+    background-color: #F0F3F7;
+    box-shadow: 0px 1px 5px #00000029;
+    border-radius: 5px;
+    padding-top: 15px;
+    padding-bottom: 10px;
+    .image{
+        padding-bottom: 10px;
+    }
+    .number{
+        color: #3B4859;
+        font-size: 24px;
+        line-height: 28px;
+        font-weight: 700;
+        padding-bottom: 5px;
+    }
+    .name{
+        color: #3B4859;
+        font-size: 20px;
+        line-height: 24px;
+        font-weight: 600;
+    }
+}
+
+.ticket-trends{
+    background-color: #F0F3F7;
+    box-shadow: 0px 1px 5px #00000029;
+    border-radius: 5px;
+    padding-top: 15px;
+    padding-bottom: 10px;
+    min-height: 345px;
+}
+
+.performer-agents{
+    background-color: #F0F3F7;
+    box-shadow: 0px 1px 5px #00000029;
+    border-radius: 5px;
+    padding-top: 20px;
+    padding-right: 15px;
+    padding-left: 15px;
+    padding-bottom: 40px;
+    min-height: 345px;
+    .heading{
+        color: #323C47;
+        font-size: 16px;
+        line-height: 20px;
+        font-weight: 600;
+        padding-bottom: 15px;
+    }
+    .performer-agents-table{
+        width: 100%;
+        thead{
+            tr{
+                td{
+                    border-bottom: 1px solid #A9B9C6;
+                    color: #A9B9C6;
+                    font-size: 12px;
+                    line-height: 16px;
+                    font-weight: 600;
+                    padding: 10px 10px 10px 0;
+                    &:last-child{
+                        padding-right: 0;
+                    }
+                }
+            }
+        }
+        tbody{
+            tr{
+                td{
+                    border-bottom: 1px solid #A9B9C6;
+                    color: #323C47;
+                    font-size: 12px;
+                    line-height: 32px;
+                    font-weight: 600;
+                    padding: 10px 10px 10px 0;
+                    &:last-child{
+                        padding-right: 0;
+                    }
+                    .image{
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        overflow: hidden;
+                        background-color: #A9B9C6;
+                        margin-right: 10px;
+                        display: inline-block;
+                        vertical-align: top;
+                    }
+                }
+            }
+        }
+    }
+}
