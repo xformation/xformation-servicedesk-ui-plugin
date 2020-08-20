@@ -471,7 +471,13 @@ a:hover {
   padding: 0 4px;
 }
 .ticket-trends .ticket-graphs {
-  min-height: 275px;
+  height: 250px;
+}
+.ticket-trends .ticket-graphs .hours-text {
+  font-size: 13px;
+  line-height: 16px;
+  color: #a9b9c6;
+  font-weight: 500;
 }
 
 .performer-agents {

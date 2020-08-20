@@ -83,7 +83,13 @@
         }
     }
     .ticket-graphs{
-        min-height: 275px;
+        height: 250px;
+        .hours-text{
+            font-size: 13px;
+            line-height: 16px;
+            color: #A9B9C6;
+            font-weight: 500;
+        }
     }
 }
 

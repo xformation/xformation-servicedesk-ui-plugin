@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { config } from '../../config';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import ticketIconImage1 from '../../img/ticket-icon-img1.png';
+import { TicketTrendsChart } from './TicketTrendsChart';
 
 export class Dashboard extends React.Component<any, any> {
     breadCrumbs: any;
@@ -462,7 +463,9 @@ export class Dashboard extends React.Component<any, any> {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="d-block p-t-20 width-100 ticket-graphs"></div>
+                                    <div className="d-block p-t-20 width-100 ticket-graphs">
+                                        <TicketTrendsChart />
+                                    </div>
                                 </div>
                             </div>
                             <div className="col-lg-5 col-md-12 col-sm-12 performer-agents-main">
