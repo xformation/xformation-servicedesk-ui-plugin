@@ -556,8 +556,12 @@ export class Dashboard extends React.Component<any, any> {
                                         <label className="d-inline-block">Sort By:</label>
                                         <select className="form-control">
                                             <option>Created Date</option>
-                                            <option>Created Date</option>
-                                            <option>Created Date</option>
+                                            <option>Due by time</option>
+                                            <option>Last modified</option>
+                                            <option>Priority</option>
+                                            <option>Status</option>
+                                            <option>Ascending</option>
+                                            <option>Descending</option>
                                         </select>
                                     </div>
                                 </div>

@@ -1,6 +1,29 @@
+.tickets-number-box{
+    padding-right: 75px;
+    h3{
+        font-size: 24px;
+        line-height: 28px;
+        font-weight: 600;
+    }
+    span{
+        color: #A9B9C6;
+        font-size: 14px;
+        line-height: 18px;
+        font-weight: 500;
+    }
+}
 
+.quarter-form{
+    .form-control{
+        background-color: #f0f3f7 !important;
+        border: none !important;
+        font-size: 12px;
+        cursor: pointer;
+        height: 35px;
+    }
+}
 
-.all-ticket-tabel{
+.all-support-ticket-tabel{
     display: grid;
     width: 100%;
     .heading{
@@ -41,7 +64,7 @@
     .tickets-tabel{
         overflow-x: scroll;
         .ticket-tabel{
-            width: 1200px;
+            width: 1500px;
             thead{
                 tr{
                     th{
@@ -55,10 +78,8 @@
             }
             tbody{
                 tr{
-                    border-bottom: 7px solid $tickets-tabel-row-border-color;
                     td{
-                        background-color: #F0F3F7;
-                        color: #323C47;
+                        color: $all-tickets-text-color;
                         font-size: 12px;
                         line-height: 32px;
                         font-weight: 600;
@@ -163,6 +184,7 @@
       
     }
 }
+
 .there-no-data{
     text-align: center;
     padding-top: 50px;
@@ -170,8 +192,13 @@
     font-size: 20px;
     line-height: 24px;
 }
+
 .chart-inner{
     height: 150px;
+}
+
+.apply-filters-button{
+    margin-top: 8px;
 }
 
 @media (max-width: 992px){

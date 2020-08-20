@@ -157,7 +157,7 @@ export class Tickets extends React.Component<any, any> {
                             <td>{Ticketdata.Assignee}</td>
                             <td className="date">{Ticketdata.createDate}</td>
                             <td>{Ticketdata.agents}</td>
-                            <td>{Ticketdata.groups}</td>
+                            <td>{Ticketdata.groups} <a href="#" className="float-right"><i className="fa fa-ellipsis-v"></i></a></td>
                         </tr>
                     );
                 }
@@ -237,14 +237,30 @@ export class Tickets extends React.Component<any, any> {
                     </div>
                     <div className="common-container border-bottom-0">
                         <div className="row">
-                            <div className="col-lg-10 col-md-8 col-sm-12">
-                                <div className="page-heading">
-                                    <h1>2450</h1>
-                                    <span>Total No.of Tickets</span>
+                            <div className="col-lg-3 col-md-8 col-sm-12">
+                                <div className="d-inline-block tickets-number-box">
+                                    <h3 className="d-block m-b-5 red">2450</h3>
+                                    <span className="d-block">Total No.of Tickets</span>
+                                </div>
+                            </div>
+                            <div className="col-lg-7 col-md-8 col-sm-12">
+                                <div className="d-block w-100 text-right">
+                                    <div className="d-inline-block tickets-number-box">
+                                        <h3 className="d-block m-b-5 blue">67%</h3>
+                                        <span className="d-block">Open Tickets</span>
+                                    </div>
+                                    <div className="d-inline-block tickets-number-box">
+                                        <h3 className="d-block m-b-5 orange">18%</h3>
+                                        <span className="d-block">Unresolved Tickets</span>
+                                    </div>
+                                    <div className="d-inline-block tickets-number-box">
+                                        <h3 className="d-block m-b-5 red">15%</h3>
+                                        <span className="d-block">Closed Tickets</span>
+                                    </div>
                                 </div>
                             </div>
                             <div className="col-lg-2 col-md-4 col-sm-12 text-right">
-                                <div className="form-group">
+                                <div className="form-group quarter-form">
                                     <select className="form-control" id="Quarter">
                                         <option value="" selected>Select Quarter</option>
                                         <option value="Quater1">Quarter 1</option>
@@ -256,7 +272,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                         </div>
-                        <div className="d-block width-100 p--t-10 chart-inner">
+                        <div className="d-block width-100 p-t-10 chart-inner">
                             <Bar
                                 data={this.barChartData}
                                 options={{
@@ -283,13 +299,12 @@ export class Tickets extends React.Component<any, any> {
                             />
                         </div>
                     </div>
-                    
                     <div className="common-container border-bottom-0 filter-container">
                         <div className="row">
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Agents">
-                                        Agents&nbsp;&nbsp;&nbsp;
+                                        Agents
                                     </label>
                                     <select className="form-control" id="Agents">
                                         <option value="" selected>Select Agent</option>
@@ -303,7 +318,7 @@ export class Tickets extends React.Component<any, any> {
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Groups">
-                                        Groups&nbsp;&nbsp;&nbsp;
+                                        Groups
                                     </label>
                                     <select className="form-control" id="Groups">
                                         <option value="" selected>Select Groups</option>
@@ -317,7 +332,7 @@ export class Tickets extends React.Component<any, any> {
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Created">
-                                        Created&nbsp;&nbsp;&nbsp;
+                                        Created
                                     </label>
                                     <select className="form-control" id="Created">
                                         <option value="" selected>Select Created</option>
@@ -331,7 +346,7 @@ export class Tickets extends React.Component<any, any> {
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="dueby">
-                                        Due by&nbsp;&nbsp;&nbsp;
+                                        Due by
                                     </label>
                                     <select className="form-control" id="dueby">
                                         <option value="" selected>Select Due by</option>
@@ -345,7 +360,7 @@ export class Tickets extends React.Component<any, any> {
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Status">
-                                        Status&nbsp;&nbsp;&nbsp;
+                                        Status
                                     </label>
                                     <select className="form-control" id="Status">
                                         <option value="" selected>Select Status</option>
@@ -359,7 +374,7 @@ export class Tickets extends React.Component<any, any> {
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Priority">
-                                        Priority&nbsp;&nbsp;&nbsp;
+                                        Priority
                                     </label>
                                     <select className="form-control" id="Priority">
                                         <option value="" selected>Select Priority</option>
@@ -373,7 +388,7 @@ export class Tickets extends React.Component<any, any> {
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Type">
-                                        Type&nbsp;&nbsp;&nbsp;
+                                        Type
                                     </label>
                                     <select className="form-control" id="Type">
                                         <option value="" selected>Select Type</option>
@@ -386,7 +401,7 @@ export class Tickets extends React.Component<any, any> {
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Source">
-                                        Source&nbsp;&nbsp;&nbsp;
+                                        Source
                                     </label>
                                     <select className="form-control" id="Source">
                                         <option value="" selected>Select Source</option>
@@ -399,7 +414,7 @@ export class Tickets extends React.Component<any, any> {
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Tags">
-                                        Tags&nbsp;&nbsp;&nbsp;
+                                        Tags
                                     </label>
                                     <select className="form-control" id="Tags">
                                         <option value="" selected>Select Tags</option>
@@ -411,7 +426,7 @@ export class Tickets extends React.Component<any, any> {
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Companies">
-                                        Companies&nbsp;&nbsp;&nbsp;
+                                        Companies
                                     </label>
                                     <select className="form-control" id="Companies">
                                         <option value="" selected>Select Company</option>
@@ -423,7 +438,7 @@ export class Tickets extends React.Component<any, any> {
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Contacts">
-                                        Contacts&nbsp;&nbsp;&nbsp;
+                                        Contacts
                                     </label>
                                     <select className="form-control" id="Contacts">
                                         <option value="" selected>Select Contacts</option>
@@ -433,15 +448,16 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-lg-2 col-md-2 col-sm-2 col-sm-12">
-                                <div className="form-group">
-                                    <a href="#" className="blue-button m-t-1">
+                                <div className="p-t-20 form-group">
+                                    <a href="#" className="blue-button m-r-0 m-b-0 apply-filters-button">
                                         Apply Filters
                                     </a>
                                 </div>
                             </div>
                         </div>
-                        {/* <div className="common-container border-bottom-0"> */}
-                        <div className="d-block p-t-20 all-ticket-tabel">
+                    </div>
+                    <div className="common-container border-bottom-0 p-t-0">
+                        <div className="d-block all-support-ticket-tabel">
                             <div className="d-block p-b-10 heading">
                                 <h2 className="d-block m-b-0">All Support Tickets</h2>
                                 <span className="d-block">List of ticket opened by Customer</span>
@@ -455,8 +471,12 @@ export class Tickets extends React.Component<any, any> {
                                         <label className="d-inline-block">Sort By:</label>
                                         <select className="form-control">
                                             <option>Created Date</option>
-                                            <option>Created Date</option>
-                                            <option>Created Date</option>
+                                            <option>Due by time</option>
+                                            <option>Last modified</option>
+                                            <option>Priority</option>
+                                            <option>Status</option>
+                                            <option>Ascending</option>
+                                            <option>Descending</option>
                                         </select>
                                     </div>
                                 </div>
@@ -478,35 +498,14 @@ export class Tickets extends React.Component<any, any> {
                                     </thead>
                                     <tbody>
                                         {this._displayTableData()}
-                                        {/* <tr>
-                                            <td>#92</td>
-                                            <td><span className="image"></span> Theodore Handle</td>
-                                            <td className="subjects">Adding a payment methods</td>
-                                            <td><span className="orange">Pending</span></td>
-                                            <td><span className="priority">Low</span></td>
-                                            <td>Jarvis Pepperspray</td>
-                                            <td className="date">22 July 2020</td>
-                                            <td>Jacob Jones</td>
-                                            <td>Billings</td>
-                                        </tr> */}
                                     </tbody>
                                 </table>
                             </div>
                             <div className="d-block width-100 p-t-15 text-right pagination">
                                 {this.peginationOfTable()}
-                                {/* <ul>
-                                    <li className="previous"><a className="desable" href="#">Previous</a></li>
-                                    <li className=""><a className="active" href="#">1</a></li>
-                                    <li className=""><a className="deactive" href="#">2</a></li>
-                                    <li className=""><a className="deactive" href="#">3</a></li>
-                                    <li className=""><a className="deactive" href="#">4</a></li>
-                                    <li className=""><a className="deactive" href="#">5</a></li>
-                                    <li className="next"><a className="enable" href="#">Next</a></li>
-                                </ul> */}
                             </div>
                         </div>
                     </div>
-                    {/* </div> */}
                 </div>
             </div>
         );
