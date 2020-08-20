@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { config } from '../../config';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import ticketIconImage1 from '../../img/ticket-icon-img1.png';
-import { TicketTrendsChart } from './TicketTrendsChart';
+import { Line } from 'react-chartjs-2';
 
 export class Dashboard extends React.Component<any, any> {
     breadCrumbs: any;
@@ -275,6 +275,19 @@ export class Dashboard extends React.Component<any, any> {
         ];
     }
 
+    LineChartData = {
+        labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],
+        datasets: [
+            {
+                label: "Hours",
+                lineTension: 0.4,
+                fill: false,
+                borderColor: "rgba(0, 170, 240, 1)",
+                data: [10, 25, 15, 9, 30, 34, 35, 35, 15, 10, 25, 30, 40, 46, 49, 33, 40, 42, 33, 35, 48, 50]
+            }
+        ]
+    };
+
     displayTicketingData() {
         const { ticketingData } = this.state;
         const retData = [];
@@ -335,13 +348,13 @@ export class Dashboard extends React.Component<any, any> {
                             <td><span className="image"></span> {data.requesterName}</td>
                             <td className="subjects">{data.subjects}</td>
                             <td>
-                                {data.status == 'Open' && 
+                                {data.status == 'Open' &&
                                     <span className="yellow-green">Open</span>
                                 }
-                                {data.status == 'Closed' && 
+                                {data.status == 'Closed' &&
                                     <span className="red">Closed</span>
                                 }
-                                {data.status == 'Pending' && 
+                                {data.status == 'Pending' &&
                                     <span className="orange">Pending</span>
                                 }
                             </td>
@@ -464,7 +477,40 @@ export class Dashboard extends React.Component<any, any> {
                                         </div>
                                     </div>
                                     <div className="d-block p-t-20 width-100 ticket-graphs">
-                                        <TicketTrendsChart />
+                                        <div className="d-block width-100" style={{ height: "100%" }}>
+                                            <Line
+                                                data={this.LineChartData}
+                                                options={{
+                                                    responsive: true,
+                                                    maintainAspectRatio: false,
+                                                    scales: {
+                                                        yAxes: [{
+                                                            gridLines: {
+                                                                color: "rgba(240, 243, 247, 1)",
+                                                            },
+                                                            ticks: {
+                                                                stepSize: 10,
+                                                                beginAtZero: true
+                                                            }
+                                                        }],
+                                                        xAxes: [{
+                                                            gridLines: {
+                                                                color: "rgba(240, 243, 247, 1)",
+                                                            },
+                                                            ticks: {
+                                                                stepSize: 10,
+                                                                beginAtZero: true
+                                                            }
+                                                        }]
+                                                    },
+                                                    legend: {
+                                                        display: false,
+                                                        position: 'bottom'
+                                                    }
+                                                }}
+                                            />
+                                            <div className="d-block text-center p-t-5 hours-text">Hours</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -534,11 +580,11 @@ export class Dashboard extends React.Component<any, any> {
                                     </tbody>
                                 </table>
                             </div>
-                            
+
                             {ticketsSetData.length > 0 &&
-                            <div className="d-block width-100 p-t-15 text-right pagination">
-                                {this.peginationOfBox()}
-                            </div>
+                                <div className="d-block width-100 p-t-15 text-right pagination">
+                                    {this.peginationOfBox()}
+                                </div>
                             }
 
                         </div>
