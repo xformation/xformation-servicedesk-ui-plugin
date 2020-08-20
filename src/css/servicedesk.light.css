@@ -538,6 +538,9 @@ a:hover {
   font-weight: 600;
   margin-bottom: 2px;
 }
+.all-ticket-tabel .heading h2 a {
+  color: #323c47;
+}
 .all-ticket-tabel .heading span {
   font-size: 13px;
   line-height: 16px;
@@ -591,6 +594,9 @@ a:hover {
 }
 .all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.date {
   font-size: 11px;
+}
+.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.there-no-data {
+  font-size: 18px;
 }
 .all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .image {
   width: 32px;

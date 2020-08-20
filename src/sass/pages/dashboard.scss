@@ -158,6 +158,9 @@
             color: $all-tickets-text-color;
             font-weight: 600;
             margin-bottom: 2px;
+            a{
+                color: $all-tickets-text-color; 
+            }
         }
         span{
             font-size: 13px;
@@ -216,6 +219,9 @@
                         }
                         &.date{
                             font-size: 11px;
+                        }
+                        &.there-no-data{
+                            font-size: 18px;
                         }
                         .image{
                             width: 32px;
@@ -311,6 +317,8 @@
       
     }
 }
+
+
 
 @media only screen and (max-width: 1200px) and (min-width: 992px) {
     .ticket-trends-main{

@@ -1,16 +1,267 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
+import { config } from '../../config';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import ticketIconImage1 from '../../img/ticket-icon-img1.png';
-import ticketIconImage2 from '../../img/ticket-icon-img2.png';
-import ticketIconImage3 from '../../img/ticket-icon-img3.png';
-import ticketIconImage4 from '../../img/ticket-icon-img4.png';
-import ticketIconImage5 from '../../img/ticket-icon-img5.png';
 
 export class Dashboard extends React.Component<any, any> {
     breadCrumbs: any;
     constructor(props: any) {
         super(props);
-        this.state = {};
+        this.state = {
+            totalPages: '',
+            currentPage: 0,
+            perPageLimit: 6,
+            ticketsSetData: [
+                {
+                    id: '27',
+                    requesterName: 'Rodney Artichoke',
+                    subjects: 'I need help with aading a New Contact....',
+                    status: 'Open',
+                    priority: 'Low',
+                    assignee: 'Fergus Douchebag',
+                    createDate: '10 July 2020',
+                },
+                {
+                    id: '39',
+                    requesterName: 'Chaplain Mondover',
+                    subjects: 'I need help with aading a New Contact data to be pre...',
+                    status: 'Closed',
+                    priority: 'Medium',
+                    assignee: 'Bodrum Salvador',
+                    createDate: '12 July 2020',
+                },
+                {
+                    id: '47',
+                    requesterName: 'Rodney Artichoke',
+                    subjects: 'Mobile Campaign',
+                    status: 'Pending',
+                    priority: 'Low',
+                    assignee: 'Inverness McKenzie',
+                    createDate: '15 July 2020',
+                },
+                {
+                    id: '52',
+                    requesterName: 'Inverness McKenzie',
+                    subjects: 'Service related announcements',
+                    status: 'Open',
+                    priority: 'Hign',
+                    assignee: 'Abraham Pigeon',
+                    createDate: '16 July 2020',
+                },
+                {
+                    id: '87',
+                    requesterName: 'Douglas Lyphe',
+                    subjects: 'I need help with aading a New Contact....',
+                    status: 'Closed',
+                    priority: 'Low',
+                    assignee: 'Fergus Douchebag',
+                    createDate: '19 July 2020',
+                },
+                {
+                    id: '92',
+                    requesterName: 'Theodore Handle',
+                    subjects: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                },
+                {
+                    id: '52',
+                    requesterName: 'Inverness McKenzie',
+                    subjects: 'Service related announcements',
+                    status: 'Open',
+                    priority: 'Hign',
+                    assignee: 'Abraham Pigeon',
+                    createDate: '16 July 2020',
+                },
+                {
+                    id: '87',
+                    requesterName: 'Douglas Lyphe',
+                    subjects: 'I need help with aading a New Contact....',
+                    status: 'Closed',
+                    priority: 'Low',
+                    assignee: 'Fergus Douchebag',
+                    createDate: '19 July 2020',
+                },
+                {
+                    id: '92',
+                    requesterName: 'Theodore Handle',
+                    subjects: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                },
+                {
+                    id: '39',
+                    requesterName: 'Chaplain Mondover',
+                    subjects: 'I need help with aading a New Contact data to be pre...',
+                    status: 'Closed',
+                    priority: 'Medium',
+                    assignee: 'Bodrum Salvador',
+                    createDate: '12 July 2020',
+                },
+                {
+                    id: '47',
+                    requesterName: 'Rodney Artichoke',
+                    subjects: 'Mobile Campaign',
+                    status: 'Pending',
+                    priority: 'Low',
+                    assignee: 'Inverness McKenzie',
+                    createDate: '15 July 2020',
+                },
+                {
+                    id: '52',
+                    requesterName: 'Inverness McKenzie',
+                    subjects: 'Service related announcements',
+                    status: 'Open',
+                    priority: 'Hign',
+                    assignee: 'Abraham Pigeon',
+                    createDate: '16 July 2020',
+                },
+                {
+                    id: '47',
+                    requesterName: 'Rodney Artichoke',
+                    subjects: 'Mobile Campaign',
+                    status: 'Pending',
+                    priority: 'Low',
+                    assignee: 'Inverness McKenzie',
+                    createDate: '15 July 2020',
+                },
+                {
+                    id: '52',
+                    requesterName: 'Inverness McKenzie',
+                    subjects: 'Service related announcements',
+                    status: 'Open',
+                    priority: 'Hign',
+                    assignee: 'Abraham Pigeon',
+                    createDate: '16 July 2020',
+                },
+                {
+                    id: '87',
+                    requesterName: 'Douglas Lyphe',
+                    subjects: 'I need help with aading a New Contact....',
+                    status: 'Closed',
+                    priority: 'Low',
+                    assignee: 'Fergus Douchebag',
+                    createDate: '19 July 2020',
+                },
+                {
+                    id: '92',
+                    requesterName: 'Theodore Handle',
+                    subjects: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                },
+                {
+                    id: '52',
+                    requesterName: 'Inverness McKenzie',
+                    subjects: 'Service related announcements',
+                    status: 'Open',
+                    priority: 'Hign',
+                    assignee: 'Abraham Pigeon',
+                    createDate: '16 July 2020',
+                },
+                {
+                    id: '87',
+                    requesterName: 'Douglas Lyphe',
+                    subjects: 'I need help with aading a New Contact....',
+                    status: 'Closed',
+                    priority: 'Low',
+                    assignee: 'Fergus Douchebag',
+                    createDate: '19 July 2020',
+                },
+                {
+                    id: '92',
+                    requesterName: 'Theodore Handle',
+                    subjects: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                },
+                {
+                    id: '39',
+                    requesterName: 'Chaplain Mondover',
+                    subjects: 'I need help with aading a New Contact data to be pre...',
+                    status: 'Closed',
+                    priority: 'Medium',
+                    assignee: 'Bodrum Salvador',
+                    createDate: '12 July 2020',
+                },
+                {
+                    id: '27',
+                    requesterName: 'Rodney Artichoke',
+                    subjects: 'I need help with aading a New Contact....',
+                    status: 'Open',
+                    priority: 'Low',
+                    assignee: 'Fergus Douchebag',
+                    createDate: '10 July 2020',
+                },
+                {
+                    id: '39',
+                    requesterName: 'Chaplain Mondover',
+                    subjects: 'I need help with aading a New Contact data to be pre...',
+                    status: 'Closed',
+                    priority: 'Medium',
+                    assignee: 'Bodrum Salvador',
+                    createDate: '12 July 2020',
+                },
+            ],
+            ticketingData: [
+                {
+                    ticketingImage: '',
+                    ticketingNumber: '560',
+                    ticketingname: 'Open Tickets',
+                },
+                {
+                    ticketingImage: '',
+                    ticketingNumber: '284',
+                    ticketingname: 'Due Today',
+                },
+                {
+                    ticketingImage: '',
+                    ticketingNumber: '24',
+                    ticketingname: 'Unassigned',
+                },
+                {
+                    ticketingImage: '',
+                    ticketingNumber: '50',
+                    ticketingname: 'Unresolved',
+                },
+                {
+                    ticketingImage: '',
+                    ticketingNumber: '10',
+                    ticketingname: 'Overdue',
+                },
+            ],
+            performerAgentsData: [
+                {
+                    agentName: 'Spruce Springclean',
+                    ticket: '89',
+                    responseRate: '91',
+                },
+                {
+                    agentName: 'Archibald Northbottom',
+                    ticket: '75',
+                    responseRate: '85',
+                },
+                {
+                    agentName: 'Rodney Artichoke',
+                    ticket: '60',
+                    responseRate: '70',
+                },
+                {
+                    agentName: 'Gustav Purpleson',
+                    ticket: '53',
+                    responseRate: '63',
+                },
+            ],
+        };
         this.breadCrumbs = [
             {
                 label: "Home",
@@ -23,8 +274,140 @@ export class Dashboard extends React.Component<any, any> {
         ];
     }
 
+    displayTicketingData() {
+        const { ticketingData } = this.state;
+        const retData = [];
+        for (let i = 0; i < ticketingData.length; i++) {
+            const data = ticketingData[i];
+            retData.push(
+                <div className="col-xl-5 col-lg-4 col-md-6 col-sm-12">
+                    <div className="d-block text-center ticketing-box">
+                        <div className="image"><img src={ticketIconImage1} alt="" /></div>
+                        <div className="number">{data.ticketingNumber}</div>
+                        <div className="name">{data.ticketingname}</div>
+                    </div>
+                </div>
+            );
+        }
+        return retData;
+    }
+
+    performerAgentsData() {
+        const { performerAgentsData } = this.state;
+        const retData = [];
+        for (let i = 0; i < performerAgentsData.length; i++) {
+            const data = performerAgentsData[i];
+            retData.push(
+                <tr>
+                    <td><span className="image"></span> {data.agentName}</td>
+                    <td>{data.ticket} Tickets</td>
+                    <td>{data.responseRate} %</td>
+                </tr>
+            );
+        }
+        return retData;
+    }
+
+    componentDidMount() {
+        this.calculateTotalPages(this.state.ticketsSetData);
+    };
+
+    calculateTotalPages = (displayData: any) => {
+        const { perPageLimit } = this.state;
+        let indexOfLastData = Math.ceil(displayData.length / perPageLimit);
+        this.setState({
+            totalPages: indexOfLastData,
+        });
+    };
+
+    allTicketsSetData = () => {
+        const { ticketsSetData, perPageLimit, currentPage } = this.state;
+        const retData = [];
+        const length = ticketsSetData.length;
+        if (length > 0) {
+            for (let i = 0; i < length; i++) {
+                if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
+                    const data = ticketsSetData[i];
+                    retData.push(
+                        <tr>
+                            <td>#{data.id}</td>
+                            <td><span className="image"></span> {data.requesterName}</td>
+                            <td className="subjects">{data.subjects}</td>
+                            <td>
+                                {data.status == 'Open' && 
+                                    <span className="yellow-green">Open</span>
+                                }
+                                {data.status == 'Closed' && 
+                                    <span className="red">Closed</span>
+                                }
+                                {data.status == 'Pending' && 
+                                    <span className="orange">Pending</span>
+                                }
+                            </td>
+                            <td><span className="priority">{data.priority}</span></td>
+                            <td>{data.assignee}</td>
+                            <td className="date">{data.createDate}</td>
+                        </tr>
+                    );
+                }
+            }
+        } else {
+            retData.push(<tr><td className="text-center there-no-data" colSpan={7}>There is no data</td></tr>);
+        }
+
+        return retData;
+    }
+
+    peginationOfBox() {
+        const { currentPage, totalPages, ticketsSetData } = this.state;
+        let rows = [];
+        for (let i = 0; i < totalPages; i++) {
+            console.log(currentPage);
+            rows.push(<li className="" key={i}><a className={currentPage === i ? 'active' : 'deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
+        }
+        return (
+            <ul>
+                <li className="previous">
+                    <a className={currentPage === 0 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
+                </li>
+                {rows}
+                <li className="next">
+                    <a className={currentPage === this.state.totalPages - 1 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
+                </li>
+            </ul>
+        );
+    }
+
+    navigatePage(target: any, e: any, i: any) {
+        const { totalPages, currentPage } = this.state;
+        e.preventDefault();
+        switch (target) {
+            case 'pre':
+                if (currentPage !== 0) {
+                    this.setState({
+                        currentPage: currentPage - 1,
+                    });
+                }
+                break;
+            case 'next':
+                if (currentPage !== totalPages - 1) {
+                    this.setState({
+                        currentPage: currentPage + 1,
+                    });
+                }
+                break;
+            case 'btn-click':
+                this.setState({
+                    currentPage: i
+                });
+                break;
+        }
+    }
+
+
     render() {
         const state = this.state;
+        const { perPageLimit, ticketsSetData, totalPages } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -46,43 +429,7 @@ export class Dashboard extends React.Component<any, any> {
                     </div>
                     <div className="common-container border-bottom-0 p-b-0">
                         <div className="row">
-                            <div className="col-xl-5 col-lg-4 col-md-6 col-sm-12">
-                                <div className="d-block text-center ticketing-box">
-                                    <div className="image"><img src={ticketIconImage1} alt="" /></div>
-                                    <div className="number">560</div>
-                                    <div className="name">Open Tickets</div>
-                                </div>
-                            </div>
-                            <div className="col-xl-5 col-lg-4 col-md-6 col-sm-12">
-                                <div className="d-block text-center ticketing-box">
-                                    <div className="d-block image">
-                                        <img src={ticketIconImage2} alt="" />
-                                    </div>
-                                    <div className="d-block number">284</div>
-                                    <div className="d-block name">Due Today</div>
-                                </div>
-                            </div>
-                            <div className="col-xl-5 col-lg-4 col-md-6 col-sm-12">
-                                <div className="d-block text-center ticketing-box">
-                                    <div className="d-block image"><img src={ticketIconImage3} alt="" /></div>
-                                    <div className="d-block number">24</div>
-                                    <div className="d-block name">Unassigned</div>
-                                </div>
-                            </div>
-                            <div className="col-xl-5 col-lg-4 col-md-6 col-sm-12">
-                                <div className="d-block text-center ticketing-box">
-                                    <div className="d-block image"><img src={ticketIconImage4} alt="" /></div>
-                                    <div className="d-block number">50</div>
-                                    <div className="d-block name">Unresolved</div>
-                                </div>
-                            </div>
-                            <div className="col-xl-5 col-lg-4 col-md-6 col-sm-12">
-                                <div className="d-block text-center ticketing-box">
-                                    <div className="d-block image"><img src={ticketIconImage5} alt="" /></div>
-                                    <div className="d-block number">10</div>
-                                    <div className="d-block name">Overdue</div>
-                                </div>
-                            </div>
+                            {this.displayTicketingData()}
                         </div>
                     </div>
                     <div className="common-container border-bottom-0 p-t-0">
@@ -132,26 +479,7 @@ export class Dashboard extends React.Component<any, any> {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td><span className="image"></span> Spruce Springclean</td>
-                                                <td>89 Tickets</td>
-                                                <td>91 %</td>
-                                            </tr>
-                                            <tr>
-                                                <td><span className="image"></span> Archibald Northbottom</td>
-                                                <td>75 Tickets</td>
-                                                <td>85 %</td>
-                                            </tr>
-                                            <tr>
-                                                <td><span className="image"></span> Rodney Artichoke</td>
-                                                <td>60 Tickets</td>
-                                                <td>70 %</td>
-                                            </tr>
-                                            <tr>
-                                                <td><span className="image"></span> Gustav Purpleson</td>
-                                                <td>50 Tickets</td>
-                                                <td>63 %</td>
-                                            </tr>
+                                            {this.performerAgentsData()}
                                         </tbody>
                                     </table>
                                 </div>
@@ -161,12 +489,18 @@ export class Dashboard extends React.Component<any, any> {
                     <div className="common-container border-bottom-0">
                         <div className="d-block p-t-20 all-ticket-tabel">
                             <div className="d-block p-b-10 heading">
-                                <h2 className="d-block m-b-0">All Tickets</h2>
+                                <h2 className="d-block m-b-0">
+                                    <Link to={`${config.basePath}/tickets`}>
+                                        All Tickets
+                                    </Link>
+                                </h2>
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
                             <div className="row">
                                 <div className="col-lg-6 col-md-6 col-sm-12">
-                                    <div className="showing">Latest Tickets (Showing 06 to 10 of 48 Tickets)</div>
+                                    <div className="showing">
+                                        Latest Tickets (Showing {perPageLimit} to {totalPages} of {ticketsSetData.length} Tickets)
+                                    </div>
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-12 text-right">
                                     <div className="sortby">
@@ -193,74 +527,17 @@ export class Dashboard extends React.Component<any, any> {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>#27</td>
-                                            <td><span className="image"></span> Rodney Artichoke</td>
-                                            <td className="subjects">I need help with aading a New Contact....</td>
-                                            <td><span className="yellow-green">Open</span></td>
-                                            <td><span className="priority">Low</span></td>
-                                            <td>Fergus Douchebag</td>
-                                            <td className="date">10 July 2020</td>
-                                        </tr>
-                                        <tr>
-                                            <td>#39</td>
-                                            <td><span className="image"></span> Chaplain Mondover</td>
-                                            <td className="subjects">I need help with aading a New Contact data to be pre...</td>
-                                            <td><span className="red">Closed</span></td>
-                                            <td><span className="priority">Medium</span></td>
-                                            <td>Bodrum Salvador</td>
-                                            <td className="date">12 July 2020</td>
-                                        </tr>
-                                        <tr>
-                                            <td>#47</td>
-                                            <td><span className="image"></span> Rodney Artichoke</td>
-                                            <td className="subjects">Mobile Campaign</td>
-                                            <td><span className="orange">Pending</span></td>
-                                            <td><span className="priority">Low</span></td>
-                                            <td>Inverness McKenzie</td>
-                                            <td className="date">15 July 2020</td>
-                                        </tr>
-                                        <tr>
-                                            <td>#52</td>
-                                            <td><span className="image"></span> Inverness McKenzie</td>
-                                            <td className="subjects">Service related announcements</td>
-                                            <td><span className="yellow-green">Open</span></td>
-                                            <td><span className="priority">Hign</span></td>
-                                            <td>Abraham Pigeon</td>
-                                            <td className="date">16 July 2020</td>
-                                        </tr>
-                                        <tr>
-                                            <td>#87</td>
-                                            <td><span className="image"></span> Douglas Lyphe</td>
-                                            <td className="subjects">I need help with aading a New Contact....</td>
-                                            <td><span className="red">Closed</span></td>
-                                            <td><span className="priority">Low</span></td>
-                                            <td>Fergus Douchebag</td>
-                                            <td className="date">19 July 2020</td>
-                                        </tr>
-                                        <tr>
-                                            <td>#92</td>
-                                            <td><span className="image"></span> Theodore Handle</td>
-                                            <td className="subjects">Adding a payment methods</td>
-                                            <td><span className="orange">Pending</span></td>
-                                            <td><span className="priority">Low</span></td>
-                                            <td>Jarvis Pepperspray</td>
-                                            <td className="date">22 July 2020</td>
-                                        </tr>
+                                        {this.allTicketsSetData()}
                                     </tbody>
                                 </table>
                             </div>
+                            
+                            {ticketsSetData.length > 0 &&
                             <div className="d-block width-100 p-t-15 text-right pagination">
-                                <ul>
-                                    <li className="previous"><a className="desable" href="#">Previous</a></li>
-                                    <li className=""><a className="active" href="#">1</a></li>
-                                    <li className=""><a className="deactive" href="#">2</a></li>
-                                    <li className=""><a className="deactive" href="#">3</a></li>
-                                    <li className=""><a className="deactive" href="#">4</a></li>
-                                    <li className=""><a className="deactive" href="#">5</a></li>
-                                    <li className="next"><a className="enable" href="#">Next</a></li>
-                                </ul>
+                                {this.peginationOfBox()}
                             </div>
+                            }
+
                         </div>
                     </div>
                 </div>
