@@ -117,7 +117,7 @@ export class Tickets extends React.Component<any, any> {
     };
 
     barChartData = {
-        labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '01', '02', '03', '04', '05', '06', '07', '08', '09', 10],
+        labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10'],
         datasets: [
             {
                 label: '',
@@ -237,13 +237,13 @@ export class Tickets extends React.Component<any, any> {
                     </div>
                     <div className="common-container border-bottom-0">
                         <div className="row">
-                            <div className="col-lg-3 col-md-8 col-sm-12">
+                            <div className="col-lg-3 col-md-12 col-sm-12">
                                 <div className="d-inline-block tickets-number-box">
                                     <h3 className="d-block m-b-5 red">2450</h3>
                                     <span className="d-block">Total No.of Tickets</span>
                                 </div>
                             </div>
-                            <div className="col-lg-7 col-md-8 col-sm-12">
+                            <div className="col-lg-7 col-md-12 col-sm-12 tickets-number-boxs">
                                 <div className="d-block w-100 text-right">
                                     <div className="d-inline-block tickets-number-box">
                                         <h3 className="d-block m-b-5 blue">67%</h3>
@@ -283,25 +283,31 @@ export class Tickets extends React.Component<any, any> {
                                     },
                                     scales: {
                                         yAxes: [{
-                                            ticks: {
-                                                fontColor: '#fff',
-                                                fontSize: 12
+                                            gridLines: {
+                                                color: "rgba(240, 243, 247, 0)",
                                             },
+                                            ticks: {
+                                                stepSize: 10,
+                                                beginAtZero: true
+                                            }
                                         }],
                                         xAxes: [{
-                                            ticks: {
-                                                fontColor: 'rgba(169, 185, 198, 1)',
-                                                fontSize: 12
+                                            gridLines: {
+                                                color: "rgba(240, 243, 247, 0)",
                                             },
+                                            ticks: {
+                                                stepSize: 10,
+                                                beginAtZero: true
+                                            }
                                         }]
-                                    }
+                                    },
                                 }}
                             />
                         </div>
                     </div>
                     <div className="common-container border-bottom-0 filter-container">
                         <div className="row">
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Agents">
                                         Agents
@@ -315,7 +321,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Groups">
                                         Groups
@@ -329,7 +335,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Created">
                                         Created
@@ -343,7 +349,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="dueby">
                                         Due by
@@ -357,7 +363,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Status">
                                         Status
@@ -371,7 +377,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Priority">
                                         Priority
@@ -385,7 +391,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Type">
                                         Type
@@ -398,7 +404,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Source">
                                         Source
@@ -411,7 +417,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Tags">
                                         Tags
@@ -423,7 +429,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Companies">
                                         Companies
@@ -435,7 +441,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Contacts">
                                         Contacts
@@ -447,7 +453,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-lg-2 col-md-2 col-sm-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="p-t-20 form-group">
                                     <a href="#" className="blue-button m-r-0 m-b-0 apply-filters-button">
                                         Apply Filters

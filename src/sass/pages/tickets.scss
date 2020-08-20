@@ -201,9 +201,30 @@
     margin-top: 8px;
 }
 
+
+@media only screen and (max-width: 1200px) and (min-width: 992px) {
+    .tickets-number-box {
+        padding-right: 15px;
+    }
+}
 @media (max-width: 992px){
     .sortby{
         float: left;
         margin-top: 10px;
+    }
+    .tickets-number-box {
+        padding-right: 15px;
+    }
+    .quarter-form{
+        padding-top: 15px;
+    }
+    .tickets-number-boxs{
+        .text-right{
+            text-align: left;
+            .tickets-number-box{
+                display: block;
+                padding-top: 15px;
+            }
+        }
     }
 }
