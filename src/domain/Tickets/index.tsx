@@ -235,58 +235,59 @@ export class Tickets extends React.Component<any, any> {
                             </div>
                         </div>
                     </div>
-                    <div className="row m-t-1">
-                        <div className="col-lg-8 col-md-8 col-sm-12">
-                            <div className="page-heading">
-                                <h1>2450</h1>
-                                <span>Total No.of Tickets</span>
-                            </div>
-                        </div>
-                        <div className="col-lg-2 col-md-2 col-sm-12 text-right">
-                            <div className="form-group">
-                                <select className="form-control" id="Quarter">
-                                    <option value="" selected>Select Quarter</option>
-                                    <option value="Quater1">Quarter 1</option>
-                                    <option value="Quater2">Quarter 2</option>
-                                    <option value="Quater3">Quarter 3</option>
-                                    <option value="Quater4">Quarter 4</option>
-                                    <option value="CustomRange">Custom Range</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="d-block chart-inner">
-                        <Bar
-                            data={this.barChartData}
-                            width={100}
-                            height={100}
-                            options={{
-                                maintainAspectRatio: false,
-                                legend: {
-                                    display: false,
-                                    position: 'right'
-                                },
-                                scales: {
-                                    yAxes: [{
-                                        ticks: {
-                                            fontColor: '#fff',
-                                            fontSize: 12
-                                        },
-                                    }],
-                                    xAxes: [{
-                                        ticks: {
-                                            fontColor: 'rgba(169, 185, 198, 1)',
-                                            fontSize: 12
-                                        },
-                                    }]
-                                }
-                            }}
-                        />
-                    </div>
                     <div className="common-container border-bottom-0">
                         <div className="row">
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-lg-10 col-md-8 col-sm-12">
+                                <div className="page-heading">
+                                    <h1>2450</h1>
+                                    <span>Total No.of Tickets</span>
+                                </div>
+                            </div>
+                            <div className="col-lg-2 col-md-4 col-sm-12 text-right">
                                 <div className="form-group">
+                                    <select className="form-control" id="Quarter">
+                                        <option value="" selected>Select Quarter</option>
+                                        <option value="Quater1">Quarter 1</option>
+                                        <option value="Quater2">Quarter 2</option>
+                                        <option value="Quater3">Quarter 3</option>
+                                        <option value="Quater4">Quarter 4</option>
+                                        <option value="CustomRange">Custom Range</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="d-block width-100 p--t-10 chart-inner">
+                            <Bar
+                                data={this.barChartData}
+                                options={{
+                                    maintainAspectRatio: false,
+                                    legend: {
+                                        display: false,
+                                        position: 'right'
+                                    },
+                                    scales: {
+                                        yAxes: [{
+                                            ticks: {
+                                                fontColor: '#fff',
+                                                fontSize: 12
+                                            },
+                                        }],
+                                        xAxes: [{
+                                            ticks: {
+                                                fontColor: 'rgba(169, 185, 198, 1)',
+                                                fontSize: 12
+                                            },
+                                        }]
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="common-container border-bottom-0 filter-container">
+                        <div className="row">
+                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                                <div className="form-group filter-control-group">
                                     <label htmlFor="Agents">
                                         Agents&nbsp;&nbsp;&nbsp;
                                     </label>
@@ -300,7 +301,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-                                <div className="form-group">
+                                <div className="form-group filter-control-group">
                                     <label htmlFor="Groups">
                                         Groups&nbsp;&nbsp;&nbsp;
                                     </label>
@@ -314,7 +315,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-                                <div className="form-group">
+                                <div className="form-group filter-control-group">
                                     <label htmlFor="Created">
                                         Created&nbsp;&nbsp;&nbsp;
                                     </label>
@@ -328,7 +329,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-                                <div className="form-group">
+                                <div className="form-group filter-control-group">
                                     <label htmlFor="dueby">
                                         Due by&nbsp;&nbsp;&nbsp;
                                     </label>
@@ -342,7 +343,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-                                <div className="form-group">
+                                <div className="form-group filter-control-group">
                                     <label htmlFor="Status">
                                         Status&nbsp;&nbsp;&nbsp;
                                     </label>
@@ -356,7 +357,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-                                <div className="form-group">
+                                <div className="form-group filter-control-group">
                                     <label htmlFor="Priority">
                                         Priority&nbsp;&nbsp;&nbsp;
                                     </label>
@@ -370,7 +371,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-                                <div className="form-group">
+                                <div className="form-group filter-control-group">
                                     <label htmlFor="Type">
                                         Type&nbsp;&nbsp;&nbsp;
                                     </label>
@@ -383,7 +384,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-                                <div className="form-group">
+                                <div className="form-group filter-control-group">
                                     <label htmlFor="Source">
                                         Source&nbsp;&nbsp;&nbsp;
                                     </label>
@@ -396,7 +397,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-                                <div className="form-group">
+                                <div className="form-group filter-control-group">
                                     <label htmlFor="Tags">
                                         Tags&nbsp;&nbsp;&nbsp;
                                     </label>
@@ -408,7 +409,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-                                <div className="form-group">
+                                <div className="form-group filter-control-group">
                                     <label htmlFor="Companies">
                                         Companies&nbsp;&nbsp;&nbsp;
                                     </label>
@@ -420,7 +421,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-                                <div className="form-group">
+                                <div className="form-group filter-control-group">
                                     <label htmlFor="Contacts">
                                         Contacts&nbsp;&nbsp;&nbsp;
                                     </label>
