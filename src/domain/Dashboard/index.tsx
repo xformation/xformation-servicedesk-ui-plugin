@@ -13,6 +13,8 @@ export class Dashboard extends React.Component<any, any> {
             totalPages: '',
             currentPage: 0,
             perPageLimit: 6,
+            start_index: 1,
+            ending_index: 6,
             ticketsSetData: [
                 {
                     id: '27',
@@ -394,21 +396,41 @@ export class Dashboard extends React.Component<any, any> {
     }
 
     navigatePage(target: any, e: any, i: any) {
-        const { totalPages, currentPage } = this.state;
+        const { totalPages, currentPage, start_index, perPageLimit, ending_index, ticketsSetData } = this.state;
         e.preventDefault();
         switch (target) {
             case 'pre':
                 if (currentPage !== 0) {
                     this.setState({
                         currentPage: currentPage - 1,
+                        start_index: start_index - perPageLimit,
                     });
+                    if (ending_index != ticketsSetData.length) {
+                        this.setState({
+                            ending_index: ending_index - perPageLimit,
+                        });
+                    }else{
+                        this.setState({
+                            ending_index: ending_index - (ticketsSetData.length - start_index),
+                        });
+                    }
                 }
                 break;
             case 'next':
                 if (currentPage !== totalPages - 1) {
                     this.setState({
                         currentPage: currentPage + 1,
+                        start_index: start_index + perPageLimit,
                     });
+                    if (ending_index + perPageLimit < (ticketsSetData.length - start_index)) {
+                        this.setState({
+                            ending_index: ending_index + perPageLimit,
+                        });
+                    } else {
+                        this.setState({
+                            ending_index: ending_index + (ticketsSetData.length - ending_index),
+                        });
+                    }
                 }
                 break;
             case 'btn-click':
@@ -422,7 +444,7 @@ export class Dashboard extends React.Component<any, any> {
 
     render() {
         const state = this.state;
-        const { perPageLimit, ticketsSetData, totalPages } = this.state;
+        const { ticketsSetData, start_index, ending_index } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -549,7 +571,7 @@ export class Dashboard extends React.Component<any, any> {
                             <div className="row">
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="showing">
-                                        Latest Tickets (Showing {perPageLimit} to {totalPages} of {ticketsSetData.length} Tickets)
+                                        Latest Tickets (Showing {start_index} to {ending_index} of {ticketsSetData.length} Tickets)
                                     </div>
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-12 text-right">
