@@ -83,7 +83,10 @@
         }
     }
     .ticket-graphs{
-        height: 250px;
+        canvas{
+            height: 220px!important;
+            width: 100%!important;
+        }
         .hours-text{
             font-size: 13px;
             line-height: 16px;

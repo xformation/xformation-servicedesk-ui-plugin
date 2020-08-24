@@ -504,8 +504,9 @@ a:hover {
   font-weight: 400;
   padding: 0 4px;
 }
-.ticket-trends .ticket-graphs {
-  height: 250px;
+.ticket-trends .ticket-graphs canvas {
+  height: 220px !important;
+  width: 100% !important;
 }
 .ticket-trends .ticket-graphs .hours-text {
   font-size: 13px;
@@ -930,8 +931,9 @@ a:hover {
   line-height: 24px;
 }
 
-.chart-inner {
-  height: 150px;
+.chart-inner canvas {
+  height: 150px !important;
+  width: 100% !important;
 }
 
 .apply-filters-button {

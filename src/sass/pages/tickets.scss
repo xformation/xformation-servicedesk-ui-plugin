@@ -194,7 +194,10 @@
 }
 
 .chart-inner{
-    height: 150px;
+    canvas{
+        height: 150px!important;
+        width: 100%!important;
+    }
 }
 
 .apply-filters-button{

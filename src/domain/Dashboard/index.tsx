@@ -452,13 +452,13 @@ export class Dashboard extends React.Component<any, any> {
                             <div className="col-lg-7 col-md-12 col-sm-12 ticket-trends-main">
                                 <div className="ticket-trends">
                                     <div className="row">
-                                        <div className="col-lg-5 col-md-5 col-sm-12">
+                                        <div className="col-lg-5 col-md-12 col-sm-12">
                                             <div className="d-block heading">
                                                 <h3 className="d-block mb-0">Today's Ticket Trends</h3>
                                                 <span className="d-block mb-0">13 August 2020</span>
                                             </div>
                                         </div>
-                                        <div className="col-lg-7 col-md-7 col-sm-12 text-right">
+                                        <div className="col-lg-7 col-md-12 col-sm-12 text-right">
                                             <div className="d-inline-block v-a-top days-box">
                                                 <div className="d-inline-block form-check">
                                                     <input type="checkbox" className="form-check-input" id="Today" />
