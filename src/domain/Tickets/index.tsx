@@ -129,14 +129,21 @@ export class Tickets extends React.Component<any, any> {
                 borderWidth: 1,
                 hoverBackgroundColor: 'rgba(222, 233, 249, 1)',
                 hoverBorderColor: 'rgba(222, 233, 249, 1)',
-                data: [5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14, 16, 18, 16, 17, 12, 22, 30, 21, 5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14]
+                data: [5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 27, 15, 24, 16, 18, 16, 27, 12, 22, 30, 21, 5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14]
             }, {
                 label: '',
                 backgroundColor: '#fff',
-                data: [5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14, 16, 18, 16, 17, 12, 22, 30, 21, 5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14],
+                data: [5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 27, 15, 24, 16, 18, 16, 27, 12, 22, 30, 21, 5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14],
                 type: 'line',
                 pointRadius: 4,
-                pointBackgroundColor: 'rgba(67, 138, 251, 1)',
+                // pointBackgroundColor: 'rgba(67, 138, 251, 1)',
+                pointBackgroundColor: function(context: any) {
+                    var index = context.dataIndex;
+                    var value = context.dataset.data[index];
+                    return value < 20 ? '#438AFB' :  // draw negative values in red
+                    value > 20 && value<= 30 ? '#FB7CA4' :    // else, alternate values in blue and green
+                            '#FBB48B';
+                },
                 borderColor: '#fff',
             }
         ]
@@ -219,11 +226,6 @@ export class Tickets extends React.Component<any, any> {
                             ending_index: ending_index - (TicketsData.length - start_index + 1),
                         });
                     }
-                    // this.setState({
-                    //     currentPage: currentPage - 1,
-                    //     start_index: start_index - perPageLimit,
-                    //     ending_index: ending_index - (TicketsData.length - start_index),
-                    // });
                 }
                 break;
             case 'next':
@@ -241,25 +243,9 @@ export class Tickets extends React.Component<any, any> {
                             ending_index: ending_index + (TicketsData.length - ending_index),
                         });
                     }
-                    // this.setState({
-                    //     currentPage: currentPage + 1,
-                    //     start_index: start_index + perPageLimit,
-                    // });
-                    // if (ending_index + perPageLimit < (TicketsData.length - start_index)) {
-                    //     this.setState({
-                    //         ending_index: ending_index + perPageLimit,
-                    //     });
-                    // } else {
-                    //     this.setState({
-                    //         ending_index: ending_index + (TicketsData.length - ending_index),
-                    //     });
-                    // }
                 }
                 break;
             case 'btn-click':
-                // this.setState({
-                //     currentPage: i
-                // });
                 if ((i + 1) * perPageLimit < TicketsData.length) {
                     this.setState({
                         currentPage: i,
