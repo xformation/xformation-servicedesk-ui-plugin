@@ -396,7 +396,7 @@ export class Dashboard extends React.Component<any, any> {
     }
 
     navigatePage(target: any, e: any, i: any) {
-        const { totalPages, currentPage, start_index, perPageLimit, ending_index, ticketsSetData } = this.state;
+        const { totalPages, currentPage, start_index, perPageLimit, ending_index, ticketsSetData, } = this.state;
         e.preventDefault();
         switch (target) {
             case 'pre':
@@ -409,9 +409,9 @@ export class Dashboard extends React.Component<any, any> {
                         this.setState({
                             ending_index: ending_index - perPageLimit,
                         });
-                    }else{
+                    } else {
                         this.setState({
-                            ending_index: ending_index - (ticketsSetData.length - start_index),
+                            ending_index: ending_index - (ticketsSetData.length - start_index + 1),
                         });
                     }
                 }
@@ -422,7 +422,7 @@ export class Dashboard extends React.Component<any, any> {
                         currentPage: currentPage + 1,
                         start_index: start_index + perPageLimit,
                     });
-                    if (ending_index + perPageLimit < (ticketsSetData.length - start_index)) {
+                    if ((ending_index + perPageLimit) < ticketsSetData.length) {
                         this.setState({
                             ending_index: ending_index + perPageLimit,
                         });
@@ -434,9 +434,21 @@ export class Dashboard extends React.Component<any, any> {
                 }
                 break;
             case 'btn-click':
-                this.setState({
-                    currentPage: i
-                });
+                if ((i + 1) * perPageLimit < ticketsSetData.length) {
+                    this.setState({
+                        currentPage: i,
+                        start_index: (i * perPageLimit) + 1,
+                        ending_index: ((i + 1) * perPageLimit),
+
+                    });
+                } else {
+                    this.setState({
+                        currentPage: i,
+                        start_index: (i * perPageLimit) + 1,
+                        ending_index: (ending_index + (ticketsSetData.length - ending_index)),
+
+                    });
+                }
                 break;
         }
     }
