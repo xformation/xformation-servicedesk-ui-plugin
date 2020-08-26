@@ -30,6 +30,13 @@
       "addToNav": false,
       "defaultNav": false,
       "component": "Tickets"
+    },
+    {
+      "type": "page",
+      "name": "AllContacts",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "AllContacts"
     }
   ],
   "dependencies": {
