@@ -8,7 +8,10 @@
       "name": "Synectiks",
       "url": "https://xformation.com"
     },
-    "keywords": ["cms", "panel"],
+    "keywords": [
+      "cms",
+      "panel"
+    ],
     "version": "1.0",
     "updated": "2018-10-12",
     "logos": {
@@ -37,6 +40,13 @@
       "addToNav": false,
       "defaultNav": false,
       "component": "AllContacts"
+    },
+    {
+      "type": "page",
+      "name": "OpenTickets",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "OpenTickets"
     }
   ],
   "dependencies": {

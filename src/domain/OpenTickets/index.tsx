@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
-import { Bar } from 'react-chartjs-2';
 
-export class Tickets extends React.Component<any, any> {
+export class OpenTickets extends React.Component<any, any> {
     breadCrumbs: any;
     constructor(props: any) {
         super(props);
@@ -12,6 +11,7 @@ export class Tickets extends React.Component<any, any> {
             perPageLimit: 3,
             start_index: 1,
             ending_index: 3,
+            page_type: '',
             TicketsData: [
                 {
                     index: '#27',
@@ -115,38 +115,14 @@ export class Tickets extends React.Component<any, any> {
         ];
     }
     componentDidMount() {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const pageType = urlParams.get('type');
+        console.log(pageType);
+        this.setState({
+            page_type: pageType,
+        });
         this.calculateTotalPages(this.state.TicketsData);
-    };
-
-    barChartData = {
-        labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '01', '02', '03', '04', '05', '06', '07', '08', '09', 10],
-        datasets: [
-            {
-                type: 'bar',
-                label: '',
-                backgroundColor: 'rgba(222, 233, 249, 1)',
-                borderColor: 'rgba(222, 233, 249, 1)',
-                borderWidth: 1,
-                hoverBackgroundColor: 'rgba(222, 233, 249, 1)',
-                hoverBorderColor: 'rgba(222, 233, 249, 1)',
-                data: [5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14, 16, 18, 16, 17, 12, 22, 23, 21, 5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14]
-            }, {
-                label: '',
-                backgroundColor: '#fff',
-                data: [5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14, 16, 18, 16, 17, 12, 22, 23, 21, 5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14],
-                type: 'line',
-                pointRadius: 4,
-                // pointBackgroundColor: 'rgba(67, 138, 251, 1)',
-                pointBackgroundColor: function (context: any) {
-                    var index = context.dataIndex;
-                    var value = context.dataset.data[index];
-                    return value < 20 ? '#438AFB' :  // draw negative values in red
-                        value > 20 && value <= 30 ? '#FB7CA4' :    // else, alternate values in blue and green
-                            '#FBB48B';
-                },
-                borderColor: '#fff',
-            }
-        ]
     };
 
     calculateTotalPages = (displayData: any) => {
@@ -266,7 +242,7 @@ export class Tickets extends React.Component<any, any> {
     }
 
     render() {
-        const { TicketsData, start_index, ending_index } = this.state;
+        const { TicketsData, start_index, ending_index, page_type } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -275,8 +251,7 @@ export class Tickets extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-8 col-md-8 col-sm-12">
                                 <div className="page-heading">
-                                    <h1>Quick Statistics</h1>
-                                    <span>List of ticket opened by Customer</span>
+                                    <h1>{page_type}</h1>
                                 </div>
                             </div>
                             <div className="col-lg-4 col-md-4 col-sm-12 text-right">
@@ -287,74 +262,6 @@ export class Tickets extends React.Component<any, any> {
                         </div>
                     </div>
                     <div className="common-container border-bottom-0">
-                        <div className="row">
-                            <div className="col-lg-3 col-md-8 col-sm-12">
-                                <div className="d-inline-block tickets-number-box">
-                                    <h3 className="d-block m-b-5 red">2450</h3>
-                                    <span className="d-block">Total No.of Tickets</span>
-                                </div>
-                            </div>
-                            <div className="col-lg-7 col-md-8 col-sm-12">
-                                <div className="d-block w-100 text-right">
-                                    <div className="d-inline-block tickets-number-box">
-                                        <h3 className="d-block m-b-5 blue">67%</h3>
-                                        <span className="d-block">Open Tickets</span>
-                                    </div>
-                                    <div className="d-inline-block tickets-number-box">
-                                        <h3 className="d-block m-b-5 orange">18%</h3>
-                                        <span className="d-block">Unresolved Tickets</span>
-                                    </div>
-                                    <div className="d-inline-block tickets-number-box">
-                                        <h3 className="d-block m-b-5 red">15%</h3>
-                                        <span className="d-block">Closed Tickets</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-lg-2 col-md-4 col-sm-12 text-right">
-                                <div className="form-group quarter-form">
-                                    <select className="form-control" id="Quarter">
-                                        <option value="" selected>Select Quarter</option>
-                                        <option value="Quater1">Quarter 1</option>
-                                        <option value="Quater2">Quarter 2</option>
-                                        <option value="Quater3">Quarter 3</option>
-                                        <option value="Quater4">Quarter 4</option>
-                                        <option value="CustomRange">Custom Range</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="d-block width-100 p-t-10 chart-inner">
-                            <Bar
-                                data={this.barChartData}
-                                options={{
-                                    maintainAspectRatio: false,
-                                    legend: {
-                                        display: false,
-                                        position: 'right'
-                                    },
-                                    scales: {
-                                        yAxes: [{
-                                            gridLines: {
-                                                color: "#fff",
-                                            },
-                                            ticks: {
-                                                fontColor: '#fff',
-                                                fontSize: 12
-                                            },
-                                        }],
-                                        xAxes: [{
-                                            gridLines: {
-                                                color: "#fff",
-                                            },
-                                            ticks: {
-                                                fontColor: 'rgba(169, 185, 198, 1)',
-                                                fontSize: 12
-                                            },
-                                        }]
-                                    }
-                                }}
-                            />
-                        </div>
                     </div>
                     <div className="common-container border-bottom-0 filter-container">
                         <div className="row">

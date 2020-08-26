@@ -4,6 +4,8 @@ import { config } from '../../config';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import ticketIconImage1 from '../../img/ticket-icon-img1.png';
 import { Line } from 'react-chartjs-2';
+import { Tickets } from './../Tickets';
+// import Link, { LinkProps } from "@material-ui/core/Link";
 
 export class Dashboard extends React.Component<any, any> {
     breadCrumbs: any;
@@ -299,11 +301,13 @@ export class Dashboard extends React.Component<any, any> {
             retData.push(
                 <div className="col-xl-5 col-lg-4 col-md-6 col-sm-12">
                     <div className="d-block text-center ticketing-box">
-                        <div className="image"><img src={ticketIconImage1} alt="" /></div>
-                        <div className="number">{data.ticketingNumber}</div>
-                        <div className="name">{data.ticketingname}</div>
+                        <Link to={`${config.basePath}/opentickets?type=${data.ticketingname}`} target="blank">
+                            <div className="image"><img src={ticketIconImage1} alt="" /></div>
+                            <div className="number">{data.ticketingNumber}</div>
+                            <div className="name">{data.ticketingname}</div>
+                        </Link>
                     </div>
-                </div>
+                </div >
             );
         }
         return retData;
