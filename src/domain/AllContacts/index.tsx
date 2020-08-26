@@ -2,220 +2,400 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { config } from '../../config';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
-import ticketIconImage1 from '../../img/ticket-icon-img1.png';
-import { Line } from 'react-chartjs-2';
 
 export class AllContacts extends React.Component<any, any> {
     breadCrumbs: any;
     constructor(props: any) {
         super(props);
         this.state = {
+            searchKey: '',
             totalPages: '',
             currentPage: 0,
             perPageLimit: 6,
             start_index: 1,
             ending_index: 6,
-            ticketsSetData: [
+            allContactsSetData: [
                 {
-                    id: '27',
-                    requesterName: 'Rodney Artichoke',
-                    subjects: 'I need help with aading a New Contact....',
-                    status: 'Open',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '10 July 2020',
+                    contact: 'Rodney Artichoke',
+                    title: 'HR Manager',
+                    company: 'RGK Groups',
+                    emailAddress: 'support@artichoke.com',
+                    workPhone: '(+1) 224 547 8425',
+                    facebook: 'Articho142',
+                    twitter: 'Rodney124',
                 },
                 {
-                    id: '39',
-                    requesterName: 'Chaplain Mondover',
-                    subjects: 'I need help with aading a New Contact data to be pre...',
-                    status: 'Closed',
-                    priority: 'Medium',
-                    assignee: 'Bodrum Salvador',
-                    createDate: '12 July 2020',
+                    contact: 'Jason Response',
+                    title: 'HR Manager',
+                    company: 'RGK Groups',
+                    emailAddress: 'support@artichoke.com',
+                    workPhone: '(+1) 224 547 8425',
+                    facebook: 'Articho142',
+                    twitter: 'Rodney124',
                 },
                 {
-                    id: '47',
-                    requesterName: 'Rodney Artichoke',
-                    subjects: 'Mobile Campaign',
-                    status: 'Pending',
-                    priority: 'Low',
-                    assignee: 'Inverness McKenzie',
-                    createDate: '15 July 2020',
+                    contact: 'Fig Nelson',
+                    title: 'HR Manager',
+                    company: 'RNKV Steels',
+                    emailAddress: 'contact@rnvksteels.com',
+                    workPhone: '(+3) 954 247 3126',
+                    facebook: 'Nelson126',
+                    twitter: 'nelson236',
                 },
                 {
-                    id: '52',
-                    requesterName: 'Inverness McKenzie',
-                    subjects: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
+                    contact: 'Inverness McKenzie',
+                    title: 'Steel Worker',
+                    company: 'Ram Fabrication',
+                    emailAddress: 'ramsteel@gmail.com',
+                    workPhone: '(+1) 387 267 5931',
+                    facebook: 'McKenzie195',
+                    twitter: 'Inverness198',
                 },
                 {
-                    id: '87',
-                    requesterName: 'Douglas Lyphe',
-                    subjects: 'I need help with aading a New Contact....',
-                    status: 'Closed',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '19 July 2020',
+                    contact: 'Fergus Douchebag',
+                    title: 'Graphic Designer',
+                    company: 'AK+',
+                    emailAddress: 'info@fergus.com',
+                    workPhone: '(+1) 174 217 8425',
+                    facebook: 'Fergus Douch',
+                    twitter: 'Douchebag102',
                 },
                 {
-                    id: '92',
-                    requesterName: 'Theodore Handle',
-                    subjects: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
+                    contact: 'Dominic L. Ement',
+                    title: 'Marketing Manager',
+                    company: 'RT Groups',
+                    emailAddress: 'd.ement@gmail.com',
+                    workPhone: '(+1) 482 268 8410',
+                    facebook: 'L.ement143',
+                    twitter: 'Dominic148',
                 },
                 {
-                    id: '52',
-                    requesterName: 'Inverness McKenzie',
-                    subjects: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
+                    contact: 'Niles Peppertrout',
+                    title: 'Art Director',
+                    company: 'StudioGreen',
+                    emailAddress: 'niles1547@gamil.com',
+                    workPhone: '(+1) 247 147 2687',
+                    facebook: 'Niles1124',
+                    twitter: 'Peppertrout12',
                 },
                 {
-                    id: '87',
-                    requesterName: 'Douglas Lyphe',
-                    subjects: 'I need help with aading a New Contact....',
-                    status: 'Closed',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '19 July 2020',
+                    contact: 'Pelican Steve',
+                    title: 'Designer',
+                    company: 'Digital Media',
+                    emailAddress: 'info@digital.com',
+                    workPhone: '(+1) 412 578 2548',
+                    facebook: 'Steve154',
+                    twitter: 'Pelican111',
                 },
                 {
-                    id: '92',
-                    requesterName: 'Theodore Handle',
-                    subjects: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
+                    contact: 'Inverness McKenzie',
+                    title: 'Steel Worker',
+                    company: 'Ram Fabrication',
+                    emailAddress: 'ramsteel@gmail.com',
+                    workPhone: '(+1) 387 267 5931',
+                    facebook: 'McKenzie195',
+                    twitter: 'Inverness198',
                 },
                 {
-                    id: '39',
-                    requesterName: 'Chaplain Mondover',
-                    subjects: 'I need help with aading a New Contact data to be pre...',
-                    status: 'Closed',
-                    priority: 'Medium',
-                    assignee: 'Bodrum Salvador',
-                    createDate: '12 July 2020',
+                    contact: 'Fergus Douchebag',
+                    title: 'Graphic Designer',
+                    company: 'AK+',
+                    emailAddress: 'info@fergus.com',
+                    workPhone: '(+1) 174 217 8425',
+                    facebook: 'Fergus Douch',
+                    twitter: 'Douchebag102',
                 },
                 {
-                    id: '47',
-                    requesterName: 'Rodney Artichoke',
-                    subjects: 'Mobile Campaign',
-                    status: 'Pending',
-                    priority: 'Low',
-                    assignee: 'Inverness McKenzie',
-                    createDate: '15 July 2020',
+                    contact: 'Dominic L. Ement',
+                    title: 'Marketing Manager',
+                    company: 'RT Groups',
+                    emailAddress: 'd.ement@gmail.com',
+                    workPhone: '(+1) 482 268 8410',
+                    facebook: 'L.ement143',
+                    twitter: 'Dominic148',
                 },
                 {
-                    id: '52',
-                    requesterName: 'Inverness McKenzie',
-                    subjects: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
+                    contact: 'Niles Peppertrout',
+                    title: 'Art Director',
+                    company: 'StudioGreen',
+                    emailAddress: 'niles1547@gamil.com',
+                    workPhone: '(+1) 247 147 2687',
+                    facebook: 'Niles1124',
+                    twitter: 'Peppertrout12',
                 },
                 {
-                    id: '47',
-                    requesterName: 'Rodney Artichoke',
-                    subjects: 'Mobile Campaign',
-                    status: 'Pending',
-                    priority: 'Low',
-                    assignee: 'Inverness McKenzie',
-                    createDate: '15 July 2020',
+                    contact: 'Pelican Steve',
+                    title: 'Designer',
+                    company: 'Digital Media',
+                    emailAddress: 'info@digital.com',
+                    workPhone: '(+1) 412 578 2548',
+                    facebook: 'Steve154',
+                    twitter: 'Pelican111',
                 },
                 {
-                    id: '52',
-                    requesterName: 'Inverness McKenzie',
-                    subjects: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
+                    contact: 'Jason Response',
+                    title: 'HR Manager',
+                    company: 'RGK Groups',
+                    emailAddress: 'support@artichoke.com',
+                    workPhone: '(+1) 224 547 8425',
+                    facebook: 'Articho142',
+                    twitter: 'Rodney124',
                 },
                 {
-                    id: '87',
-                    requesterName: 'Douglas Lyphe',
-                    subjects: 'I need help with aading a New Contact....',
-                    status: 'Closed',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '19 July 2020',
+                    contact: 'Fig Nelson',
+                    title: 'HR Manager',
+                    company: 'RNKV Steels',
+                    emailAddress: 'contact@rnvksteels.com',
+                    workPhone: '(+3) 954 247 3126',
+                    facebook: 'Nelson126',
+                    twitter: 'nelson236',
                 },
                 {
-                    id: '92',
-                    requesterName: 'Theodore Handle',
-                    subjects: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
+                    contact: 'Inverness McKenzie',
+                    title: 'Steel Worker',
+                    company: 'Ram Fabrication',
+                    emailAddress: 'ramsteel@gmail.com',
+                    workPhone: '(+1) 387 267 5931',
+                    facebook: 'McKenzie195',
+                    twitter: 'Inverness198',
                 },
                 {
-                    id: '52',
-                    requesterName: 'Inverness McKenzie',
-                    subjects: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
+                    contact: 'Fergus Douchebag',
+                    title: 'Graphic Designer',
+                    company: 'AK+',
+                    emailAddress: 'info@fergus.com',
+                    workPhone: '(+1) 174 217 8425',
+                    facebook: 'Fergus Douch',
+                    twitter: 'Douchebag102',
                 },
                 {
-                    id: '87',
-                    requesterName: 'Douglas Lyphe',
-                    subjects: 'I need help with aading a New Contact....',
-                    status: 'Closed',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '19 July 2020',
+                    contact: 'Dominic L. Ement',
+                    title: 'Marketing Manager',
+                    company: 'RT Groups',
+                    emailAddress: 'd.ement@gmail.com',
+                    workPhone: '(+1) 482 268 8410',
+                    facebook: 'L.ement143',
+                    twitter: 'Dominic148',
                 },
                 {
-                    id: '92',
-                    requesterName: 'Theodore Handle',
-                    subjects: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
+                    contact: 'Niles Peppertrout',
+                    title: 'Art Director',
+                    company: 'StudioGreen',
+                    emailAddress: 'niles1547@gamil.com',
+                    workPhone: '(+1) 247 147 2687',
+                    facebook: 'Niles1124',
+                    twitter: 'Peppertrout12',
                 },
                 {
-                    id: '39',
-                    requesterName: 'Chaplain Mondover',
-                    subjects: 'I need help with aading a New Contact data to be pre...',
-                    status: 'Closed',
-                    priority: 'Medium',
-                    assignee: 'Bodrum Salvador',
-                    createDate: '12 July 2020',
+                    contact: 'Pelican Steve',
+                    title: 'Designer',
+                    company: 'Digital Media',
+                    emailAddress: 'info@digital.com',
+                    workPhone: '(+1) 412 578 2548',
+                    facebook: 'Steve154',
+                    twitter: 'Pelican111',
                 },
                 {
-                    id: '27',
-                    requesterName: 'Rodney Artichoke',
-                    subjects: 'I need help with aading a New Contact....',
-                    status: 'Open',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '10 July 2020',
-                },
-                {
-                    id: '39',
-                    requesterName: 'Chaplain Mondover',
-                    subjects: 'I need help with aading a New Contact data to be pre...',
-                    status: 'Closed',
-                    priority: 'Medium',
-                    assignee: 'Bodrum Salvador',
-                    createDate: '12 July 2020',
+                    contact: 'Inverness McKenzie',
+                    title: 'Steel Worker',
+                    company: 'Ram Fabrication',
+                    emailAddress: 'ramsteel@gmail.com',
+                    workPhone: '(+1) 387 267 5931',
+                    facebook: 'McKenzie195',
+                    twitter: 'Inverness198',
                 },
             ],
-            
+            duplicateAllContacts: [
+                {
+                    contact: 'Rodney Artichoke',
+                    title: 'HR Manager',
+                    company: 'RGK Groups',
+                    emailAddress: 'support@artichoke.com',
+                    workPhone: '(+1) 224 547 8425',
+                    facebook: 'Articho142',
+                    twitter: 'Rodney124',
+                },
+                {
+                    contact: 'Jason Response',
+                    title: 'HR Manager',
+                    company: 'RGK Groups',
+                    emailAddress: 'support@artichoke.com',
+                    workPhone: '(+1) 224 547 8425',
+                    facebook: 'Articho142',
+                    twitter: 'Rodney124',
+                },
+                {
+                    contact: 'Fig Nelson',
+                    title: 'HR Manager',
+                    company: 'RNKV Steels',
+                    emailAddress: 'contact@rnvksteels.com',
+                    workPhone: '(+3) 954 247 3126',
+                    facebook: 'Nelson126',
+                    twitter: 'nelson236',
+                },
+                {
+                    contact: 'Inverness McKenzie',
+                    title: 'Steel Worker',
+                    company: 'Ram Fabrication',
+                    emailAddress: 'ramsteel@gmail.com',
+                    workPhone: '(+1) 387 267 5931',
+                    facebook: 'McKenzie195',
+                    twitter: 'Inverness198',
+                },
+                {
+                    contact: 'Fergus Douchebag',
+                    title: 'Graphic Designer',
+                    company: 'AK+',
+                    emailAddress: 'info@fergus.com',
+                    workPhone: '(+1) 174 217 8425',
+                    facebook: 'Fergus Douch',
+                    twitter: 'Douchebag102',
+                },
+                {
+                    contact: 'Dominic L. Ement',
+                    title: 'Marketing Manager',
+                    company: 'RT Groups',
+                    emailAddress: 'd.ement@gmail.com',
+                    workPhone: '(+1) 482 268 8410',
+                    facebook: 'L.ement143',
+                    twitter: 'Dominic148',
+                },
+                {
+                    contact: 'Niles Peppertrout',
+                    title: 'Art Director',
+                    company: 'StudioGreen',
+                    emailAddress: 'niles1547@gamil.com',
+                    workPhone: '(+1) 247 147 2687',
+                    facebook: 'Niles1124',
+                    twitter: 'Peppertrout12',
+                },
+                {
+                    contact: 'Pelican Steve',
+                    title: 'Designer',
+                    company: 'Digital Media',
+                    emailAddress: 'info@digital.com',
+                    workPhone: '(+1) 412 578 2548',
+                    facebook: 'Steve154',
+                    twitter: 'Pelican111',
+                },
+                {
+                    contact: 'Inverness McKenzie',
+                    title: 'Steel Worker',
+                    company: 'Ram Fabrication',
+                    emailAddress: 'ramsteel@gmail.com',
+                    workPhone: '(+1) 387 267 5931',
+                    facebook: 'McKenzie195',
+                    twitter: 'Inverness198',
+                },
+                {
+                    contact: 'Fergus Douchebag',
+                    title: 'Graphic Designer',
+                    company: 'AK+',
+                    emailAddress: 'info@fergus.com',
+                    workPhone: '(+1) 174 217 8425',
+                    facebook: 'Fergus Douch',
+                    twitter: 'Douchebag102',
+                },
+                {
+                    contact: 'Dominic L. Ement',
+                    title: 'Marketing Manager',
+                    company: 'RT Groups',
+                    emailAddress: 'd.ement@gmail.com',
+                    workPhone: '(+1) 482 268 8410',
+                    facebook: 'L.ement143',
+                    twitter: 'Dominic148',
+                },
+                {
+                    contact: 'Niles Peppertrout',
+                    title: 'Art Director',
+                    company: 'StudioGreen',
+                    emailAddress: 'niles1547@gamil.com',
+                    workPhone: '(+1) 247 147 2687',
+                    facebook: 'Niles1124',
+                    twitter: 'Peppertrout12',
+                },
+                {
+                    contact: 'Pelican Steve',
+                    title: 'Designer',
+                    company: 'Digital Media',
+                    emailAddress: 'info@digital.com',
+                    workPhone: '(+1) 412 578 2548',
+                    facebook: 'Steve154',
+                    twitter: 'Pelican111',
+                },
+                {
+                    contact: 'Jason Response',
+                    title: 'HR Manager',
+                    company: 'RGK Groups',
+                    emailAddress: 'support@artichoke.com',
+                    workPhone: '(+1) 224 547 8425',
+                    facebook: 'Articho142',
+                    twitter: 'Rodney124',
+                },
+                {
+                    contact: 'Fig Nelson',
+                    title: 'HR Manager',
+                    company: 'RNKV Steels',
+                    emailAddress: 'contact@rnvksteels.com',
+                    workPhone: '(+3) 954 247 3126',
+                    facebook: 'Nelson126',
+                    twitter: 'nelson236',
+                },
+                {
+                    contact: 'Inverness McKenzie',
+                    title: 'Steel Worker',
+                    company: 'Ram Fabrication',
+                    emailAddress: 'ramsteel@gmail.com',
+                    workPhone: '(+1) 387 267 5931',
+                    facebook: 'McKenzie195',
+                    twitter: 'Inverness198',
+                },
+                {
+                    contact: 'Fergus Douchebag',
+                    title: 'Graphic Designer',
+                    company: 'AK+',
+                    emailAddress: 'info@fergus.com',
+                    workPhone: '(+1) 174 217 8425',
+                    facebook: 'Fergus Douch',
+                    twitter: 'Douchebag102',
+                },
+                {
+                    contact: 'Dominic L. Ement',
+                    title: 'Marketing Manager',
+                    company: 'RT Groups',
+                    emailAddress: 'd.ement@gmail.com',
+                    workPhone: '(+1) 482 268 8410',
+                    facebook: 'L.ement143',
+                    twitter: 'Dominic148',
+                },
+                {
+                    contact: 'Niles Peppertrout',
+                    title: 'Art Director',
+                    company: 'StudioGreen',
+                    emailAddress: 'niles1547@gamil.com',
+                    workPhone: '(+1) 247 147 2687',
+                    facebook: 'Niles1124',
+                    twitter: 'Peppertrout12',
+                },
+                {
+                    contact: 'Pelican Steve',
+                    title: 'Designer',
+                    company: 'Digital Media',
+                    emailAddress: 'info@digital.com',
+                    workPhone: '(+1) 412 578 2548',
+                    facebook: 'Steve154',
+                    twitter: 'Pelican111',
+                },
+                {
+                    contact: 'Inverness McKenzie',
+                    title: 'Steel Worker',
+                    company: 'Ram Fabrication',
+                    emailAddress: 'ramsteel@gmail.com',
+                    workPhone: '(+1) 387 267 5931',
+                    facebook: 'McKenzie195',
+                    twitter: 'Inverness198',
+                },
+            ],
         };
         this.breadCrumbs = [
             {
@@ -230,7 +410,7 @@ export class AllContacts extends React.Component<any, any> {
     }
 
     componentDidMount() {
-        this.calculateTotalPages(this.state.ticketsSetData);
+        this.calculateTotalPages(this.state.allContactsSetData);
     };
 
     calculateTotalPages = (displayData: any) => {
@@ -241,33 +421,23 @@ export class AllContacts extends React.Component<any, any> {
         });
     };
 
-    allTicketsSetData = () => {
-        const { ticketsSetData, perPageLimit, currentPage } = this.state;
+    allContactsSetData = () => {
+        const { allContactsSetData, perPageLimit, currentPage } = this.state;
         const retData = [];
-        const length = ticketsSetData.length;
+        const length = allContactsSetData.length;
         if (length > 0) {
             for (let i = 0; i < length; i++) {
                 if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
-                    const data = ticketsSetData[i];
+                    const data = allContactsSetData[i];
                     retData.push(
                         <tr>
-                            <td>#{data.id}</td>
-                            <td><span className="image"></span> {data.requesterName}</td>
-                            <td className="subjects">{data.subjects}</td>
-                            <td>
-                                {data.status == 'Open' &&
-                                    <span className="yellow-green">Open</span>
-                                }
-                                {data.status == 'Closed' &&
-                                    <span className="red">Closed</span>
-                                }
-                                {data.status == 'Pending' &&
-                                    <span className="orange">Pending</span>
-                                }
-                            </td>
-                            <td><span className="priority">{data.priority}</span></td>
-                            <td>{data.assignee}</td>
-                            <td className="date">{data.createDate}</td>
+                            <td><input type="checkbox" className="checkbox" checked={allContactsSetData.checkValueStatus} onChange={(e) => { this.onClickChildCheckbox(e, i) }} /> <span className="image"></span> {data.contact}</td>
+                            <td>{data.title}</td>
+                            <td>{data.company}</td>
+                            <td>{data.emailAddress}</td>
+                            <td>{data.workPhone}</td>
+                            <td>{data.facebook}</td>
+                            <td>{data.twitter} <a href="#" className="float-right"><i className="fa fa-ellipsis-v"></i></a></td>
                         </tr>
                     );
                 }
@@ -280,7 +450,7 @@ export class AllContacts extends React.Component<any, any> {
     }
 
     peginationOfBox() {
-        const { currentPage, totalPages, ticketsSetData } = this.state;
+        const { currentPage, totalPages, allContactsSetData } = this.state;
         let rows = [];
         for (let i = 0; i < totalPages; i++) {
             console.log(currentPage);
@@ -300,7 +470,7 @@ export class AllContacts extends React.Component<any, any> {
     }
 
     navigatePage(target: any, e: any, i: any) {
-        const { totalPages, currentPage, start_index, perPageLimit, ending_index, ticketsSetData, } = this.state;
+        const { totalPages, currentPage, start_index, perPageLimit, ending_index, allContactsSetData, } = this.state;
         e.preventDefault();
         switch (target) {
             case 'pre':
@@ -309,13 +479,13 @@ export class AllContacts extends React.Component<any, any> {
                         currentPage: currentPage - 1,
                         start_index: start_index - perPageLimit,
                     });
-                    if (ending_index != ticketsSetData.length) {
+                    if (ending_index != allContactsSetData.length) {
                         this.setState({
                             ending_index: ending_index - perPageLimit,
                         });
                     } else {
                         this.setState({
-                            ending_index: ending_index - (ticketsSetData.length - start_index + 1),
+                            ending_index: ending_index - (allContactsSetData.length - start_index + 1),
                         });
                     }
                 }
@@ -326,19 +496,19 @@ export class AllContacts extends React.Component<any, any> {
                         currentPage: currentPage + 1,
                         start_index: start_index + perPageLimit,
                     });
-                    if ((ending_index + perPageLimit) < ticketsSetData.length) {
+                    if ((ending_index + perPageLimit) < allContactsSetData.length) {
                         this.setState({
                             ending_index: ending_index + perPageLimit,
                         });
                     } else {
                         this.setState({
-                            ending_index: ending_index + (ticketsSetData.length - ending_index),
+                            ending_index: ending_index + (allContactsSetData.length - ending_index),
                         });
                     }
                 }
                 break;
             case 'btn-click':
-                if ((i + 1) * perPageLimit < ticketsSetData.length) {
+                if ((i + 1) * perPageLimit < allContactsSetData.length) {
                     this.setState({
                         currentPage: i,
                         start_index: (i * perPageLimit) + 1,
@@ -349,7 +519,7 @@ export class AllContacts extends React.Component<any, any> {
                     this.setState({
                         currentPage: i,
                         start_index: (i * perPageLimit) + 1,
-                        ending_index: (ending_index + (ticketsSetData.length - ending_index)),
+                        ending_index: (ending_index + (allContactsSetData.length - ending_index)),
 
                     });
                 }
@@ -357,14 +527,57 @@ export class AllContacts extends React.Component<any, any> {
         }
     }
 
+    onSearchChange = (e: any) => {
+        const { value } = e.target;
+        this.setState({
+            searchKey: value,
+        });
+        const { duplicateAllContacts } = this.state;
+        var searchResult = [];
+        for (let i = 0; i < duplicateAllContacts.length; i++) {
+            if (duplicateAllContacts[i].title.indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            } else if (duplicateAllContacts[i].title.toLowerCase().indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            }
+        }
+        this.calculateTotalPages(searchResult);
+        this.setState({
+            allContactsSetData: searchResult,
+            currentPage: 0
+        });
+    }
+
+    onClickChildCheckbox = (parentIndex: any, childIndex: any) => {
+        let countCheckedCheckbox = 0;
+        const { allContactsSetData } = this.state;
+        const parentCheckbox = allContactsSetData[parentIndex];
+        parentCheckbox.subData[childIndex].checkValue = !parentCheckbox.subData[childIndex].checkValue;
+        for (let j = 0; j < parentCheckbox.subData.length; j++) {
+            if (parentCheckbox.subData[j].checkValue == true) {
+                countCheckedCheckbox++;
+            } else {
+                countCheckedCheckbox--;
+            }
+        }
+        if (countCheckedCheckbox == parentCheckbox.subData.length) {
+            parentCheckbox.checkValueStatus = true;
+        } else {
+            parentCheckbox.checkValueStatus = false;
+        }
+        this.setState({
+            allContactsSetData
+        })
+    }
+
 
     render() {
         const state = this.state;
-        const { ticketsSetData, start_index, ending_index } = this.state;
+        const { allContactsSetData } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
-                <div className="servicedesk-page-container">
+                <div className="servicedesk-page-container all-contacts-container">
                     <div className="common-container border-bottom-0 p-b-0">
                         <div className="row">
                             <div className="col-lg-8 col-md-8 col-sm-12">
@@ -381,53 +594,62 @@ export class AllContacts extends React.Component<any, any> {
                     </div>
                     
                     <div className="common-container border-bottom-0 p-t-0">
-                        <div className="d-block p-t-20 all-ticket-tabel">
+                        <div className="d-block p-t-20 all-contacts-tabel">
                             <div className="row">
-                                <div className="col-lg-6 col-md-6 col-sm-12">
-                                    <div className="showing">
-                                        Latest Tickets (Showing {start_index} to {ending_index} of {ticketsSetData.length} Tickets)
+                                <div className="col-lg-9 col-md-12 col-sm-12">
+                                    <div className="d-inline-block select-all">
+                                        <input type="checkbox" className="checkbox" checked={allContactsSetData.checkValueStatus} 
+                                        onChange={(e) => { this.onClickChildCheckbox }}  />
+                                        <label className="d-inline-block">Select All</label>
+                                    </div>
+                                    <div className="d-inline-block showby">
+                                        <label className="d-inline-block">Show</label>
+                                        <select className="form-control">
+                                            <option>8</option>
+                                            <option>16</option>
+                                            <option>24</option>
+                                            <option>32</option>
+                                            <option>40</option>
+                                            <option>All</option>
+                                        </select>
+                                        <span>entries per page</span>
                                     </div>
                                 </div>
-                                <div className="col-lg-6 col-md-6 col-sm-12 text-right">
-                                    <div className="sortby">
-                                        <label className="d-inline-block">Sort By:</label>
-                                        <select className="form-control">
-                                            <option>Created Date</option>
-                                            <option>Due by time</option>
-                                            <option>Last modified</option>
-                                            <option>Priority</option>
-                                            <option>Status</option>
-                                            <option>Ascending</option>
-                                            <option>Descending</option>
-                                        </select>
+                                <div className="col-lg-3 col-md-12 col-sm-12 text-right">
+                                    <div className="form-group contacts-control-group">
+                                        <form>
+                                            <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey}  />
+                                            <button>
+                                                <i className="fa fa-search"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
-                            <div className="d-block p-t-5 tickets-tabel">
-                                <table className="ticket-tabel">
+                            <div className="d-block p-t-5 contacts-tabel">
+                                <table className="contact-tabel">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Requester Name</th>
-                                            <th>Subjects</th>
-                                            <th>Status</th>
-                                            <th>Priority</th>
-                                            <th>Assignee</th>
-                                            <th>Create Date</th>
+                                            <th>Contact</th>
+                                            <th>Title</th>
+                                            <th>Company</th>
+                                            <th>Email Address</th>
+                                            <th>Work Phone</th>
+                                            <th>Facebook</th>
+                                            <th>Twitter</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {this.allTicketsSetData()}
+                                        {this.allContactsSetData()}
                                     </tbody>
                                 </table>
                             </div>
 
-                            {ticketsSetData.length > 0 &&
+                            {allContactsSetData.length > 0 &&
                                 <div className="d-block width-100 p-t-15 text-right pagination">
                                     {this.peginationOfBox()}
                                 </div>
                             }
-
                         </div>
                     </div>
                 </div>
