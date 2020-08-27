@@ -1,4 +1,10 @@
-import { Dashboard, Tickets, AllContacts, OpenTickets } from "./ui";
+import {
+  Dashboard,
+  Tickets,
+  AllContacts,
+  OpenTickets,
+  AllCompanies
+} from "./ui";
 import { ConfigCtrl } from "./ConfigCtrl";
 
 // import { loadPluginCss } from '@grafana/runtime';
@@ -14,4 +20,11 @@ export function loadPluginCss() {
 
 loadPluginCss();
 
-export { ConfigCtrl, Dashboard, Tickets, AllContacts, OpenTickets };
+export {
+  ConfigCtrl,
+  Dashboard,
+  Tickets,
+  AllContacts,
+  OpenTickets,
+  AllCompanies
+};

@@ -11,9 +11,7 @@ export class AllContacts extends React.Component<any, any> {
             searchKey: '',
             totalPages: '',
             currentPage: 0,
-            perPageLimit: 6,
-            start_index: 1,
-            ending_index: 6,
+            perPageLimit: 8,
             allContactsSetData: [
                 {
                     contact: 'Rodney Artichoke',
@@ -535,9 +533,39 @@ export class AllContacts extends React.Component<any, any> {
         const { duplicateAllContacts } = this.state;
         var searchResult = [];
         for (let i = 0; i < duplicateAllContacts.length; i++) {
+            if (duplicateAllContacts[i].contact.indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            } else if (duplicateAllContacts[i].contact.toLowerCase().indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            }
             if (duplicateAllContacts[i].title.indexOf(value) !== -1 || value === '') {
                 searchResult.push(duplicateAllContacts[i]);
             } else if (duplicateAllContacts[i].title.toLowerCase().indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            }
+            if (duplicateAllContacts[i].company.indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            } else if (duplicateAllContacts[i].company.toLowerCase().indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            }
+            if (duplicateAllContacts[i].emailAddress.indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            } else if (duplicateAllContacts[i].emailAddress.toLowerCase().indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            }
+            if (duplicateAllContacts[i].workPhone.indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            } else if (duplicateAllContacts[i].workPhone.toLowerCase().indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            }
+            if (duplicateAllContacts[i].facebook.indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            } else if (duplicateAllContacts[i].facebook.toLowerCase().indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            }
+            if (duplicateAllContacts[i].twitter.indexOf(value) !== -1 || value === '') {
+                searchResult.push(duplicateAllContacts[i]);
+            } else if (duplicateAllContacts[i].twitter.toLowerCase().indexOf(value) !== -1 || value === '') {
                 searchResult.push(duplicateAllContacts[i]);
             }
         }
