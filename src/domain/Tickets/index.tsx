@@ -301,7 +301,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                                <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto">
+                                <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto create-btn">
                                     Create
                                 </a>
                                 {openCreateMenu == true && <div className="text-center open-create-menu">
@@ -324,7 +324,7 @@ export class Tickets extends React.Component<any, any> {
                     </div>
                     <div className="common-container border-bottom-0">
                         <div className="row">
-                            <div className="col-lg-3 col-md-8 col-sm-12">
+                            <div className="col-lg-3 col-md-4 col-sm-12">
                                 <div className="d-inline-block tickets-number-box">
                                     <h3 className="d-block m-b-5 red">2450</h3>
                                     <span className="d-block">Total No.of Tickets</span>

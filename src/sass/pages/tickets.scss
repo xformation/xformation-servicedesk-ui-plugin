@@ -360,13 +360,18 @@
     
 }
 @media (max-width: 767px){
-    .tickets-number-boxs{
-        .text-right{
-            text-align: left;
-            .tickets-number-box{
-                display: block;
-                padding-top: 15px;
-            }
-        }
+    .tickets-number-box{
+        display: block;
+        padding-top: 15px;
+        text-align: left;
+    }
+    .create-btn{
+        float: left;
+        margin-bottom: 0;
+        margin-top: 10px;
+    }
+    .open-create-menu{
+        left: 15px;
+        top: 45px;
     }
 }
