@@ -2,10 +2,12 @@ import * as React from 'react';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import { Bar } from 'react-chartjs-2';
 import { OpenNewContactPopup } from './OpenNewContactPopup';
+import { OpenNewCompanyPopup } from './OpenNewCompanyPopup';
 
 export class Tickets extends React.Component<any, any> {
     breadCrumbs: any;
     openNewContactRef: any;
+    openNewCompanyRef: any;
     constructor(props: any) {
         super(props);
         this.state = {
@@ -13,6 +15,7 @@ export class Tickets extends React.Component<any, any> {
             currentPage: 0,
             perPageLimit: 3,
             start_index: 1,
+            openCreateMenu: false,
             ending_index: 3,
             TicketsData: [
                 {
@@ -116,6 +119,7 @@ export class Tickets extends React.Component<any, any> {
             }
         ];
         this.openNewContactRef = React.createRef();
+        this.openNewCompanyRef = React.createRef();
     }
     componentDidMount() {
         this.calculateTotalPages(this.state.TicketsData);
@@ -125,6 +129,16 @@ export class Tickets extends React.Component<any, any> {
         this.openNewContactRef.current.toggle();
     };
 
+    onClickOpenNewCompany = (e: any) => {
+        this.openNewCompanyRef.current.toggle();
+    };
+
+    onClickOpenSubLink = () => {
+        let menu = !this.state.openCreateMenu;
+        this.setState({
+            openCreateMenu: menu,
+        });
+    }
     barChartData = {
         labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '01', '02', '03', '04', '05', '06', '07', '08', '09', 10],
         datasets: [
@@ -273,7 +287,7 @@ export class Tickets extends React.Component<any, any> {
     }
 
     render() {
-        const { TicketsData, start_index, ending_index } = this.state;
+        const { TicketsData, start_index, ending_index, openCreateMenu } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -287,10 +301,25 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                                <a href="#" onClick={this.onClickOpenNewContact} className="blue-button m-r-0 min-width-inherit width-auto">
+                                <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto">
                                     Create
                                 </a>
+                                {openCreateMenu == true && <div className="col-lg-4 col-md-4 col-sm-12 text-right">
+                                    <a href="#" className="blue-button m-r-0 min-width-inherit width-auto">
+                                        Ticket
+                                </a>
+                                    <a href="#" className="blue-button m-r-0 min-width-inherit width-auto">
+                                        Email
+                                </a>
+                                    <a href="#" onClick={this.onClickOpenNewContact} className="blue-button m-r-0 min-width-inherit width-auto">
+                                        Contact
+                                </a>
+                                    <a href="#" onClick={this.onClickOpenNewCompany} className="blue-button m-r-0 min-width-inherit width-auto">
+                                        Company
+                                </a>
+                                </div>}
                             </div>
+
                         </div>
                     </div>
                     <div className="common-container border-bottom-0">
@@ -572,6 +601,7 @@ export class Tickets extends React.Component<any, any> {
                     </div>
                 </div>
                 <OpenNewContactPopup ref={this.openNewContactRef} />
+                <OpenNewCompanyPopup ref={this.openNewCompanyRef} />
             </div>
         );
     }
