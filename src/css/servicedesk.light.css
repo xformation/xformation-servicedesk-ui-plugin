@@ -425,6 +425,20 @@ a:hover {
   }
 }
 
+.modal {
+  -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, 0);
+  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);
+  max-width: 992px;
+}
+.modal .modal-content {
+  padding: 40px;
+}
+
+.modal-backdrop {
+  background-color: #141414b3;
+  opacity: 0.8;
+}
+
 .ticketing-box {
   background-color: #f0f3f7;
   box-shadow: 0px 1px 5px #00000029;
@@ -937,6 +951,128 @@ a:hover {
 
 .apply-filters-button {
   margin-top: 8px;
+}
+
+.open-create-menu {
+  position: absolute;
+  right: 15px;
+  top: 36px;
+  background-color: #f0f3f7;
+  box-shadow: 0px 2px 5px #00000029;
+  width: 120px;
+  z-index: 10;
+  padding: 5px 0;
+}
+.open-create-menu a {
+  color: #2a9ce7;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  display: block;
+  padding: 4px 0;
+}
+
+.contact-popup-container .heading h4 {
+  color: #323c47;
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.contact-popup-container .heading span {
+  color: #a9b9c6;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 400;
+}
+.contact-popup-container .heading span a {
+  color: #49c740;
+}
+
+.contact-popup-container .upload-photo .upload-icon {
+  background-color: #438afb;
+  border-radius: 2px;
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  color: #ffffff;
+  font-size: 24px;
+  line-height: 44px;
+  text-align: center;
+  margin-right: 15px;
+  vertical-align: top;
+}
+
+.contact-popup-container .upload-photo strong {
+  font-size: 16px;
+  line-height: 20px;
+  color: #438afb;
+}
+
+.contact-popup-container .upload-photo p {
+  color: #a9b9c6;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 400;
+}
+
+.contact-popup-container .form-group {
+  margin-bottom: 1.5rem;
+}
+.contact-popup-container .form-group label {
+  color: #323c47;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+.contact-popup-container .form-group .input-group-text {
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid #d1dae2;
+  color: #d1dae2;
+  font-size: 13px;
+  line-height: 18px;
+  padding: 5px 0;
+  width: 100%;
+  border-radius: 0;
+  text-align: left;
+}
+.contact-popup-container .form-group .input-group-text:focus {
+  outline: none;
+}
+
+.contact-popup-container .atleast-fields-box {
+  border: 1px solid #d1dae2;
+  background-color: #f9f9f9;
+  padding: 20px;
+  padding-bottom: 0;
+  margin-bottom: 20px;
+}
+.contact-popup-container .atleast-fields-box h3 {
+  color: #323c47;
+  font-size: 15px;
+  line-height: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.contact-popup-container .contact-popup-buttons button {
+  border: 2px solid #a9b9c6;
+  background-color: #ffffff;
+  color: #d1dae2;
+  font-size: 15px;
+  line-height: 48px;
+  font-weight: 500;
+  padding: 0 30px;
+  margin: 5px;
+  text-align: center;
+}
+.contact-popup-container .contact-popup-buttons button.save {
+  border-color: #3b7cff;
+  background-color: #3b7cff;
+  color: #ffffff;
 }
 
 @media only screen and (max-width: 992px) and (min-width: 768px) {

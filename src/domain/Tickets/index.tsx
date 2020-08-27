@@ -304,19 +304,19 @@ export class Tickets extends React.Component<any, any> {
                                 <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto">
                                     Create
                                 </a>
-                                {openCreateMenu == true && <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                                    <a href="#" className="blue-button m-r-0 min-width-inherit width-auto">
+                                {openCreateMenu == true && <div className="text-center open-create-menu">
+                                    <a href="#">
                                         Ticket
-                                </a>
-                                    <a href="#" className="blue-button m-r-0 min-width-inherit width-auto">
+                                    </a>
+                                    <a href="#">
                                         Email
-                                </a>
-                                    <a href="#" onClick={this.onClickOpenNewContact} className="blue-button m-r-0 min-width-inherit width-auto">
+                                    </a>
+                                    <a href="#" onClick={this.onClickOpenNewContact}>
                                         Contact
-                                </a>
-                                    <a href="#" onClick={this.onClickOpenNewCompany} className="blue-button m-r-0 min-width-inherit width-auto">
+                                    </a>
+                                    <a href="#" onClick={this.onClickOpenNewCompany}>
                                         Company
-                                </a>
+                                    </a>
                                 </div>}
                             </div>
 
