@@ -1,9 +1,11 @@
 import * as React from 'react';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import { Bar } from 'react-chartjs-2';
+import { OpenNewContactPopup } from './OpenNewContactPopup';
 
 export class Tickets extends React.Component<any, any> {
     breadCrumbs: any;
+    openNewContactRef: any;
     constructor(props: any) {
         super(props);
         this.state = {
@@ -113,9 +115,14 @@ export class Tickets extends React.Component<any, any> {
                 isCurrentPage: true
             }
         ];
+        this.openNewContactRef = React.createRef();
     }
     componentDidMount() {
         this.calculateTotalPages(this.state.TicketsData);
+    };
+
+    onClickOpenNewContact = (e: any) => {
+        this.openNewContactRef.current.toggle();
     };
 
     barChartData = {
@@ -280,7 +287,7 @@ export class Tickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                                <a href="#" className="blue-button m-r-0 min-width-inherit width-auto">
+                                <a href="#" onClick={this.onClickOpenNewContact} className="blue-button m-r-0 min-width-inherit width-auto">
                                     Create
                                 </a>
                             </div>
@@ -564,6 +571,7 @@ export class Tickets extends React.Component<any, any> {
                         </div>
                     </div>
                 </div>
+                <OpenNewContactPopup ref={this.openNewContactRef} />
             </div>
         );
     }
