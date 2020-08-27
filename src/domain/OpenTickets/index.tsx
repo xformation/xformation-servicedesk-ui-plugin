@@ -118,7 +118,6 @@ export class OpenTickets extends React.Component<any, any> {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         const pageType = urlParams.get('type');
-        console.log(pageType);
         this.setState({
             page_type: pageType,
         });
