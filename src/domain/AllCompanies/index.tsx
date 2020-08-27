@@ -13,360 +13,449 @@ export class AllCompanies extends React.Component<any, any> {
             totalPages: '',
             currentPage: 0,
             perPageLimit: 10,
+            selectAll: false,
             allCompaniesSetData: [
                 {
                     company: 'Rodney Artichoke',
                     contacts: '02',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK Founder & Co',
                     contacts: '01',
+                    checkStatus: false,
                 },
                 {
                     company: 'Ram Fabrication',
                     contacts: '08',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'Rodney Artichoke',
                     contacts: '02',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK Founder & Co',
                     contacts: '01',
+                    checkStatus: false,
                 },
                 {
                     company: 'Ram Fabrication',
                     contacts: '08',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Rodney Artichoke',
                     contacts: '02',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK Founder & Co',
                     contacts: '01',
+                    checkStatus: false,
                 },
                 {
                     company: 'Ram Fabrication',
                     contacts: '08',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'Rodney Artichoke',
                     contacts: '02',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK Founder & Co',
                     contacts: '01',
+                    checkStatus: false,
                 },
                 {
                     company: 'Ram Fabrication',
                     contacts: '08',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
             ],
             duplicateAllCompanies: [
                 {
                     company: 'Rodney Artichoke',
                     contacts: '02',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK Founder & Co',
                     contacts: '01',
+                    checkStatus: false,
                 },
                 {
                     company: 'Ram Fabrication',
                     contacts: '08',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'Rodney Artichoke',
                     contacts: '02',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK Founder & Co',
                     contacts: '01',
+                    checkStatus: false,
                 },
                 {
                     company: 'Ram Fabrication',
                     contacts: '08',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Rodney Artichoke',
                     contacts: '02',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK Founder & Co',
                     contacts: '01',
+                    checkStatus: false,
                 },
                 {
                     company: 'Ram Fabrication',
                     contacts: '08',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'Rodney Artichoke',
                     contacts: '02',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK Founder & Co',
                     contacts: '01',
+                    checkStatus: false,
                 },
                 {
                     company: 'Ram Fabrication',
                     contacts: '08',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
                 {
                     company: 'Digital Media',
                     contacts: '07',
+                    checkStatus: false,
                 },
                 {
                     company: 'RT Groups',
                     contacts: '04',
+                    checkStatus: false,
                 },
                 {
                     company: 'RNKV Steels',
                     contacts: '12',
+                    checkStatus: false,
                 },
                 {
                     company: 'Studiogreen',
                     contacts: '09',
+                    checkStatus: false,
                 },
                 {
                     company: 'AK+',
                     contacts: '05',
+                    checkStatus: false,
                 },
             ],
         };
@@ -405,8 +494,8 @@ export class AllCompanies extends React.Component<any, any> {
                     retData.push(
                         <tr>
                             <td>
-                                <input type="checkbox" className="checkbox" checked={allCompaniesSetData.checkValueStatus} onChange={(e) => { this.onClickChildCheckbox(e, i) }} /> 
-                                <span className="image"><img src={companyIcon} alt="" /></span> 
+                                <input type="checkbox" className="checkbox" checked={data.checkStatus} onChange={(e) => { this.onClickChildCheckbox(e, i) }} />
+                                <span className="image"><img src={companyIcon} alt="" /></span>
                                 {data.company}
                             </td>
                             <td>{data.contacts} <a href="#" className="float-right"><i className="fa fa-ellipsis-v"></i></a></td>
@@ -525,33 +614,59 @@ export class AllCompanies extends React.Component<any, any> {
         });
     }
 
-    onClickChildCheckbox = (parentIndex: any, childIndex: any) => {
-        let countCheckedCheckbox = 0;
+    onClickChildCheckbox = (e: any, index: any) => {
         const { allCompaniesSetData } = this.state;
-        const parentCheckbox = allCompaniesSetData[parentIndex];
-        parentCheckbox.subData[childIndex].checkValue = !parentCheckbox.subData[childIndex].checkValue;
-        for (let j = 0; j < parentCheckbox.subData.length; j++) {
-            if (parentCheckbox.subData[j].checkValue == true) {
+        let countCheckedCheckbox = 0;
+        let selectedData = false;
+        const checked = e.target.checked;
+        allCompaniesSetData[index].checkStatus = checked;
+        for (let j = 0; j < allCompaniesSetData.length; j++) {
+            if (allCompaniesSetData[j].checkStatus == true) {
                 countCheckedCheckbox++;
             } else {
                 countCheckedCheckbox--;
             }
         }
-        if (countCheckedCheckbox == parentCheckbox.subData.length) {
-            parentCheckbox.checkValueStatus = true;
+        if (countCheckedCheckbox == allCompaniesSetData.length) {
+            selectedData = true;
         } else {
-            parentCheckbox.checkValueStatus = false;
+            selectedData = false;
         }
         this.setState({
+            selectAll: selectedData,
             allCompaniesSetData
-        })
+        });
+    }
+
+    onClickSelectAll = (e: any) => {
+        const { allCompaniesSetData } = this.state;
+        for (let j = 0; j < allCompaniesSetData.length; j++) {
+            allCompaniesSetData[j].checkStatus = e.target.checked;
+        }
+        this.setState({
+            allCompaniesSetData,
+            selectAll: e.target.checked,
+        });
+    }
+
+    handleChange = (e: any) => {
+        const totalData = this.state.allCompaniesSetData.length;
+        if (e.target.value !== 'all') {
+            this.setState({
+                perPageLimit: e.target.value,
+            });
+        } else {
+            this.setState({
+                perPageLimit: totalData,
+            });
+        }
     }
 
     render() {
         const state = this.state;
-        const { allCompaniesSetData } = this.state;
+        const { allCompaniesSetData, selectAll } = this.state;
         return (
-            <div className="servicedesk-dashboard-container">
+            <div className="servicedesk-dashboard-container" >
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
                 <div className="servicedesk-page-container all-contacts-container">
                     <div className="common-container border-bottom-0 p-b-0">
@@ -573,19 +688,19 @@ export class AllCompanies extends React.Component<any, any> {
                             <div className="row">
                                 <div className="col-lg-9 col-md-12 col-sm-12">
                                     <div className="d-inline-block select-all">
-                                        <input type="checkbox" className="checkbox" checked={allCompaniesSetData.checkValueStatus} 
-                                        onChange={(e) => { this.onClickChildCheckbox }}  />
+                                        <input type="checkbox" className="checkbox" checked={selectAll}
+                                            onChange={(e) => { this.onClickSelectAll(e) }} />
                                         <label className="d-inline-block">Select All</label>
                                     </div>
                                     <div className="d-inline-block showby">
                                         <label className="d-inline-block">Show</label>
-                                        <select className="form-control">
-                                            <option>10</option>
-                                            <option>20</option>
-                                            <option>30</option>
-                                            <option>40</option>
-                                            <option>50</option>
-                                            <option>All</option>
+                                        <select onChange={this.handleChange} className="form-control">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                            <option value="40">40</option>
+                                            <option value="50">50</option>
+                                            <option value="all">All</option>
                                         </select>
                                         <span>entries per page</span>
                                     </div>
@@ -593,7 +708,7 @@ export class AllCompanies extends React.Component<any, any> {
                                 <div className="col-lg-3 col-md-12 col-sm-12 text-right">
                                     <div className="form-group companies-control-group">
                                         <form>
-                                            <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey}  />
+                                            <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey} />
                                             <button>
                                                 <i className="fa fa-search"></i>
                                             </button>

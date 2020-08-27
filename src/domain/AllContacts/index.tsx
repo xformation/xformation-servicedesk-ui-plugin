@@ -12,6 +12,7 @@ export class AllContacts extends React.Component<any, any> {
             totalPages: '',
             currentPage: 0,
             perPageLimit: 8,
+            selectAll: false,
             allContactsSetData: [
                 {
                     contact: 'Rodney Artichoke',
@@ -21,6 +22,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 224 547 8425',
                     facebook: 'Articho142',
                     twitter: 'Rodney124',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Jason Response',
@@ -30,6 +32,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 224 547 8425',
                     facebook: 'Articho142',
                     twitter: 'Rodney124',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Fig Nelson',
@@ -39,6 +42,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+3) 954 247 3126',
                     facebook: 'Nelson126',
                     twitter: 'nelson236',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Inverness McKenzie',
@@ -48,6 +52,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 387 267 5931',
                     facebook: 'McKenzie195',
                     twitter: 'Inverness198',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Fergus Douchebag',
@@ -57,6 +62,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 174 217 8425',
                     facebook: 'Fergus Douch',
                     twitter: 'Douchebag102',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Dominic L. Ement',
@@ -66,6 +72,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 482 268 8410',
                     facebook: 'L.ement143',
                     twitter: 'Dominic148',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Niles Peppertrout',
@@ -75,6 +82,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 247 147 2687',
                     facebook: 'Niles1124',
                     twitter: 'Peppertrout12',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Pelican Steve',
@@ -84,6 +92,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 412 578 2548',
                     facebook: 'Steve154',
                     twitter: 'Pelican111',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Inverness McKenzie',
@@ -93,6 +102,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 387 267 5931',
                     facebook: 'McKenzie195',
                     twitter: 'Inverness198',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Fergus Douchebag',
@@ -102,6 +112,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 174 217 8425',
                     facebook: 'Fergus Douch',
                     twitter: 'Douchebag102',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Dominic L. Ement',
@@ -111,6 +122,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 482 268 8410',
                     facebook: 'L.ement143',
                     twitter: 'Dominic148',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Niles Peppertrout',
@@ -120,6 +132,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 247 147 2687',
                     facebook: 'Niles1124',
                     twitter: 'Peppertrout12',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Pelican Steve',
@@ -129,6 +142,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 412 578 2548',
                     facebook: 'Steve154',
                     twitter: 'Pelican111',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Jason Response',
@@ -138,6 +152,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 224 547 8425',
                     facebook: 'Articho142',
                     twitter: 'Rodney124',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Fig Nelson',
@@ -147,6 +162,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+3) 954 247 3126',
                     facebook: 'Nelson126',
                     twitter: 'nelson236',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Inverness McKenzie',
@@ -156,6 +172,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 387 267 5931',
                     facebook: 'McKenzie195',
                     twitter: 'Inverness198',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Fergus Douchebag',
@@ -165,6 +182,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 174 217 8425',
                     facebook: 'Fergus Douch',
                     twitter: 'Douchebag102',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Dominic L. Ement',
@@ -174,6 +192,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 482 268 8410',
                     facebook: 'L.ement143',
                     twitter: 'Dominic148',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Niles Peppertrout',
@@ -183,6 +202,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 247 147 2687',
                     facebook: 'Niles1124',
                     twitter: 'Peppertrout12',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Pelican Steve',
@@ -192,6 +212,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 412 578 2548',
                     facebook: 'Steve154',
                     twitter: 'Pelican111',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Inverness McKenzie',
@@ -201,6 +222,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 387 267 5931',
                     facebook: 'McKenzie195',
                     twitter: 'Inverness198',
+                    checkStatus: false,
                 },
             ],
             duplicateAllContacts: [
@@ -212,6 +234,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 224 547 8425',
                     facebook: 'Articho142',
                     twitter: 'Rodney124',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Jason Response',
@@ -221,6 +244,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 224 547 8425',
                     facebook: 'Articho142',
                     twitter: 'Rodney124',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Fig Nelson',
@@ -230,6 +254,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+3) 954 247 3126',
                     facebook: 'Nelson126',
                     twitter: 'nelson236',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Inverness McKenzie',
@@ -239,6 +264,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 387 267 5931',
                     facebook: 'McKenzie195',
                     twitter: 'Inverness198',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Fergus Douchebag',
@@ -248,6 +274,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 174 217 8425',
                     facebook: 'Fergus Douch',
                     twitter: 'Douchebag102',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Dominic L. Ement',
@@ -257,6 +284,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 482 268 8410',
                     facebook: 'L.ement143',
                     twitter: 'Dominic148',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Niles Peppertrout',
@@ -266,6 +294,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 247 147 2687',
                     facebook: 'Niles1124',
                     twitter: 'Peppertrout12',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Pelican Steve',
@@ -275,6 +304,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 412 578 2548',
                     facebook: 'Steve154',
                     twitter: 'Pelican111',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Inverness McKenzie',
@@ -284,6 +314,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 387 267 5931',
                     facebook: 'McKenzie195',
                     twitter: 'Inverness198',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Fergus Douchebag',
@@ -293,6 +324,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 174 217 8425',
                     facebook: 'Fergus Douch',
                     twitter: 'Douchebag102',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Dominic L. Ement',
@@ -302,6 +334,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 482 268 8410',
                     facebook: 'L.ement143',
                     twitter: 'Dominic148',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Niles Peppertrout',
@@ -311,6 +344,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 247 147 2687',
                     facebook: 'Niles1124',
                     twitter: 'Peppertrout12',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Pelican Steve',
@@ -320,6 +354,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 412 578 2548',
                     facebook: 'Steve154',
                     twitter: 'Pelican111',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Jason Response',
@@ -329,6 +364,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 224 547 8425',
                     facebook: 'Articho142',
                     twitter: 'Rodney124',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Fig Nelson',
@@ -338,6 +374,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+3) 954 247 3126',
                     facebook: 'Nelson126',
                     twitter: 'nelson236',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Inverness McKenzie',
@@ -347,6 +384,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 387 267 5931',
                     facebook: 'McKenzie195',
                     twitter: 'Inverness198',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Fergus Douchebag',
@@ -356,6 +394,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 174 217 8425',
                     facebook: 'Fergus Douch',
                     twitter: 'Douchebag102',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Dominic L. Ement',
@@ -365,6 +404,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 482 268 8410',
                     facebook: 'L.ement143',
                     twitter: 'Dominic148',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Niles Peppertrout',
@@ -374,6 +414,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 247 147 2687',
                     facebook: 'Niles1124',
                     twitter: 'Peppertrout12',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Pelican Steve',
@@ -383,6 +424,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 412 578 2548',
                     facebook: 'Steve154',
                     twitter: 'Pelican111',
+                    checkStatus: false,
                 },
                 {
                     contact: 'Inverness McKenzie',
@@ -392,6 +434,7 @@ export class AllContacts extends React.Component<any, any> {
                     workPhone: '(+1) 387 267 5931',
                     facebook: 'McKenzie195',
                     twitter: 'Inverness198',
+                    checkStatus: false,
                 },
             ],
         };
@@ -429,7 +472,7 @@ export class AllContacts extends React.Component<any, any> {
                     const data = allContactsSetData[i];
                     retData.push(
                         <tr>
-                            <td><input type="checkbox" className="checkbox" checked={allContactsSetData.checkValueStatus} onChange={(e) => { this.onClickChildCheckbox(e, i) }} /> <span className="image"></span> {data.contact}</td>
+                            <td><input type="checkbox" className="checkbox" checked={data.checkStatus} onChange={(e) => { this.onClickChildCheckbox(e, i) }} /><span className="image"></span> {data.contact}</td>
                             <td>{data.title}</td>
                             <td>{data.company}</td>
                             <td>{data.emailAddress}</td>
@@ -445,6 +488,41 @@ export class AllContacts extends React.Component<any, any> {
         }
 
         return retData;
+    }
+
+    onClickChildCheckbox = (e: any, index: any) => {
+        const { allContactsSetData } = this.state;
+        let countCheckedCheckbox = 0;
+        let selectedData = false;
+        const checked = e.target.checked;
+        allContactsSetData[index].checkStatus = checked;
+        for (let j = 0; j < allContactsSetData.length; j++) {
+            if (allContactsSetData[j].checkStatus == true) {
+                countCheckedCheckbox++;
+            } else {
+                countCheckedCheckbox--;
+            }
+        }
+        if (countCheckedCheckbox == allContactsSetData.length) {
+            selectedData = true;
+        } else {
+            selectedData = false;
+        }
+        this.setState({
+            selectAll: selectedData,
+            allContactsSetData
+        });
+    }
+
+    onClickSelectAll = (e: any) => {
+        const { allContactsSetData } = this.state;
+        for (let j = 0; j < allContactsSetData.length; j++) {
+            allContactsSetData[j].checkStatus = e.target.checked;
+        }
+        this.setState({
+            allContactsSetData,
+            selectAll: e.target.checked,
+        });
     }
 
     peginationOfBox() {
@@ -576,32 +654,21 @@ export class AllContacts extends React.Component<any, any> {
         });
     }
 
-    onClickChildCheckbox = (parentIndex: any, childIndex: any) => {
-        let countCheckedCheckbox = 0;
-        const { allContactsSetData } = this.state;
-        const parentCheckbox = allContactsSetData[parentIndex];
-        parentCheckbox.subData[childIndex].checkValue = !parentCheckbox.subData[childIndex].checkValue;
-        for (let j = 0; j < parentCheckbox.subData.length; j++) {
-            if (parentCheckbox.subData[j].checkValue == true) {
-                countCheckedCheckbox++;
-            } else {
-                countCheckedCheckbox--;
-            }
-        }
-        if (countCheckedCheckbox == parentCheckbox.subData.length) {
-            parentCheckbox.checkValueStatus = true;
+    handleChange = (e: any) => {
+        const totalData = this.state.allContactsSetData.length;
+        if (e.target.value !== 'all') {
+            this.setState({
+                perPageLimit: e.target.value,
+            });
         } else {
-            parentCheckbox.checkValueStatus = false;
+            this.setState({
+                perPageLimit: totalData,
+            });
         }
-        this.setState({
-            allContactsSetData
-        })
     }
 
-
     render() {
-        const state = this.state;
-        const { allContactsSetData } = this.state;
+        const { allContactsSetData, selectAll } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -620,25 +687,25 @@ export class AllContacts extends React.Component<any, any> {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="common-container border-bottom-0 p-t-0">
                         <div className="d-block p-t-20 all-contacts-tabel">
                             <div className="row">
                                 <div className="col-lg-9 col-md-12 col-sm-12">
                                     <div className="d-inline-block select-all">
-                                        <input type="checkbox" className="checkbox" checked={allContactsSetData.checkValueStatus} 
-                                        onChange={(e) => { this.onClickChildCheckbox }}  />
+                                        <input type="checkbox" className="checkbox" checked={selectAll}
+                                            onChange={(e) => { this.onClickSelectAll(e) }} />
                                         <label className="d-inline-block">Select All</label>
                                     </div>
                                     <div className="d-inline-block showby">
                                         <label className="d-inline-block">Show</label>
-                                        <select className="form-control">
-                                            <option>8</option>
-                                            <option>16</option>
-                                            <option>24</option>
-                                            <option>32</option>
-                                            <option>40</option>
-                                            <option>All</option>
+                                        <select onChange={this.handleChange} className="form-control">
+                                            <option value="8">8</option>
+                                            <option value="16">16</option>
+                                            <option value="24">24</option>
+                                            <option value="32">32</option>
+                                            <option value="40">40</option>
+                                            <option value="all">All</option>
                                         </select>
                                         <span>entries per page</span>
                                     </div>
@@ -646,7 +713,7 @@ export class AllContacts extends React.Component<any, any> {
                                 <div className="col-lg-3 col-md-12 col-sm-12 text-right">
                                     <div className="form-group contacts-control-group">
                                         <form>
-                                            <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey}  />
+                                            <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey} />
                                             <button>
                                                 <i className="fa fa-search"></i>
                                             </button>
