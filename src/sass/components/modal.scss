@@ -1,0 +1,12 @@
+.modal{
+  -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, 0.0);
+  box-shadow: 0 0px 0px rgba(0, 0, 0, 0.0);
+  max-width: 992px;
+  .modal-content {
+    padding: 40px;
+  }
+}
+.modal-backdrop{
+  background-color: #141414B3;
+  opacity: 0.8;
+}
