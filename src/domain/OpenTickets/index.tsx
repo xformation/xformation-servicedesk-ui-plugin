@@ -145,7 +145,7 @@ export class OpenTickets extends React.Component<any, any> {
                             <td>{Ticketdata.index}</td>
                             <td><span className="image"></span>{Ticketdata.requesterName}</td>
                             <td className="subjects">{Ticketdata.subject}</td>
-                            <td><span className={Ticketdata.status == 'Open' ? "yellow-green" : Ticketdata.status == 'Closed' ? "red" : "orange"}>{Ticketdata.status}</span></td>
+                            <td>{Ticketdata.status} <i className="fa fa-chevron-down"></i></td>
                             <td><span className="priority">{Ticketdata.priority}</span></td>
                             <td>{Ticketdata.Assignee}</td>
                             <td className="date">{Ticketdata.createDate}</td>
@@ -260,11 +260,9 @@ export class OpenTickets extends React.Component<any, any> {
                             </div>
                         </div>
                     </div>
-                    <div className="common-container border-bottom-0">
-                    </div>
                     <div className="common-container border-bottom-0 filter-container">
                         <div className="row">
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Agents">
                                         Agents
@@ -278,7 +276,7 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Groups">
                                         Groups
@@ -292,7 +290,7 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Created">
                                         Created
@@ -306,7 +304,7 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="dueby">
                                         Due by
@@ -320,7 +318,7 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Status">
                                         Status
@@ -334,7 +332,7 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Priority">
                                         Priority
@@ -348,7 +346,7 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Type">
                                         Type
@@ -361,7 +359,7 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Source">
                                         Source
@@ -374,7 +372,7 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Tags">
                                         Tags
@@ -386,7 +384,7 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Companies">
                                         Companies
@@ -398,7 +396,7 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Contacts">
                                         Contacts
@@ -410,7 +408,7 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-lg-2 col-md-2 col-sm-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="p-t-20 form-group">
                                     <a href="#" className="blue-button m-r-0 m-b-0 apply-filters-button">
                                         Apply Filters
@@ -419,18 +417,17 @@ export class OpenTickets extends React.Component<any, any> {
                             </div>
                         </div>
                     </div>
-                    <div className="common-container border-bottom-0 p-t-0">
-                        <div className="d-block all-support-ticket-tabel">
-                            <div className="d-block p-b-10 heading">
-                                <h2 className="d-block m-b-0">All Support Tickets</h2>
-                                <span className="d-block">List of ticket opened by Customer</span>
-                            </div>
+                    <div className="common-container border-bottom-0">
+                        <div className="d-block all-open-ticket-tabel">
                             <div className="row">
-                                <div className="col-lg-6 col-md-6 col-sm-12">
+                                <div className="col-lg-5 col-md-12 col-sm-12">
                                     <div className="showing">Latest Tickets (Showing {start_index} to {ending_index} of {TicketsData.length} Tickets)</div>
                                 </div>
-                                <div className="col-lg-6 col-md-6 col-sm-12 text-right">
-                                    <div className="sortby">
+                                <div className="col-lg-7 col-md-12 col-sm-12 text-right">
+                                    <div className="d-inline-block p-r-10 filters-button">
+                                        <button className="blue-button">Show Filters</button>
+                                    </div>
+                                    <div className="d-inline-block sortby">
                                         <label className="d-inline-block">Sort By:</label>
                                         <select className="form-control">
                                             <option>Created Date</option>
@@ -444,8 +441,8 @@ export class OpenTickets extends React.Component<any, any> {
                                     </div>
                                 </div>
                             </div>
-                            <div className="d-block p-t-5 tickets-tabel">
-                                <table className="ticket-tabel">
+                            <div className="d-block p-t-5 open-tickets-tabel">
+                                <table className="open-ticket-tabel">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
