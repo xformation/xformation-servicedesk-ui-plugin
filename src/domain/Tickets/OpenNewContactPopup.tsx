@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Modal, ModalBody } from 'reactstrap';
+import { CustomTextbox } from './../../components/CustomTextbox';
 
 export class OpenNewContactPopup extends React.Component<any, any> {
     steps: any;
@@ -7,6 +8,21 @@ export class OpenNewContactPopup extends React.Component<any, any> {
         super(props);
         this.state = {
             modal: false,
+            fullName: '',
+            title: '',
+            email: '',
+            alternateEmail: '',
+            workPhone: '',
+            mobilePhone: '',
+            twitter: '',
+            uniqueId: '',
+            company: '',
+            address: '',
+            timeZone: '',
+            language: '',
+            tag: '',
+            about: '',
+            isSubmitted: false
         };
     }
 
@@ -18,11 +34,149 @@ export class OpenNewContactPopup extends React.Component<any, any> {
     handleClose = () => {
         this.setState({
             modal: false,
-        }); 
+        });
+    }
+
+    handleSubmit = (event: any) => {
+        event.preventDefault();
+        this.setState({
+            isSubmitted: true
+        });
+        const errorData = this.validate(true);
+        if (errorData.fullName.isValid && errorData.title.isValid && errorData.email.isValid && errorData.alternateEmail.isValid &&
+            errorData.workPhone.isValid && errorData.mobilePhone.isValid && errorData.twitter.isValid && errorData.uniqueId.isValid
+            && errorData.company.isValid && errorData.address.isValid && errorData.timeZone.isValid && errorData.language.isValid && errorData.tag.isValid && errorData.about.isValid) {
+
+            const { fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueId,
+                company, address, timeZone, language, tag, about } = this.state;
+            const sendData = {
+                fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueId, company, address, timeZone, language, tag, about,
+            };
+            console.log(sendData);
+        }
+    }
+
+    validate = (isSubmitted: any) => {
+        const validObj = {
+            isValid: true,
+            message: ""
+        };
+        const retData = {
+            fullName: validObj,
+            title: validObj,
+            email: validObj,
+            alternateEmail: validObj,
+            workPhone: validObj,
+            mobilePhone: validObj,
+            twitter: validObj,
+            uniqueId: validObj,
+            company: validObj,
+            address: validObj,
+            timeZone: validObj,
+            language: validObj,
+            tag: validObj,
+            about: validObj,
+        };
+        if (isSubmitted) {
+            const { fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueId, company, address, timeZone, language, tag, about, } = this.state;
+            if (!fullName) {
+                retData.fullName = {
+                    isValid: false,
+                    message: "full Name is required"
+                };
+            }
+            if (!title) {
+                retData.title = {
+                    isValid: false,
+                    message: "Title is required"
+                };
+            }
+            if (!email) {
+                retData.email = {
+                    isValid: false,
+                    message: "Email is required"
+                };
+            }
+            if (!alternateEmail) {
+                retData.alternateEmail = {
+                    isValid: false,
+                    message: "Altername Email is required"
+                };
+            }
+            if (!workPhone) {
+                retData.workPhone = {
+                    isValid: false,
+                    message: "Work phone is required"
+                };
+            }
+            if (!mobilePhone) {
+                retData.mobilePhone = {
+                    isValid: false,
+                    message: "Mobile number is required"
+                };
+            }
+            if (!twitter) {
+                retData.twitter = {
+                    isValid: false,
+                    message: "Twitter id is required"
+                };
+            }
+            if (!uniqueId) {
+                retData.uniqueId = {
+                    isValid: false,
+                    message: "Unique id is required"
+                };
+            }
+            if (!company) {
+                retData.company = {
+                    isValid: false,
+                    message: "Company name is required"
+                };
+            }
+            if (!address) {
+                retData.address = {
+                    isValid: false,
+                    message: "Address is required"
+                };
+            }
+            if (!timeZone) {
+                retData.timeZone = {
+                    isValid: false,
+                    message: "Time Zone is required"
+                };
+            }
+            if (!language) {
+                retData.language = {
+                    isValid: false,
+                    message: "Language is required"
+                };
+            }
+            if (!tag) {
+                retData.tag = {
+                    isValid: false,
+                    message: "Tag is required"
+                };
+            }
+            if (!about) {
+                retData.about = {
+                    isValid: false,
+                    message: "About detail is required"
+                };
+            }
+        }
+        return retData;
+    }
+
+    handleStateChange = (e: any) => {
+        const { name, value } = e.target;
+        this.setState({
+            [name]: value
+        });
     }
 
     render() {
-        const { modal } = this.state;
+        const { modal, isSubmitted, fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueId, company, address, timeZone, language, tag, about, } = this.state;
+        const errorData = this.validate(isSubmitted);
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
@@ -44,13 +198,15 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
                                     <label>Full Name*</label>
-                                    <input type="text" className="input-group-text" placeholder="Enter the name of this person" />
+                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="fullName" id="fullName" placeholder="Enter the name of this person" name="fullName" value={fullName} onChange={this.handleStateChange} isValid={errorData.fullName.isValid} message={errorData.fullName.message} />
+                                    {/* <input type="text" className="input-group-text" placeholder="Enter the name of this person" /> */}
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
                                     <label>Title</label>
-                                    <input type="text" className="input-group-text" placeholder="Enter a title" />
+                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="title" id="title" placeholder="Enter a title" name="title" value={title} onChange={this.handleStateChange} isValid={errorData.title.isValid} message={errorData.title.message} />
+                                    {/* <input type="text" className="input-group-text" placeholder="Enter a title" /> */}
                                 </div>
                             </div>
                         </div>
@@ -60,13 +216,15 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
                                         <label>Email</label>
-                                        <input type="text" className="input-group-text" placeholder="Enter a phone email address" />
+                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="email" id="email" placeholder="Enter a phone email address" name="email" value={email} onChange={this.handleStateChange} isValid={errorData.email.isValid} message={errorData.email.message} />
+                                        {/* <input type="text" className="input-group-text" placeholder="Enter a phone email address" /> */}
                                     </div>
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
                                         <label>Alternate Email</label>
-                                        <input type="text" className="input-group-text" placeholder="Enter a email address" />
+                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="alternateEmail" id="alternateEmail" placeholder="Enter a email address" name="alternateEmail" value={alternateEmail} onChange={this.handleStateChange} isValid={errorData.alternateEmail.isValid} message={errorData.alternateEmail.message} />
+                                        {/* <input type="text" className="input-group-text" placeholder="Enter a email address" /> */}
                                     </div>
                                 </div>
                             </div>
@@ -74,13 +232,15 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
                                         <label>Work Phone</label>
-                                        <input type="text" className="input-group-text" placeholder="Enter a phone number" />
+                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="workPhone" id="workPhone" placeholder="Enter a phone number" name="workPhone" value={workPhone} onChange={this.handleStateChange} isValid={errorData.workPhone.isValid} message={errorData.workPhone.message} />
+                                        {/* <input type="text" className="input-group-text" placeholder="Enter a phone number" /> */}
                                     </div>
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
                                         <label>Mobile Phone</label>
-                                        <input type="text" className="input-group-text" placeholder="Enter a phone number" />
+                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="mobilePhone" id="mobilePhone" placeholder="Enter a phone number" name="mobilePhone" value={mobilePhone} onChange={this.handleStateChange} isValid={errorData.mobilePhone.isValid} message={errorData.mobilePhone.message} />
+                                        {/* <input type="text" className="input-group-text" placeholder="Enter a phone number" /> */}
                                     </div>
                                 </div>
                             </div>
@@ -88,22 +248,25 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
                                         <label>Twitter</label>
-                                        <input type="text" className="input-group-text" placeholder="Enter a Twitter ID" />
+                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="twitter" id="twitter" placeholder="Enter a Twitter ID" name="twitter" value={twitter} onChange={this.handleStateChange} isValid={errorData.twitter.isValid} message={errorData.twitter.message} />
+                                        {/* <input type="text" className="input-group-text" placeholder="Enter a Twitter ID" /> */}
                                     </div>
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
                                         <label>Unique external Id</label>
-                                        <input type="text" className="input-group-text" placeholder="Enter the contact’s unique ID" />
+                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="uniqueId" id="uniqueId" placeholder="Enter the contact’s unique ID" name="uniqueId" value={uniqueId} onChange={this.handleStateChange} isValid={errorData.uniqueId.isValid} message={errorData.uniqueId.message} />
+                                        {/* <input type="text" className="input-group-text" placeholder="Enter the contact’s unique ID" /> */}
                                     </div>
                                 </div>
                             </div>
-                        </div>                       
+                        </div>
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <label>Company</label>
-                                    <input type="text" className="input-group-text" placeholder="" />
+                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="company" id="company" placeholder="" name="uniqueId" value={company} onChange={this.handleStateChange} isValid={errorData.company.isValid} message={errorData.company.message} />
+                                    {/* <input type="text" className="input-group-text" placeholder="" /> */}
                                 </div>
                             </div>
                         </div>
@@ -111,7 +274,8 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <label>Address</label>
-                                    <textarea className="input-group-text" rows={3} placeholder="Enter the address of this person" />
+                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="address" id="address" rows={3} placeholder="Enter the address of this person" name="address" value={address} onChange={this.handleStateChange} isValid={errorData.address.isValid} message={errorData.address.message} />
+                                    {/* <textarea className="input-group-text" rows={3} placeholder="Enter the address of this person" /> */}
                                 </div>
                             </div>
                         </div>
@@ -119,13 +283,15 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
                                     <label>Time Zone</label>
-                                    <input type="date" className="input-group-text" placeholder="(GMT +05:30) Chennai" />
+                                    <CustomTextbox type="date" containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="timeZone" id="timeZone" placeholder="(GMT +05:30) Chennai" name="timeZone" value={timeZone} onChange={this.handleStateChange} isValid={errorData.timeZone.isValid} message={errorData.timeZone.message} />
+                                    {/* <input type="date" className="input-group-text" placeholder="(GMT +05:30) Chennai" /> */}
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
                                     <label>Language</label>
-                                    <input type="text" className="input-group-text" placeholder="English" />
+                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="language" id="language" placeholder="English" name="language" value={language} onChange={this.handleStateChange} isValid={errorData.language.isValid} message={errorData.language.message} />
+                                    {/* <input type="text" className="input-group-text" placeholder="English" /> */}
                                 </div>
                             </div>
                         </div>
@@ -133,13 +299,15 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
                                     <label>Tags</label>
+                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="tag" id="tag" placeholder="" name="tag" value={tag} onChange={this.handleStateChange} isValid={errorData.tag.isValid} message={errorData.tag.message} />
                                     <input type="text" className="input-group-text" placeholder="" />
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
                                     <label>About</label>
-                                    <input type="text" className="input-group-text" placeholder="Enter some text" />
+                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="about" id="about" placeholder="Enter some text" name="about" value={about} onChange={this.handleStateChange} isValid={errorData.about.isValid} message={errorData.about.message} />
+                                    {/* <input type="text" className="input-group-text" placeholder="Enter some text" /> */}
                                 </div>
                             </div>
                         </div>
@@ -147,7 +315,7 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="d-block text-center p-t-20 contact-popup-buttons">
                                     <button className="cancel" onClick={this.handleClose}>Cancel</button>
-                                    <button className="save">Save</button>
+                                    <button className="save" onClick={this.handleSubmit}>Save</button>
                                 </div>
                             </div>
                         </div>
