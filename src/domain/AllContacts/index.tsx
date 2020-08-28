@@ -526,23 +526,26 @@ export class AllContacts extends React.Component<any, any> {
     }
 
     peginationOfBox() {
-        const { currentPage, totalPages, allContactsSetData } = this.state;
+        const { currentPage, totalPages } = this.state;
         let rows = [];
         for (let i = 0; i < totalPages; i++) {
-            console.log(currentPage);
             rows.push(<li className="" key={i}><a className={currentPage === i ? 'active' : 'deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
         }
-        return (
-            <ul>
-                <li className="previous">
-                    <a className={currentPage === 0 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
-                </li>
-                {rows}
-                <li className="next">
-                    <a className={currentPage === this.state.totalPages - 1 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
-                </li>
-            </ul>
-        );
+        if (totalPages != 0) {
+            return (
+                <ul>
+                    <li className="previous">
+                        <a className={currentPage === 0 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
+                    </li>
+                    {rows}
+                    <li className="next">
+                        <a className={currentPage === this.state.totalPages - 1 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
+                    </li>
+                </ul>
+            );
+        } else {
+            return (<ul></ul>);
+        }
     }
 
     navigatePage(target: any, e: any, i: any) {
@@ -655,14 +658,19 @@ export class AllContacts extends React.Component<any, any> {
     }
 
     handleChange = (e: any) => {
-        const totalData = this.state.allContactsSetData.length;
+        const { allContactsSetData } = this.state;
+        const totalData = allContactsSetData.length;
         if (e.target.value !== 'all') {
+            let indexOfLastData = Math.ceil(totalData / e.target.value);
             this.setState({
                 perPageLimit: e.target.value,
+                totalPages: indexOfLastData,
             });
         } else {
+            let indexOfLastData = Math.ceil(totalData / totalData);
             this.setState({
                 perPageLimit: totalData,
+                totalPages: indexOfLastData
             });
         }
     }

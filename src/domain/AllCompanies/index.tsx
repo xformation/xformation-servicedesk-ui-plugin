@@ -650,14 +650,19 @@ export class AllCompanies extends React.Component<any, any> {
     }
 
     handleChange = (e: any) => {
-        const totalData = this.state.allCompaniesSetData.length;
+        const { allCompaniesSetData } = this.state;
+        const totalData = allCompaniesSetData.length;
         if (e.target.value !== 'all') {
+            let indexOfLastData = Math.ceil(totalData / e.target.value);
             this.setState({
                 perPageLimit: e.target.value,
+                totalPages: indexOfLastData,
             });
         } else {
+            let indexOfLastData = Math.ceil(totalData / totalData);
             this.setState({
                 perPageLimit: totalData,
+                totalPages: indexOfLastData
             });
         }
     }
