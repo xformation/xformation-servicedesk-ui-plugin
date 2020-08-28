@@ -152,56 +152,56 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>Company Name*</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="companyName" id="companyName" placeholder="" name="companyName" value={companyName} onChange={this.handleStateChange} isValid={errorData.companyName.isValid} message={errorData.companyName.message} />
+                                    <label htmlFor="companyName">Company Name*</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="companyName" id="companyName" placeholder="" name="companyName" value={companyName} onChange={this.handleStateChange} isValid={errorData.companyName.isValid} message={errorData.companyName.message} />
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>Description</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="description" id="description" placeholder="Write something that describe this company" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label>Notes</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="notes" id="notes" placeholder="Add notes about this company - make something about a recent deal, etc." name="notes" value={notes} onChange={this.handleStateChange} isValid={errorData.notes.isValid} message={errorData.notes.message} />
-                                </div>
-                            </div>
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label>Company</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="company" id="company" placeholder="eg: My company1.com, mycompany2.com" name="company" value={company} onChange={this.handleStateChange} isValid={errorData.company.isValid} message={errorData.company.message} />
+                                    <label htmlFor="description">Description</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="description" id="description" placeholder="Write something that describe this company" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
                                 </div>
                             </div>
                         </div>
                         <div className="row">
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>Health Score</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="healthCare" id="healthCare" placeholder="Any" name="healthCare" value={healthCare} onChange={this.handleStateChange} isValid={errorData.healthCare.isValid} message={errorData.healthCare.message} />
+                                    <label htmlFor="notes">Notes</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="notes" id="notes" placeholder="Add notes about this company - make something about a recent deal, etc." name="notes" value={notes} onChange={this.handleStateChange} isValid={errorData.notes.isValid} message={errorData.notes.message} />
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>Account tier</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="accountTier" id="accountTier" placeholder="Any" name="accountTier" value={accountTier} onChange={this.handleStateChange} isValid={errorData.accountTier.isValid} message={errorData.accountTier.message} />
+                                    <label htmlFor="company">Company</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="company" id="company" placeholder="eg: My company1.com, mycompany2.com" name="company" value={company} onChange={this.handleStateChange} isValid={errorData.company.isValid} message={errorData.company.message} />
                                 </div>
                             </div>
                         </div>
                         <div className="row">
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>Renewal Date</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" type="date" inputClass="form-control" htmlFor="renewalDate" id="renewalDate" placeholder="Any" name="renewalDate" value={renewalDate} onChange={this.handleStateChange} isValid={errorData.renewalDate.isValid} message={errorData.renewalDate.message} />
+                                    <label htmlFor="healthCare">Health Score</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="healthCare" id="healthCare" placeholder="Any" name="healthCare" value={healthCare} onChange={this.handleStateChange} isValid={errorData.healthCare.isValid} message={errorData.healthCare.message} />
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>Industry</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="industry" id="industry" placeholder="Any" name="industry" value={industry} onChange={this.handleStateChange} isValid={errorData.industry.isValid} message={errorData.industry.message} />
+                                    <label htmlFor="accountTier">Account tier</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="accountTier" id="accountTier" placeholder="Any" name="accountTier" value={accountTier} onChange={this.handleStateChange} isValid={errorData.accountTier.isValid} message={errorData.accountTier.message} />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-lg-6 col-md-6 col-sm-12">
+                                <div className="form-group">
+                                    <label htmlFor="renewalDate">Renewal Date</label>
+                                    <CustomTextbox containerClass="form-group-inner" type="date" inputClass="form-control" htmlFor="renewalDate" id="renewalDate" placeholder="Any" name="renewalDate" value={renewalDate} onChange={this.handleStateChange} isValid={errorData.renewalDate.isValid} message={errorData.renewalDate.message} />
+                                </div>
+                            </div>
+                            <div className="col-lg-6 col-md-6 col-sm-12">
+                                <div className="form-group">
+                                    <label htmlFor="industry">Industry</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="industry" id="industry" placeholder="Any" name="industry" value={industry} onChange={this.handleStateChange} isValid={errorData.industry.isValid} message={errorData.industry.message} />
                                 </div>
                             </div>
                         </div>

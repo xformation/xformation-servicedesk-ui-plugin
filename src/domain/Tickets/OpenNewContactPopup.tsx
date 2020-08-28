@@ -197,15 +197,15 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>Full Name*</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="fullName" id="fullName" placeholder="Enter the name of this person" name="fullName" value={fullName} onChange={this.handleStateChange} isValid={errorData.fullName.isValid} message={errorData.fullName.message} />
+                                    <label htmlFor="fullName">Full Name*</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="fullName" id="fullName" placeholder="Enter the name of this person" name="fullName" value={fullName} onChange={this.handleStateChange} isValid={errorData.fullName.isValid} message={errorData.fullName.message} />
                                     {/* <input type="text" className="input-group-text" placeholder="Enter the name of this person" /> */}
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>Title</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="title" id="title" placeholder="Enter a title" name="title" value={title} onChange={this.handleStateChange} isValid={errorData.title.isValid} message={errorData.title.message} />
+                                    <label htmlFor="title">Title</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="title" id="title" placeholder="Enter a title" name="title" value={title} onChange={this.handleStateChange} isValid={errorData.title.isValid} message={errorData.title.message} />
                                     {/* <input type="text" className="input-group-text" placeholder="Enter a title" /> */}
                                 </div>
                             </div>
@@ -215,15 +215,15 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             <div className="row">
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
-                                        <label>Email</label>
-                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="email" id="email" placeholder="Enter a phone email address" name="email" value={email} onChange={this.handleStateChange} isValid={errorData.email.isValid} message={errorData.email.message} />
+                                        <label htmlFor="email">Email</label>
+                                        <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="email" id="email" placeholder="Enter a phone email address" name="email" value={email} onChange={this.handleStateChange} isValid={errorData.email.isValid} message={errorData.email.message} />
                                         {/* <input type="text" className="input-group-text" placeholder="Enter a phone email address" /> */}
                                     </div>
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
-                                        <label>Alternate Email</label>
-                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="alternateEmail" id="alternateEmail" placeholder="Enter a email address" name="alternateEmail" value={alternateEmail} onChange={this.handleStateChange} isValid={errorData.alternateEmail.isValid} message={errorData.alternateEmail.message} />
+                                        <label htmlFor="alternateEmail">Alternate Email</label>
+                                        <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="alternateEmail" id="alternateEmail" placeholder="Enter a email address" name="alternateEmail" value={alternateEmail} onChange={this.handleStateChange} isValid={errorData.alternateEmail.isValid} message={errorData.alternateEmail.message} />
                                         {/* <input type="text" className="input-group-text" placeholder="Enter a email address" /> */}
                                     </div>
                                 </div>
@@ -231,15 +231,15 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             <div className="row">
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
-                                        <label>Work Phone</label>
-                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="workPhone" id="workPhone" placeholder="Enter a phone number" name="workPhone" value={workPhone} onChange={this.handleStateChange} isValid={errorData.workPhone.isValid} message={errorData.workPhone.message} />
+                                        <label htmlFor="workPhone">Work Phone</label>
+                                        <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="workPhone" id="workPhone" placeholder="Enter a phone number" name="workPhone" value={workPhone} onChange={this.handleStateChange} isValid={errorData.workPhone.isValid} message={errorData.workPhone.message} />
                                         {/* <input type="text" className="input-group-text" placeholder="Enter a phone number" /> */}
                                     </div>
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
-                                        <label>Mobile Phone</label>
-                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="mobilePhone" id="mobilePhone" placeholder="Enter a phone number" name="mobilePhone" value={mobilePhone} onChange={this.handleStateChange} isValid={errorData.mobilePhone.isValid} message={errorData.mobilePhone.message} />
+                                        <label htmlFor="mobilePhone">Mobile Phone</label>
+                                        <CustomTextbox containerClass="form-group-inner"  inputClass="form-control" htmlFor="mobilePhone" id="mobilePhone" placeholder="Enter a phone number" name="mobilePhone" value={mobilePhone} onChange={this.handleStateChange} isValid={errorData.mobilePhone.isValid} message={errorData.mobilePhone.message} />
                                         {/* <input type="text" className="input-group-text" placeholder="Enter a phone number" /> */}
                                     </div>
                                 </div>
@@ -247,15 +247,15 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             <div className="row">
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
-                                        <label>Twitter</label>
-                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="twitter" id="twitter" placeholder="Enter a Twitter ID" name="twitter" value={twitter} onChange={this.handleStateChange} isValid={errorData.twitter.isValid} message={errorData.twitter.message} />
+                                        <label htmlFor="twitter">Twitter</label>
+                                        <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="twitter" id="twitter" placeholder="Enter a Twitter ID" name="twitter" value={twitter} onChange={this.handleStateChange} isValid={errorData.twitter.isValid} message={errorData.twitter.message} />
                                         {/* <input type="text" className="input-group-text" placeholder="Enter a Twitter ID" /> */}
                                     </div>
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
-                                        <label>Unique external Id</label>
-                                        <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="uniqueId" id="uniqueId" placeholder="Enter the contact’s unique ID" name="uniqueId" value={uniqueId} onChange={this.handleStateChange} isValid={errorData.uniqueId.isValid} message={errorData.uniqueId.message} />
+                                        <label htmlFor="uniqueId">Unique external Id</label>
+                                        <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="uniqueId" id="uniqueId" placeholder="Enter the contact’s unique ID" name="uniqueId" value={uniqueId} onChange={this.handleStateChange} isValid={errorData.uniqueId.isValid} message={errorData.uniqueId.message} />
                                         {/* <input type="text" className="input-group-text" placeholder="Enter the contact’s unique ID" /> */}
                                     </div>
                                 </div>
@@ -264,8 +264,8 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
-                                    <label>Company</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="company" id="company" placeholder="" name="uniqueId" value={company} onChange={this.handleStateChange} isValid={errorData.company.isValid} message={errorData.company.message} />
+                                    <label htmlFor="company">Company</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="company" id="company" placeholder="" name="uniqueId" value={company} onChange={this.handleStateChange} isValid={errorData.company.isValid} message={errorData.company.message} />
                                     {/* <input type="text" className="input-group-text" placeholder="" /> */}
                                 </div>
                             </div>
@@ -273,8 +273,8 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
-                                    <label>Address</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="address" id="address" rows={3} placeholder="Enter the address of this person" name="address" value={address} onChange={this.handleStateChange} isValid={errorData.address.isValid} message={errorData.address.message} />
+                                    <label htmlFor="address">Address</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="address" id="address" rows={3} placeholder="Enter the address of this person" name="address" value={address} onChange={this.handleStateChange} isValid={errorData.address.isValid} message={errorData.address.message} />
                                     {/* <textarea className="input-group-text" rows={3} placeholder="Enter the address of this person" /> */}
                                 </div>
                             </div>
@@ -282,15 +282,15 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>Time Zone</label>
-                                    <CustomTextbox type="date" containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="timeZone" id="timeZone" placeholder="(GMT +05:30) Chennai" name="timeZone" value={timeZone} onChange={this.handleStateChange} isValid={errorData.timeZone.isValid} message={errorData.timeZone.message} />
+                                    <label htmlFor="timeZone">Time Zone</label>
+                                    <CustomTextbox containerClass="form-group-inner" type="date" inputClass="form-control" htmlFor="timeZone" id="timeZone" placeholder="(GMT +05:30) Chennai" name="timeZone" value={timeZone} onChange={this.handleStateChange} isValid={errorData.timeZone.isValid} message={errorData.timeZone.message} />
                                     {/* <input type="date" className="input-group-text" placeholder="(GMT +05:30) Chennai" /> */}
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>Language</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="language" id="language" placeholder="English" name="language" value={language} onChange={this.handleStateChange} isValid={errorData.language.isValid} message={errorData.language.message} />
+                                    <label htmlFor="language">Language</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="language" id="language" placeholder="English" name="language" value={language} onChange={this.handleStateChange} isValid={errorData.language.isValid} message={errorData.language.message} />
                                     {/* <input type="text" className="input-group-text" placeholder="English" /> */}
                                 </div>
                             </div>
@@ -298,15 +298,14 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>Tags</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="tag" id="tag" placeholder="" name="tag" value={tag} onChange={this.handleStateChange} isValid={errorData.tag.isValid} message={errorData.tag.message} />
-                                    <input type="text" className="input-group-text" placeholder="" />
+                                    <label htmlFor="tag">Tags</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="tag" id="tag" placeholder="" name="tag" value={tag} onChange={this.handleStateChange} isValid={errorData.tag.isValid} message={errorData.tag.message} />
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label>About</label>
-                                    <CustomTextbox containerClass="form-group mb-4 position-relative" inputClass="form-control" htmlFor="about" id="about" placeholder="Enter some text" name="about" value={about} onChange={this.handleStateChange} isValid={errorData.about.isValid} message={errorData.about.message} />
+                                    <label htmlFor="about">About</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="about" id="about" placeholder="Enter some text" name="about" value={about} onChange={this.handleStateChange} isValid={errorData.about.isValid} message={errorData.about.message} />
                                     {/* <input type="text" className="input-group-text" placeholder="Enter some text" /> */}
                                 </div>
                             </div>

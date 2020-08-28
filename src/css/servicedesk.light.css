@@ -1027,7 +1027,10 @@ a:hover {
   font-weight: 600;
   margin-bottom: 0;
 }
-.contact-popup-container .form-group .input-group-text {
+.contact-popup-container .form-group .form-group-inner label {
+  display: none;
+}
+.contact-popup-container .form-group .form-control {
   background-color: transparent;
   border: none;
   border-bottom: 1px solid #d1dae2;
@@ -1039,7 +1042,7 @@ a:hover {
   border-radius: 0;
   text-align: left;
 }
-.contact-popup-container .form-group .input-group-text:focus {
+.contact-popup-container .form-group .form-control:focus {
   outline: none;
 }
 

@@ -276,7 +276,12 @@
             font-weight: 600;
             margin-bottom: 0;
         }
-        .input-group-text{
+        .form-group-inner{
+            label{
+                display: none;
+            } 
+        }
+        .form-control{
             background-color: transparent;
             border: none;
             border-bottom: 1px solid #D1DAE2;
