@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
-import { config } from '../../config';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 
 export class AllContacts extends React.Component<any, any> {
