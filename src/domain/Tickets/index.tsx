@@ -13,7 +13,6 @@ export class Tickets extends React.Component<any, any> {
     perPageLimit: any;
     constructor(props: any) {
         super(props);
-
         this.tableValue = {
             columns: [
                 { label: 'ID', key: 'id' },
@@ -118,9 +117,9 @@ export class Tickets extends React.Component<any, any> {
             ]
         };
         this.perPageLimit = 3,
-            this.state = {
-                openCreateMenu: false,
-            };
+        this.state = {
+           openCreateMenu: false,
+         };
         this.breadCrumbs = [
             {
                 label: "Home",
@@ -184,7 +183,7 @@ export class Tickets extends React.Component<any, any> {
     };
 
     render() {
-        const { start_index, ending_index, openCreateMenu } = this.state;
+        const { openCreateMenu } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
