@@ -301,7 +301,7 @@ export class Dashboard extends React.Component<any, any> {
             retData.push(
                 <div className="col-xl-5 col-lg-4 col-md-6 col-sm-12">
                     <div className="d-block text-center ticketing-box">
-                        <Link to={`${config.basePath}/opentickets?type=${data.ticketingname}`} target="blank">
+                        <Link to={`${config.basePath}/opentickets?type=${data.ticketingname}`}>
                             <div className="image"><img src={ticketIconImage1} alt="" /></div>
                             <div className="number">{data.ticketingNumber}</div>
                             <div className="name">{data.ticketingname}</div>
