@@ -93,6 +93,7 @@ export class Table extends React.Component<any, any> {
             </ul>
         );
     }
+
     navigatePage(target: any, e: any, i: any) {
         const { totalPages, currentPage, start_index, perPageLimit, ending_index, displayData } = this.state;
         e.preventDefault();
@@ -152,13 +153,14 @@ export class Table extends React.Component<any, any> {
     }
     render() {
         const { displayData, start_index, ending_index } = this.state;
+        const { tableClasses } = this.props;
         return (
-            <div>
+            <div className={tableClasses.allSupport}>
                 <div className="row">
                     <div className="col-lg-6 col-md-6 col-sm-12">
                         <div className="showing">Latest Tickets (Showing {start_index} to {ending_index} of {displayData.length} Tickets)</div>
                     </div>
-                    <div className="col-lg-6 col-md-6 col-sm-12 text-right">
+                    {/* <div className="col-lg-6 col-md-6 col-sm-12 text-right">
                         <div className="sortby">
                             <label className="d-inline-block">Sort By:</label>
                             <select className="form-control">
@@ -171,19 +173,21 @@ export class Table extends React.Component<any, any> {
                                 <option>Descending</option>
                             </select>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
-                <table className="ticket-tabel">
-                    <thead>
-                        <tr>
-                            {this.tableHeader()}
-                        </tr>
-                    </thead>
+                <div className={tableClasses.ticketsTable}>
+                    <table className={tableClasses.ticketTable}>
+                        <thead>
+                            <tr>
+                                {this.tableHeader()}
+                            </tr>
+                        </thead>
 
-                    <tbody>
-                        {this.tableBodyData()}
-                    </tbody>
-                </table>
+                        <tbody>
+                            {this.tableBodyData()}
+                        </tbody>
+                    </table>
+                </div>
                 <div className="d-block width-100 p-t-15 text-right pagination">
                     {this.peginationOfTable()}
                 </div>
