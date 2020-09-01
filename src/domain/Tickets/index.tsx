@@ -3,20 +3,29 @@ import { Breadcrumbs } from '../../components/Breadcrumbs';
 import { Bar } from 'react-chartjs-2';
 import { OpenNewContactPopup } from './OpenNewContactPopup';
 import { OpenNewCompanyPopup } from './OpenNewCompanyPopup';
+import Table from './../../components/table';
 
 export class Tickets extends React.Component<any, any> {
     breadCrumbs: any;
     openNewContactRef: any;
     openNewCompanyRef: any;
+    tableValue: any;
+    perPageLimit: any;
     constructor(props: any) {
         super(props);
-        this.state = {
-            totalPages: '',
-            currentPage: 0,
-            perPageLimit: 3,
-            start_index: 1,
-            openCreateMenu: false,
-            ending_index: 3,
+
+        this.tableValue = {
+            columns: [
+                { label: 'ID', key: 'id' },
+                { label: 'Requester Name', key: 'requestername' },
+                { label: 'Subjects', key: 'subjects' },
+                { label: 'Status', key: 'status' },
+                { label: 'Priority', key: 'priority' },
+                { label: 'Assignee', key: 'assignee' },
+                { label: 'Create Date', key: 'createDate' },
+                { label: 'Agents', key: 'agents' },
+                { label: 'Groups', key: 'groups' }
+            ],
             TicketsData: [
                 {
                     index: '#27',
@@ -108,6 +117,15 @@ export class Tickets extends React.Component<any, any> {
                 }
             ]
         };
+        this.perPageLimit = 3,
+            this.state = {
+                // totalPages: '',
+                // currentPage: 0,
+                // start_index: 1,
+                openCreateMenu: false,
+                // ending_index: 3,
+
+            };
         this.breadCrumbs = [
             {
                 label: "Home",
@@ -122,7 +140,7 @@ export class Tickets extends React.Component<any, any> {
         this.openNewCompanyRef = React.createRef();
     }
     componentDidMount() {
-        this.calculateTotalPages(this.state.TicketsData);
+        // this.calculateTotalPages(this.state.TicketsData);
     };
 
     onClickOpenNewContact = (e: any) => {
@@ -170,124 +188,124 @@ export class Tickets extends React.Component<any, any> {
         ]
     };
 
-    calculateTotalPages = (displayData: any) => {
-        const { perPageLimit } = this.state;
-        let indexOfLastData = Math.ceil(displayData.length / perPageLimit);
-        this.setState({
-            totalPages: indexOfLastData,
-        });
-    };
+    // calculateTotalPages = (displayData: any) => {
+    //     const { perPageLimit } = this.state;
+    //     let indexOfLastData = Math.ceil(displayData.length / perPageLimit);
+    //     this.setState({
+    //         totalPages: indexOfLastData,
+    //     });
+    // };
 
-    _displayTableData() {
-        const { TicketsData, perPageLimit, currentPage } = this.state;
-        const retuData = [];
-        const length = TicketsData.length;
-        if (length > 0) {
-            for (let i = 0; i < this.state.TicketsData.length; i++) {
-                if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
-                    const Ticketdata = this.state.TicketsData[i];
-                    retuData.push(
-                        <tr>
-                            <td>{Ticketdata.index}</td>
-                            <td><span className="image"></span>{Ticketdata.requesterName}</td>
-                            <td className="subjects">{Ticketdata.subject}</td>
-                            <td><span className={Ticketdata.status == 'Open' ? "yellow-green" : Ticketdata.status == 'Closed' ? "red" : "orange"}>{Ticketdata.status}</span></td>
-                            <td><span className="priority">{Ticketdata.priority}</span></td>
-                            <td>{Ticketdata.Assignee}</td>
-                            <td className="date">{Ticketdata.createDate}</td>
-                            <td>{Ticketdata.agents}</td>
-                            <td>{Ticketdata.groups} <a href="#" className="float-right"><i className="fa fa-ellipsis-v"></i></a></td>
-                        </tr>
-                    );
-                }
-            }
-        } else {
-            retuData.push(<div className="d-block width-100 there-no-data">There is no data</div>);
-        }
-        return retuData;
-    }
+    // _displayTableData() {
+    //     const { TicketsData, perPageLimit, currentPage } = this.state;
+    //     const retuData = [];
+    //     const length = TicketsData.length;
+    //     if (length > 0) {
+    //         for (let i = 0; i < this.state.TicketsData.length; i++) {
+    //             if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
+    //                 const Ticketdata = this.state.TicketsData[i];
+    //                 retuData.push(
+    //                     <tr>
+    //                         <td>{Ticketdata.index}</td>
+    //                         <td><span className="image"></span>{Ticketdata.requesterName}</td>
+    //                         <td className="subjects">{Ticketdata.subject}</td>
+    //                         <td><span className={Ticketdata.status == 'Open' ? "yellow-green" : Ticketdata.status == 'Closed' ? "red" : "orange"}>{Ticketdata.status}</span></td>
+    //                         <td><span className="priority">{Ticketdata.priority}</span></td>
+    //                         <td>{Ticketdata.Assignee}</td>
+    //                         <td className="date">{Ticketdata.createDate}</td>
+    //                         <td>{Ticketdata.agents}</td>
+    //                         <td>{Ticketdata.groups} <a href="#" className="float-right"><i className="fa fa-ellipsis-v"></i></a></td>
+    //                     </tr>
+    //                 );
+    //             }
+    //         }
+    //     } else {
+    //         retuData.push(<div className="d-block width-100 there-no-data">There is no data</div>);
+    //     }
+    //     return retuData;
+    // }
 
-    peginationOfTable() {
-        const { currentPage, totalPages } = this.state;
-        let rows = [];
-        for (let i = 0; i < totalPages; i++) {
-            console.log(currentPage);
-            rows.push(<li className="" key={i}><a className={currentPage === i ? 'active' : 'deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
-        }
-        return (
-            <ul>
-                <li className="previous">
-                    <a className={currentPage === 0 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
-                </li>
-                {rows}
-                <li className="next">
-                    <a className={currentPage === this.state.totalPages - 1 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
-                </li>
-            </ul>
-        );
-    }
+    // peginationOfTable() {
+    //     const { currentPage, totalPages } = this.state;
+    //     let rows = [];
+    //     for (let i = 0; i < totalPages; i++) {
+    //         console.log(currentPage);
+    //         rows.push(<li className="" key={i}><a className={currentPage === i ? 'active' : 'deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
+    //     }
+    //     return (
+    //         <ul>
+    //             <li className="previous">
+    //                 <a className={currentPage === 0 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
+    //             </li>
+    //             {rows}
+    //             <li className="next">
+    //                 <a className={currentPage === this.state.totalPages - 1 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
+    //             </li>
+    //         </ul>
+    //     );
+    // }
 
-    navigatePage(target: any, e: any, i: any) {
-        console.log(e.target.value);
-        const { totalPages, currentPage, start_index, perPageLimit, ending_index, TicketsData } = this.state;
-        e.preventDefault();
-        switch (target) {
-            case 'pre':
-                if (currentPage !== 0) {
-                    this.setState({
-                        currentPage: currentPage - 1,
-                        start_index: start_index - perPageLimit,
-                    });
-                    if (ending_index != TicketsData.length) {
-                        this.setState({
-                            ending_index: ending_index - perPageLimit,
-                        });
-                    } else {
-                        this.setState({
-                            ending_index: ending_index - (TicketsData.length - start_index + 1),
-                        });
-                    }
-                }
-                break;
-            case 'next':
-                if (currentPage !== totalPages - 1) {
-                    this.setState({
-                        currentPage: currentPage + 1,
-                        start_index: start_index + perPageLimit,
-                    });
-                    if ((ending_index + perPageLimit) < TicketsData.length) {
-                        this.setState({
-                            ending_index: ending_index + perPageLimit,
-                        });
-                    } else {
-                        this.setState({
-                            ending_index: ending_index + (TicketsData.length - ending_index),
-                        });
-                    }
-                }
-                break;
-            case 'btn-click':
-                if ((i + 1) * perPageLimit < TicketsData.length) {
-                    this.setState({
-                        currentPage: i,
-                        start_index: (i * perPageLimit) + 1,
-                        ending_index: ((i + 1) * perPageLimit),
+    // navigatePage(target: any, e: any, i: any) {
+    //     const { totalPages, currentPage, start_index, perPageLimit, ending_index, TicketsData } = this.state;
+    //     e.preventDefault();
+    //     switch (target) {
+    //         case 'pre':
+    //             if (currentPage !== 0) {
+    //                 this.setState({
+    //                     currentPage: currentPage - 1,
+    //                     start_index: start_index - perPageLimit,
+    //                 });
+    //                 if (ending_index != TicketsData.length) {
+    //                     this.setState({
+    //                         ending_index: ending_index - perPageLimit,
+    //                     });
+    //                 } else {
+    //                     this.setState({
+    //                         ending_index: ending_index - (TicketsData.length - start_index + 1),
+    //                     });
+    //                 }
+    //             }
+    //             break;
+    //         case 'next':
+    //             if (currentPage !== totalPages - 1) {
+    //                 this.setState({
+    //                     currentPage: currentPage + 1,
+    //                     start_index: start_index + perPageLimit,
+    //                 });
+    //                 if ((ending_index + perPageLimit) < TicketsData.length) {
+    //                     this.setState({
+    //                         ending_index: ending_index + perPageLimit,
+    //                     });
+    //                 } else {
+    //                     this.setState({
+    //                         ending_index: ending_index + (TicketsData.length - ending_index),
+    //                     });
+    //                 }
+    //             }
+    //             break;
+    //         case 'btn-click':
+    //             if ((i + 1) * perPageLimit < TicketsData.length) {
+    //                 this.setState({
+    //                     currentPage: i,
+    //                     start_index: (i * perPageLimit) + 1,
+    //                     ending_index: ((i + 1) * perPageLimit),
 
-                    });
-                } else {
-                    this.setState({
-                        currentPage: i,
-                        start_index: (i * perPageLimit) + 1,
-                        ending_index: (ending_index + (TicketsData.length - ending_index)),
+    //                 });
+    //             } else {
+    //                 this.setState({
+    //                     currentPage: i,
+    //                     start_index: (i * perPageLimit) + 1,
+    //                     ending_index: (ending_index + (TicketsData.length - ending_index)),
 
-                    });
-                }
-                break;
-        }
-    }
+    //                 });
+    //             }
+    //             break;
+    //     }
+    // }
 
     render() {
-        const { TicketsData, start_index, ending_index, openCreateMenu } = this.state;
+        // TicketsData
+        const { start_index, ending_index, openCreateMenu } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -317,7 +335,8 @@ export class Tickets extends React.Component<any, any> {
                                     <a href="#" onClick={this.onClickOpenNewCompany}>
                                         Company
                                     </a>
-                                </div>}
+                                </div>
+                                }
                             </div>
 
                         </div>
@@ -555,9 +574,9 @@ export class Tickets extends React.Component<any, any> {
                                 <h2 className="d-block m-b-0">All Support Tickets</h2>
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
-                            <div className="row">
+                            {/* <div className="row">
                                 <div className="col-lg-6 col-md-6 col-sm-12">
-                                    <div className="showing">Latest Tickets (Showing {start_index} to {ending_index} of {TicketsData.length} Tickets)</div>
+                                     <div className="showing">Latest Tickets (Showing {start_index} to {ending_index} of {TicketsData.length} Tickets)</div> 
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-12 text-right">
                                     <div className="sortby">
@@ -573,9 +592,11 @@ export class Tickets extends React.Component<any, any> {
                                         </select>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                             <div className="d-block p-t-5 tickets-tabel">
-                                <table className="ticket-tabel">
+                                <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} />
+
+                                {/* <table className="ticket-tabel">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
@@ -592,10 +613,10 @@ export class Tickets extends React.Component<any, any> {
                                     <tbody>
                                         {this._displayTableData()}
                                     </tbody>
-                                </table>
+                                </table> */}
                             </div>
                             <div className="d-block width-100 p-t-15 text-right pagination">
-                                {this.peginationOfTable()}
+                                {/* {this.peginationOfTable()} */}
                             </div>
                         </div>
                     </div>
