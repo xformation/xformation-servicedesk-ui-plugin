@@ -1,11 +1,20 @@
 import * as React from 'react';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import Table from './../../components/table';
+import { OpenNewContactPopup } from '../../components/OpenNewContactPopup';
+import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
+import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
+import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 
 export class OpenTickets extends React.Component<any, any> {
     breadCrumbs: any;
     perPageLimit: any;
     tableValue: any;
+    openNewContactRef: any;
+    openNewCompanyRef: any;
+    openNewEmailRef: any;
+    openNewTicketRef: any;
+
     constructor(props: any) {
         super(props);
         this.perPageLimit = 3;
@@ -114,6 +123,7 @@ export class OpenTickets extends React.Component<any, any> {
         };
         this.state = {
             page_type: '',
+            openCreateMenu: false,
         };
         this.breadCrumbs = [
             {
@@ -125,6 +135,10 @@ export class OpenTickets extends React.Component<any, any> {
                 isCurrentPage: true
             }
         ];
+        this.openNewContactRef = React.createRef();
+        this.openNewCompanyRef = React.createRef();
+        this.openNewEmailRef = React.createRef();
+        this.openNewTicketRef = React.createRef();
     }
     componentDidMount() {
         const queryString = window.location.search;
@@ -133,127 +147,33 @@ export class OpenTickets extends React.Component<any, any> {
         this.setState({
             page_type: pageType,
         });
-        // this.calculateTotalPages(this.state.TicketsData);
     };
 
-    calculateTotalPages = (displayData: any) => {
-        const { perPageLimit } = this.state;
-        let indexOfLastData = Math.ceil(displayData.length / perPageLimit);
+    onClickOpenNewContact = (e: any) => {
+        this.openNewContactRef.current.toggle();
+    };
+
+    onClickOpenNewCompany = (e: any) => {
+        this.openNewCompanyRef.current.toggle();
+    };
+
+    onClickOpenNewEmail = (e: any) => {
+        this.openNewEmailRef.current.toggle();
+    };
+
+    onClickOpenNewTicket = (e: any) => {
+        this.openNewTicketRef.current.toggle();
+    };
+
+    onClickOpenSubLink = () => {
+        let menu = !this.state.openCreateMenu;
         this.setState({
-            totalPages: indexOfLastData,
+            openCreateMenu: menu,
         });
-    };
-
-    // _displayTableData() {
-    //     const { TicketsData, perPageLimit, currentPage } = this.state;
-    //     const retuData = [];
-    //     const length = TicketsData.length;
-    //     if (length > 0) {
-    //         for (let i = 0; i < this.state.TicketsData.length; i++) {
-    //             if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
-    //                 const Ticketdata = this.state.TicketsData[i];
-    //                 retuData.push(
-    //                     <tr>
-    //                         <td>{Ticketdata.index}</td>
-    //                         <td><span className="image"></span>{Ticketdata.requesterName}</td>
-    //                         <td className="subjects">{Ticketdata.subject}</td>
-    //                         <td>{Ticketdata.status} <i className="fa fa-chevron-down"></i></td>
-    //                         <td><span className="priority">{Ticketdata.priority}</span></td>
-    //                         <td>{Ticketdata.Assignee}</td>
-    //                         <td className="date">{Ticketdata.createDate}</td>
-    //                         <td>{Ticketdata.agents}</td>
-    //                         <td>{Ticketdata.groups} <a href="#" className="float-right"><i className="fa fa-ellipsis-v"></i></a></td>
-    //                     </tr>
-    //                 );
-    //             }
-    //         }
-    //     } else {
-    //         retuData.push(<div className="d-block width-100 there-no-data">There is no data</div>);
-    //     }
-    //     return retuData;
-    // }
-
-    // peginationOfTable() {
-    //     const { currentPage, totalPages } = this.state;
-    //     let rows = [];
-    //     for (let i = 0; i < totalPages; i++) {
-    //         console.log(currentPage);
-    //         rows.push(<li className="" key={i}><a className={currentPage === i ? 'active' : 'deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
-    //     }
-    //     return (
-    //         <ul>
-    //             <li className="previous">
-    //                 <a className={currentPage === 0 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
-    //             </li>
-    //             {rows}
-    //             <li className="next">
-    //                 <a className={currentPage === this.state.totalPages - 1 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
-    //             </li>
-    //         </ul>
-    //     );
-    // }
-
-    // navigatePage(target: any, e: any, i: any) {
-    //     console.log(e.target.value);
-    //     const { totalPages, currentPage, start_index, perPageLimit, ending_index, TicketsData } = this.state;
-    //     e.preventDefault();
-    //     switch (target) {
-    //         case 'pre':
-    //             if (currentPage !== 0) {
-    //                 this.setState({
-    //                     currentPage: currentPage - 1,
-    //                     start_index: start_index - perPageLimit,
-    //                 });
-    //                 if (ending_index != TicketsData.length) {
-    //                     this.setState({
-    //                         ending_index: ending_index - perPageLimit,
-    //                     });
-    //                 } else {
-    //                     this.setState({
-    //                         ending_index: ending_index - (TicketsData.length - start_index + 1),
-    //                     });
-    //                 }
-    //             }
-    //             break;
-    //         case 'next':
-    //             if (currentPage !== totalPages - 1) {
-    //                 this.setState({
-    //                     currentPage: currentPage + 1,
-    //                     start_index: start_index + perPageLimit,
-    //                 });
-    //                 if ((ending_index + perPageLimit) < TicketsData.length) {
-    //                     this.setState({
-    //                         ending_index: ending_index + perPageLimit,
-    //                     });
-    //                 } else {
-    //                     this.setState({
-    //                         ending_index: ending_index + (TicketsData.length - ending_index),
-    //                     });
-    //                 }
-    //             }
-    //             break;
-    //         case 'btn-click':
-    //             if ((i + 1) * perPageLimit < TicketsData.length) {
-    //                 this.setState({
-    //                     currentPage: i,
-    //                     start_index: (i * perPageLimit) + 1,
-    //                     ending_index: ((i + 1) * perPageLimit),
-
-    //                 });
-    //             } else {
-    //                 this.setState({
-    //                     currentPage: i,
-    //                     start_index: (i * perPageLimit) + 1,
-    //                     ending_index: (ending_index + (TicketsData.length - ending_index)),
-
-    //                 });
-    //             }
-    //             break;
-    //     }
-    // }
+    }
 
     render() {
-        const { page_type } = this.state;
+        const { page_type, openCreateMenu } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -266,9 +186,24 @@ export class OpenTickets extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                                <a href="#" className="blue-button m-r-0 min-width-inherit width-auto">
+                                <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto create-btn">
                                     Create
                                 </a>
+                                {openCreateMenu == true && <div className="text-center open-create-menu">
+                                    <a onClick={this.onClickOpenNewTicket}>
+                                        Ticket
+                                    </a>
+                                    <a onClick={this.onClickOpenNewEmail}>
+                                        Email
+                                    </a>
+                                    <a onClick={this.onClickOpenNewContact}>
+                                        Contact
+                                    </a>
+                                    <a onClick={this.onClickOpenNewCompany}>
+                                        Company
+                                    </a>
+                                </div>
+                                }
                             </div>
                         </div>
                     </div>
@@ -433,54 +368,13 @@ export class OpenTickets extends React.Component<any, any> {
                         <div className="d-block all-open-ticket-tabel">
                             <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit}
                                 tableClasses={{ ticketTable: "open-ticket-tabel", ticketsTable: "d-block p-t-5 open-tickets-tabel", allSupport: "all-open-ticket-tabel", Classfafarrow: "fa fa-chevron-down" }} />
-                            {/* <div className="row"> */}
-                            {/* <div className="col-lg-5 col-md-12 col-sm-12">
-                                    <div className="showing">Latest Tickets (Showing {start_index} to {ending_index} of {TicketsData.length} Tickets)</div>
-                                </div> */}
-                            {/* <div className="col-lg-7 col-md-12 col-sm-12 text-right">
-                                    <div className="d-inline-block p-r-10 filters-button">
-                                        <button className="blue-button">Show Filters</button>
-                                    </div>
-                                    <div className="d-inline-block sortby">
-                                        <label className="d-inline-block">Sort By:</label>
-                                        <select className="form-control">
-                                            <option>Created Date</option>
-                                            <option>Due by time</option>
-                                            <option>Last modified</option>
-                                            <option>Priority</option>
-                                            <option>Status</option>
-                                            <option>Ascending</option>
-                                            <option>Descending</option>
-                                        </select>
-                                    </div>
-                                </div> */}
-                            {/* </div> */}
-                            {/* <div className="d-block p-t-5 open-tickets-tabel">
-                                <table className="open-ticket-tabel">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Requester Name</th>
-                                            <th>Subjects</th>
-                                            <th>Status</th>
-                                            <th>Priority</th>
-                                            <th>Assignee</th>
-                                            <th>Create Date</th>
-                                            <th>Agents</th>
-                                            <th>Groups</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {this._displayTableData()}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div className="d-block width-100 p-t-15 text-right pagination">
-                                {this.peginationOfTable()}
-                            </div> */}
                         </div>
                     </div>
                 </div>
+                <OpenNewContactPopup ref={this.openNewContactRef} />
+                <OpenNewCompanyPopup ref={this.openNewCompanyRef} />
+                <OpenNewEmailPopup ref={this.openNewEmailRef} />
+                <OpenNewTicketPopup ref={this.openNewTicketRef} />
             </div>
         );
     }

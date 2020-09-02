@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Modal, ModalBody } from 'reactstrap';
-import { CustomTextbox } from './../../components/CustomTextbox';
+import { CustomTextbox } from './CustomTextbox';
 
-export class OpenNewCompanyPopup extends React.Component<any, any> {
+export class OpenNewEmailPopup extends React.Component<any, any> {
     steps: any;
     constructor(props: any) {
         super(props);
@@ -137,7 +137,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
                     <div className="d-block width-100 contact-popup-container">
                         <div className="d-block width-100 p-b-20 heading">
-                            <h4 className="d-block"><i className="fa fa-building"></i> New Company</h4>
+                            <h4 className="d-block"><i className="fa fa-building"></i>New Email</h4>
                             <span className="d-block">When someone reaches out to you, they become a contact in your account. You can create companies and associate contacts with them. <a href="#">Learn more.</a></span>
                         </div>
                         <div className="d-block width-100 p-t-10 p-b-10 upload-photo">

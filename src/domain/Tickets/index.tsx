@@ -1,14 +1,18 @@
 import * as React from 'react';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import { Bar } from 'react-chartjs-2';
-import { OpenNewContactPopup } from './OpenNewContactPopup';
-import { OpenNewCompanyPopup } from './OpenNewCompanyPopup';
+import { OpenNewContactPopup } from '../../components/OpenNewContactPopup';
+import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
+import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
+import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import Table from './../../components/table';
 
 export class Tickets extends React.Component<any, any> {
     breadCrumbs: any;
     openNewContactRef: any;
     openNewCompanyRef: any;
+    openNewEmailRef: any;
+    openNewTicketRef: any;
     tableValue: any;
     perPageLimit: any;
     constructor(props: any) {
@@ -132,6 +136,8 @@ export class Tickets extends React.Component<any, any> {
         ];
         this.openNewContactRef = React.createRef();
         this.openNewCompanyRef = React.createRef();
+        this.openNewEmailRef = React.createRef();
+        this.openNewTicketRef = React.createRef();
     }
     componentDidMount() {
         // this.calculateTotalPages(this.state.TicketsData);
@@ -143,6 +149,14 @@ export class Tickets extends React.Component<any, any> {
 
     onClickOpenNewCompany = (e: any) => {
         this.openNewCompanyRef.current.toggle();
+    };
+
+    onClickOpenNewEmail = (e: any) => {
+        this.openNewEmailRef.current.toggle();
+    };
+
+    onClickOpenNewTicket = (e: any) => {
+        this.openNewTicketRef.current.toggle();
     };
 
     onClickOpenSubLink = () => {
@@ -201,16 +215,16 @@ export class Tickets extends React.Component<any, any> {
                                     Create
                                 </a>
                                 {openCreateMenu == true && <div className="text-center open-create-menu">
-                                    <a href="#">
+                                    <a onClick={this.onClickOpenNewTicket}>
                                         Ticket
                                     </a>
-                                    <a href="#">
+                                    <a onClick={this.onClickOpenNewEmail}>
                                         Email
                                     </a>
-                                    <a href="#" onClick={this.onClickOpenNewContact}>
+                                    <a onClick={this.onClickOpenNewContact}>
                                         Contact
                                     </a>
-                                    <a href="#" onClick={this.onClickOpenNewCompany}>
+                                    <a onClick={this.onClickOpenNewCompany}>
                                         Company
                                     </a>
                                 </div>
@@ -459,6 +473,8 @@ export class Tickets extends React.Component<any, any> {
                 </div>
                 <OpenNewContactPopup ref={this.openNewContactRef} />
                 <OpenNewCompanyPopup ref={this.openNewCompanyRef} />
+                <OpenNewEmailPopup ref={this.openNewEmailRef} />
+                <OpenNewTicketPopup ref={this.openNewTicketRef} />
             </div>
         );
     }

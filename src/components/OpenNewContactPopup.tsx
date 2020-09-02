@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Modal, ModalBody } from 'reactstrap';
-import { CustomTextbox } from './../../components/CustomTextbox';
+import { CustomTextbox } from './CustomTextbox';
 
 export class OpenNewContactPopup extends React.Component<any, any> {
     steps: any;
