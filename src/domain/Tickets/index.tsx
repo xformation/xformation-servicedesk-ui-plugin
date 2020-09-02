@@ -117,9 +117,9 @@ export class Tickets extends React.Component<any, any> {
             ]
         };
         this.perPageLimit = 3,
-        this.state = {
-           openCreateMenu: false,
-         };
+            this.state = {
+                openCreateMenu: false,
+            };
         this.breadCrumbs = [
             {
                 label: "Home",
@@ -453,7 +453,7 @@ export class Tickets extends React.Component<any, any> {
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
                             <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit}
-                                tableClasses={{ ticketTable: "ticket-tabel", ticketsTable: "d-block p-t-5 tickets-tabel", allSupport: "all-support-ticket-tabel" }} />
+                                tableClasses={{ ticketTable: "ticket-tabel", ticketsTable: "d-block p-t-5 tickets-tabel", allSupport: "all-support-ticket-tabel", statusClassOpen: "yellow-green", statusClassClose: "red", statusClassPendding: "orange" }} />
                         </div>
                     </div>
                 </div>

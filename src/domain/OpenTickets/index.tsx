@@ -1,17 +1,26 @@
 import * as React from 'react';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
+import Table from './../../components/table';
 
 export class OpenTickets extends React.Component<any, any> {
     breadCrumbs: any;
+    perPageLimit: any;
+    tableValue: any;
     constructor(props: any) {
         super(props);
-        this.state = {
-            totalPages: '',
-            currentPage: 0,
-            perPageLimit: 3,
-            start_index: 1,
-            ending_index: 3,
-            page_type: '',
+        this.perPageLimit = 3;
+        this.tableValue = {
+            columns: [
+                { label: 'ID', key: 'id' },
+                { label: 'Requester Name', key: 'requestername' },
+                { label: 'Subjects', key: 'subjects' },
+                { label: 'Status', key: 'status' },
+                { label: 'Priority', key: 'priority' },
+                { label: 'Assignee', key: 'assignee' },
+                { label: 'Create Date', key: 'createDate' },
+                { label: 'Agents', key: 'agents' },
+                { label: 'Groups', key: 'groups' }
+            ],
             TicketsData: [
                 {
                     index: '#27',
@@ -103,6 +112,9 @@ export class OpenTickets extends React.Component<any, any> {
                 }
             ]
         };
+        this.state = {
+            page_type: '',
+        };
         this.breadCrumbs = [
             {
                 label: "Home",
@@ -121,7 +133,7 @@ export class OpenTickets extends React.Component<any, any> {
         this.setState({
             page_type: pageType,
         });
-        this.calculateTotalPages(this.state.TicketsData);
+        // this.calculateTotalPages(this.state.TicketsData);
     };
 
     calculateTotalPages = (displayData: any) => {
@@ -132,116 +144,116 @@ export class OpenTickets extends React.Component<any, any> {
         });
     };
 
-    _displayTableData() {
-        const { TicketsData, perPageLimit, currentPage } = this.state;
-        const retuData = [];
-        const length = TicketsData.length;
-        if (length > 0) {
-            for (let i = 0; i < this.state.TicketsData.length; i++) {
-                if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
-                    const Ticketdata = this.state.TicketsData[i];
-                    retuData.push(
-                        <tr>
-                            <td>{Ticketdata.index}</td>
-                            <td><span className="image"></span>{Ticketdata.requesterName}</td>
-                            <td className="subjects">{Ticketdata.subject}</td>
-                            <td>{Ticketdata.status} <i className="fa fa-chevron-down"></i></td>
-                            <td><span className="priority">{Ticketdata.priority}</span></td>
-                            <td>{Ticketdata.Assignee}</td>
-                            <td className="date">{Ticketdata.createDate}</td>
-                            <td>{Ticketdata.agents}</td>
-                            <td>{Ticketdata.groups} <a href="#" className="float-right"><i className="fa fa-ellipsis-v"></i></a></td>
-                        </tr>
-                    );
-                }
-            }
-        } else {
-            retuData.push(<div className="d-block width-100 there-no-data">There is no data</div>);
-        }
-        return retuData;
-    }
+    // _displayTableData() {
+    //     const { TicketsData, perPageLimit, currentPage } = this.state;
+    //     const retuData = [];
+    //     const length = TicketsData.length;
+    //     if (length > 0) {
+    //         for (let i = 0; i < this.state.TicketsData.length; i++) {
+    //             if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
+    //                 const Ticketdata = this.state.TicketsData[i];
+    //                 retuData.push(
+    //                     <tr>
+    //                         <td>{Ticketdata.index}</td>
+    //                         <td><span className="image"></span>{Ticketdata.requesterName}</td>
+    //                         <td className="subjects">{Ticketdata.subject}</td>
+    //                         <td>{Ticketdata.status} <i className="fa fa-chevron-down"></i></td>
+    //                         <td><span className="priority">{Ticketdata.priority}</span></td>
+    //                         <td>{Ticketdata.Assignee}</td>
+    //                         <td className="date">{Ticketdata.createDate}</td>
+    //                         <td>{Ticketdata.agents}</td>
+    //                         <td>{Ticketdata.groups} <a href="#" className="float-right"><i className="fa fa-ellipsis-v"></i></a></td>
+    //                     </tr>
+    //                 );
+    //             }
+    //         }
+    //     } else {
+    //         retuData.push(<div className="d-block width-100 there-no-data">There is no data</div>);
+    //     }
+    //     return retuData;
+    // }
 
-    peginationOfTable() {
-        const { currentPage, totalPages } = this.state;
-        let rows = [];
-        for (let i = 0; i < totalPages; i++) {
-            console.log(currentPage);
-            rows.push(<li className="" key={i}><a className={currentPage === i ? 'active' : 'deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
-        }
-        return (
-            <ul>
-                <li className="previous">
-                    <a className={currentPage === 0 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
-                </li>
-                {rows}
-                <li className="next">
-                    <a className={currentPage === this.state.totalPages - 1 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
-                </li>
-            </ul>
-        );
-    }
+    // peginationOfTable() {
+    //     const { currentPage, totalPages } = this.state;
+    //     let rows = [];
+    //     for (let i = 0; i < totalPages; i++) {
+    //         console.log(currentPage);
+    //         rows.push(<li className="" key={i}><a className={currentPage === i ? 'active' : 'deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
+    //     }
+    //     return (
+    //         <ul>
+    //             <li className="previous">
+    //                 <a className={currentPage === 0 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
+    //             </li>
+    //             {rows}
+    //             <li className="next">
+    //                 <a className={currentPage === this.state.totalPages - 1 ? 'desable' : 'enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
+    //             </li>
+    //         </ul>
+    //     );
+    // }
 
-    navigatePage(target: any, e: any, i: any) {
-        console.log(e.target.value);
-        const { totalPages, currentPage, start_index, perPageLimit, ending_index, TicketsData } = this.state;
-        e.preventDefault();
-        switch (target) {
-            case 'pre':
-                if (currentPage !== 0) {
-                    this.setState({
-                        currentPage: currentPage - 1,
-                        start_index: start_index - perPageLimit,
-                    });
-                    if (ending_index != TicketsData.length) {
-                        this.setState({
-                            ending_index: ending_index - perPageLimit,
-                        });
-                    } else {
-                        this.setState({
-                            ending_index: ending_index - (TicketsData.length - start_index + 1),
-                        });
-                    }
-                }
-                break;
-            case 'next':
-                if (currentPage !== totalPages - 1) {
-                    this.setState({
-                        currentPage: currentPage + 1,
-                        start_index: start_index + perPageLimit,
-                    });
-                    if ((ending_index + perPageLimit) < TicketsData.length) {
-                        this.setState({
-                            ending_index: ending_index + perPageLimit,
-                        });
-                    } else {
-                        this.setState({
-                            ending_index: ending_index + (TicketsData.length - ending_index),
-                        });
-                    }
-                }
-                break;
-            case 'btn-click':
-                if ((i + 1) * perPageLimit < TicketsData.length) {
-                    this.setState({
-                        currentPage: i,
-                        start_index: (i * perPageLimit) + 1,
-                        ending_index: ((i + 1) * perPageLimit),
+    // navigatePage(target: any, e: any, i: any) {
+    //     console.log(e.target.value);
+    //     const { totalPages, currentPage, start_index, perPageLimit, ending_index, TicketsData } = this.state;
+    //     e.preventDefault();
+    //     switch (target) {
+    //         case 'pre':
+    //             if (currentPage !== 0) {
+    //                 this.setState({
+    //                     currentPage: currentPage - 1,
+    //                     start_index: start_index - perPageLimit,
+    //                 });
+    //                 if (ending_index != TicketsData.length) {
+    //                     this.setState({
+    //                         ending_index: ending_index - perPageLimit,
+    //                     });
+    //                 } else {
+    //                     this.setState({
+    //                         ending_index: ending_index - (TicketsData.length - start_index + 1),
+    //                     });
+    //                 }
+    //             }
+    //             break;
+    //         case 'next':
+    //             if (currentPage !== totalPages - 1) {
+    //                 this.setState({
+    //                     currentPage: currentPage + 1,
+    //                     start_index: start_index + perPageLimit,
+    //                 });
+    //                 if ((ending_index + perPageLimit) < TicketsData.length) {
+    //                     this.setState({
+    //                         ending_index: ending_index + perPageLimit,
+    //                     });
+    //                 } else {
+    //                     this.setState({
+    //                         ending_index: ending_index + (TicketsData.length - ending_index),
+    //                     });
+    //                 }
+    //             }
+    //             break;
+    //         case 'btn-click':
+    //             if ((i + 1) * perPageLimit < TicketsData.length) {
+    //                 this.setState({
+    //                     currentPage: i,
+    //                     start_index: (i * perPageLimit) + 1,
+    //                     ending_index: ((i + 1) * perPageLimit),
 
-                    });
-                } else {
-                    this.setState({
-                        currentPage: i,
-                        start_index: (i * perPageLimit) + 1,
-                        ending_index: (ending_index + (TicketsData.length - ending_index)),
+    //                 });
+    //             } else {
+    //                 this.setState({
+    //                     currentPage: i,
+    //                     start_index: (i * perPageLimit) + 1,
+    //                     ending_index: (ending_index + (TicketsData.length - ending_index)),
 
-                    });
-                }
-                break;
-        }
-    }
+    //                 });
+    //             }
+    //             break;
+    //     }
+    // }
 
     render() {
-        const { TicketsData, start_index, ending_index, page_type } = this.state;
+        const { page_type } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -419,11 +431,13 @@ export class OpenTickets extends React.Component<any, any> {
                     </div>
                     <div className="common-container border-bottom-0">
                         <div className="d-block all-open-ticket-tabel">
-                            <div className="row">
-                                <div className="col-lg-5 col-md-12 col-sm-12">
+                            <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit}
+                                tableClasses={{ ticketTable: "open-ticket-tabel", ticketsTable: "d-block p-t-5 open-tickets-tabel", allSupport: "all-open-ticket-tabel", Classfafarrow: "fa fa-chevron-down" }} />
+                            {/* <div className="row"> */}
+                            {/* <div className="col-lg-5 col-md-12 col-sm-12">
                                     <div className="showing">Latest Tickets (Showing {start_index} to {ending_index} of {TicketsData.length} Tickets)</div>
-                                </div>
-                                <div className="col-lg-7 col-md-12 col-sm-12 text-right">
+                                </div> */}
+                            {/* <div className="col-lg-7 col-md-12 col-sm-12 text-right">
                                     <div className="d-inline-block p-r-10 filters-button">
                                         <button className="blue-button">Show Filters</button>
                                     </div>
@@ -439,9 +453,9 @@ export class OpenTickets extends React.Component<any, any> {
                                             <option>Descending</option>
                                         </select>
                                     </div>
-                                </div>
-                            </div>
-                            <div className="d-block p-t-5 open-tickets-tabel">
+                                </div> */}
+                            {/* </div> */}
+                            {/* <div className="d-block p-t-5 open-tickets-tabel">
                                 <table className="open-ticket-tabel">
                                     <thead>
                                         <tr>
@@ -463,7 +477,7 @@ export class OpenTickets extends React.Component<any, any> {
                             </div>
                             <div className="d-block width-100 p-t-15 text-right pagination">
                                 {this.peginationOfTable()}
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>

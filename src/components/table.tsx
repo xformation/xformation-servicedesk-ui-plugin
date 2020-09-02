@@ -11,12 +11,15 @@ export class Table extends React.Component<any, any> {
         super(props);
         this.state = {
             displayData: this.props.valueFromData.TicketsData,
+            searchData: this.props.valueFromData.TicketsData,
             perPageLimit: this.props.perPageLimit,
+            noOfRecordPerPage: this.props.perPageLimit,
             columns: this.props.valueFromData.columns,
             storeColumsData: this.props.valueFromData.columns,
             totalPages: '',
             currentPage: 0,
             start_index: 1,
+            searchKey: '',
             ending_index: this.props.perPageLimit,
         }
     };
@@ -46,13 +49,13 @@ export class Table extends React.Component<any, any> {
     }
     tableBodyData() {
         const { displayData, perPageLimit, currentPage, columns } = this.state;
+        const { tableClasses } = this.props;
         const retuData = [];
         const length = displayData.length;
         const cLength = columns.length;
         if (length > 0) {
             for (let i = 0; i < length; i++) {
                 if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
-                    const tdJSX = [];
                     const row = displayData[i];
                     console.log(row);
                     retuData.push(
@@ -60,7 +63,8 @@ export class Table extends React.Component<any, any> {
                             <td>{row.index}</td>
                             <td><span className="image"></span>{row.requesterName}</td>
                             <td className="subjects">{row.subject}</td>
-                            <td><span className={row.status == 'Open' ? "yellow-green" : row.status == 'Closed' ? "red" : "orange"}>{row.status}</span></td>
+                            {(tableClasses.statusClassOpen != undefined && tableClasses.statusClassClose != undefined && tableClasses.statusClassPendding != undefined) && <td><span className={row.status == 'Open' ? tableClasses.statusClassOpen : row.status == 'Closed' ? tableClasses.statusClassClose : tableClasses.statusClassPendding}>{row.status}</span></td>}
+                            {tableClasses.Classfafarrow != undefined && <td>{row.status} <i className="fa fa-chevron-down"></i></td>}
                             <td><span className="priority">{row.priority}</span></td>
                             <td>{row.Assignee}</td>
                             <td className="date">{row.createDate}</td>
@@ -151,18 +155,93 @@ export class Table extends React.Component<any, any> {
                 break;
         }
     }
+
+    handleChange = (e: any) => {
+        const { displayData } = this.state;
+        const totalData = displayData.length;
+        if (e.target.value !== 'all') {
+            let indexOfLastData = Math.ceil(totalData / e.target.value);
+            this.setState({
+                perPageLimit: e.target.value,
+                totalPages: indexOfLastData,
+                start_index: 1,
+                ending_index: e.target.value,
+            });
+        } else {
+            let indexOfLastData = Math.ceil(totalData / totalData);
+            this.setState({
+                perPageLimit: totalData,
+                totalPages: indexOfLastData,
+                start_index: 1,
+                ending_index: totalData
+            });
+        }
+    }
+
+    onSearchChange = (e: any) => {
+        const { value } = e.target;
+        this.setState({
+            searchKey: value,
+        });
+        const { searchData } = this.state;
+        var searchResult = [];
+        for (let i = 0; i < searchData.length; i++) {
+            if (searchData[i].requesterName.indexOf(value) !== -1 || value === '') {
+                searchResult.push(searchData[i]);
+            } else if (searchData[i].requesterName.toLowerCase().indexOf(value) !== -1 || value === '') {
+                searchResult.push(searchData[i]);
+            }
+        }
+        this.calculateTotalPages(searchResult);
+        this.setState({
+            displayData: searchResult,
+            currentPage: 0
+        });
+    }
+
+    displayShowPageLimit() {
+        const { noOfRecordPerPage, displayData } = this.state;
+        let pageData = [];
+        let i = noOfRecordPerPage;
+        while (i <= displayData.length) {
+            pageData.push(
+                <option value={i}>{i}</option>
+            )
+            i = i + noOfRecordPerPage;
+        }
+        pageData.push(
+            <option value="all">All</option>
+        )
+        return pageData;
+    }
+
     render() {
-        const { displayData, start_index, ending_index } = this.state;
+        const { displayData, start_index, ending_index, perPageLimit } = this.state;
+        console.log(start_index);
+        console.log(ending_index);
         const { tableClasses } = this.props;
         return (
             <div className={tableClasses.allSupport}>
                 <div className="row">
                     <div className="col-lg-6 col-md-6 col-sm-12">
                         <div className="showing">Latest Tickets (Showing {start_index} to {ending_index} of {displayData.length} Tickets)</div>
+                        <div className="d-inline-block showby">
+                            <label className="d-inline-block">Show</label>
+                            <select onChange={this.handleChange} className="form-control">
+                                {this.displayShowPageLimit()}
+                            </select>
+                            <span>entries per page</span>
+                        </div>
                     </div>
-                    {/* <div className="col-lg-6 col-md-6 col-sm-12 text-right">
-                        <div className="sortby">
-                            <label className="d-inline-block">Sort By:</label>
+                    <div className="col-lg-6 col-md-6 col-sm-12 text-right">
+                        <form>
+                            <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey} />
+                            <button>
+                                <i className="fa fa-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {/*    <label className="d-inline-block">Sort By:</label>
                             <select className="form-control">
                                 <option>Created Date</option>
                                 <option>Due by time</option>

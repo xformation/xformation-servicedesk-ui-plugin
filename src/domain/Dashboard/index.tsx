@@ -463,7 +463,7 @@ export class Dashboard extends React.Component<any, any> {
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
                             <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit}
-                                tableClasses={{ ticketTable: "ticket-tabel", ticketsTable: "d-block p-t-5 tickets-tabel", allSupport: "all-support-ticket-tabel" }} />
+                                tableClasses={{ ticketTable: "ticket-tabel", ticketsTable: "d-block p-t-5 tickets-tabel", allSupport: "all-support-ticket-tabel", statusClassOpen: "yellow-green", statusClassClose: "red", statusClassPendding: "orange" }} />
                             {/* <div className="row"> */}
                             {/* <div className="col-lg-6 col-md-6 col-sm-12 text-right">
                                     <div className="sortby">
