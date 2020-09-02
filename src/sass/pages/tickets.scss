@@ -41,26 +41,6 @@
             font-weight: 400;
         }
     }
-    .showing{
-        font-size: 13px;
-        line-height: 40px;
-        color: $all-tickets-text-color;
-        font-weight: 500;
-    }
-    .sortby{
-        label{
-            font-size: 15px;
-            line-height: 40px;
-            color: $all-tickets-text-color;
-            font-weight: 500;
-            padding-right: 15px;
-        }
-        .form-control{
-            display: inline-block;
-            width: 175px;
-            border-radius: 25px;
-        }
-    }
     .tickets-tabel{
         overflow-x: scroll;
         .ticket-tabel{
@@ -117,72 +97,6 @@
             }
         }
     }
-    .pagination{
-        ul{
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            li{
-                display: inline-block;
-                a{
-                    display: block;
-                    padding: 5px 10px;
-                    font-size: 11px;
-                    color: #868F9B;
-                    line-height: 16px;
-                    border: 1px solid #CBCFD4;
-                    border-right: none;
-                    &:hover{
-                        background-color: #CBCFD4;
-                    }
-                }
-                a.active{
-                    background-color: #CBCFD4;
-                    color: black;
-                  }
-                 a.deactive{
-                    background-color: white;
-                    color: black;
-                  }
-                 a.desable{
-                    background-color:rgb(94, 87, 87);
-                    color: white;
-                  
-                  }
-                 a.enable{
-                    background-color: #3b4859;
-                    color: #ffffff;
-                  
-                  }
-                &.previous{
-                    a{
-                        padding-left: 20px;
-                        padding-right: 20px;
-                        -webkit-border-top-left-radius: 5px;
-                        -webkit-border-bottom-left-radius: 5px;
-                        -moz-border-radius-topleft: 5px;
-                        -moz-border-radius-bottomleft: 5px;
-                        border-top-left-radius: 5px;
-                        border-bottom-left-radius: 5px;
-                    }
-                }
-                &.next{
-                    a{
-                        padding-left: 20px;
-                        padding-right: 20px;
-                        border-right: 1px solid #CBCFD4;
-                        -webkit-border-top-right-radius: 5px;
-                        -webkit-border-bottom-right-radius: 5px;
-                        -moz-border-radius-topright: 5px;
-                        -moz-border-radius-bottomright: 5px;
-                        border-top-right-radius: 5px;
-                        border-bottom-right-radius: 5px;
-                    }
-                }
-            }
-        }
-      
-    }
 }
 
 .there-no-data{
@@ -203,133 +117,6 @@
     margin-top: 8px;
 }
 
-.open-create-menu{
-    position: absolute;
-    right: 15px;
-    top: 36px;
-    background-color: #f0f3f7;
-    box-shadow: 0px 2px 5px #00000029;
-    width: 120px;
-    z-index: 10;
-    padding: 5px 0;
-    a{
-        color: #2a9ce7;
-        font-size: 12px;
-        font-weight: 400;
-        line-height: 20px;
-        display: block;
-        padding: 4px 0;
-    }
-}
-
-.contact-popup-container{
-    .heading{
-        h4{
-            color: #323C47;
-            font-size: 20px;
-            line-height: 24px;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        span{
-            color: #A9B9C6;
-            font-size: 12px;
-            line-height: 18px;
-            font-weight: 400;
-            a{
-                color: #49C740;
-            }
-        }
-    }
-    .upload-photo{
-        .upload-icon{
-            background-color: #438AFB;
-            border-radius: 2px;
-            padding: 0;
-            width: 44px;
-            height: 44px;
-            color: #ffffff;
-            font-size: 24px;
-            line-height: 44px;
-            text-align: center;
-            margin-right: 15px;
-            vertical-align: top;
-        }
-        strong{
-            font-size: 16px;
-            line-height: 20px;
-            color: #438AFB;
-        }
-        p{
-            color: #A9B9C6;
-            font-size: 12px;
-            line-height: 18px;
-            font-weight: 400;
-        }
-    }
-    .form-group{
-        margin-bottom: 1.5rem;
-        label{
-            color: #323C47;
-            font-size: 14px;
-            line-height: 18px;
-            font-weight: 600;
-            margin-bottom: 0;
-        }
-        .form-group-inner{
-            label{
-                display: none;
-            } 
-        }
-        .form-control{
-            background-color: transparent;
-            border: none;
-            border-bottom: 1px solid #D1DAE2;
-            color: #D1DAE2;
-            font-size: 13px;
-            line-height: 18px;
-            padding: 5px 0;
-            width: 100%;
-            border-radius: 0;
-            text-align: left;
-            &:focus{
-                outline: none;
-            }
-        }
-    }
-    .atleast-fields-box{
-        border: 1px solid #D1DAE2;
-        background-color: #F9F9F9;
-        padding: 20px;
-        padding-bottom: 0;
-        margin-bottom: 20px;
-        h3{
-            color: #323C47;
-            font-size: 15px;
-            line-height: 18px;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-    }
-    .contact-popup-buttons{
-        button{
-            border: 2px solid #A9B9C6;
-            background-color: #ffffff;
-            color: #D1DAE2;
-            font-size: 15px;
-            line-height: 48px;
-            font-weight: 500;
-            padding: 0 30px;
-            margin: 5px;
-            text-align: center;
-            &.save{
-                border-color: #3B7CFF;
-                background-color: #3B7CFF;
-                color: #ffffff;
-            }
-        }
-    }
-}
 
 
 
@@ -353,11 +140,6 @@
     
 }
 @media (max-width: 992px){
-    .sortby{
-        float: left;
-        margin-top: 10px;
-    }
-    
     .tickets-number-box {
         padding-right: 15px;
     }

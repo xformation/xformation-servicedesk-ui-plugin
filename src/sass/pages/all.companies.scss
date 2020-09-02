@@ -2,8 +2,6 @@
     display: grid;
     width: 100%;
     .select-all{
-        border-right: 1px solid #D6DEE5;
-        margin-right: 15px;
         .checkbox{
             display: inline-block;
             vertical-align: middle;
@@ -16,60 +14,6 @@
             font-weight: 500;
             padding-left: 15px;
             padding-right: 15px;
-        }
-    }
-
-    .showby{
-        label{
-            font-size: 14px;
-            line-height: 40px;
-            color: $all-tickets-text-color;
-            font-weight: 500;
-            padding-right: 15px;
-        }
-        .form-control{
-            display: inline-block;
-            width: 75px;
-            border-radius: 25px;
-        }
-        span{
-            font-size: 14px;
-            line-height: 40px;
-            color: $all-tickets-text-color;
-            font-weight: 500;
-            padding-left: 15px;
-        }
-    }
-
-    .companies-control-group {
-        position: relative;
-        margin-bottom: 0;
-        .input-group-text {
-            max-width: 100%;
-            text-align: left;
-            padding-right: 30px;
-            padding-left: 15px;
-            width: 100%;
-            border: 1px solid #ced4da;
-            background-color: #ffffff;
-            border-radius: 25px;
-            &:focus{
-                outline: none;
-            }
-        }
-        button {
-            position: absolute;
-            right: 0;
-            top: 0;
-            z-index: 1;
-            cursor: pointer;
-            border: none;
-            background-color: transparent;
-            width: 34px;
-            height: 32px;
-            &:hover {
-                color: #333333;
-            }
         }
     }
 
@@ -116,73 +60,6 @@
                 }
             }
         }
-    }
-
-    .pagination{
-        ul{
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            li{
-                display: inline-block;
-                a{
-                    display: block;
-                    padding: 5px 10px;
-                    font-size: 11px;
-                    color: #868F9B;
-                    line-height: 16px;
-                    border: 1px solid #CBCFD4;
-                    border-right: none;
-                    &:hover{
-                        background-color: #CBCFD4;
-                    }
-                }
-                a.active{
-                    background-color: #CBCFD4;
-                    color: black;
-                  }
-                 a.deactive{
-                    background-color: white;
-                    color: black;
-                  }
-                 a.desable{
-                    background-color:rgb(94, 87, 87);
-                    color: white;
-                  
-                  }
-                 a.enable{
-                    background-color: #3b4859;
-                    color: #ffffff;
-                  
-                  }
-                &.previous{
-                    a{
-                        padding-left: 20px;
-                        padding-right: 20px;
-                        -webkit-border-top-left-radius: 5px;
-                        -webkit-border-bottom-left-radius: 5px;
-                        -moz-border-radius-topleft: 5px;
-                        -moz-border-radius-bottomleft: 5px;
-                        border-top-left-radius: 5px;
-                        border-bottom-left-radius: 5px;
-                    }
-                }
-                &.next{
-                    a{
-                        padding-left: 20px;
-                        padding-right: 20px;
-                        border-right: 1px solid #CBCFD4;
-                        -webkit-border-top-right-radius: 5px;
-                        -webkit-border-bottom-right-radius: 5px;
-                        -moz-border-radius-topright: 5px;
-                        -moz-border-radius-bottomright: 5px;
-                        border-top-right-radius: 5px;
-                        border-bottom-right-radius: 5px;
-                    }
-                }
-            }
-        }
-      
     }
 }
 

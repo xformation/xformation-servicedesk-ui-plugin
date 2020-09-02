@@ -223,23 +223,25 @@ export class Table extends React.Component<any, any> {
         return (
             <div className={tableClasses.allSupport}>
                 <div className="row">
-                    <div className="col-lg-6 col-md-6 col-sm-12">
-                        <div className="showing">Latest Tickets (Showing {start_index} to {ending_index} of {displayData.length} Tickets)</div>
+                    <div className="col-lg-8 col-md-8 col-sm-12">
+                        <div className="d-inline-block showing">Latest Tickets (Showing {start_index} to {ending_index} of {displayData.length} Tickets)</div>
                         <div className="d-inline-block showby">
                             <label className="d-inline-block">Show</label>
                             <select onChange={this.handleChange} className="form-control">
                                 {this.displayShowPageLimit()}
                             </select>
-                            <span>entries per page</span>
+                            <span className="d-inline-block">entries per page</span>
                         </div>
                     </div>
-                    <div className="col-lg-6 col-md-6 col-sm-12 text-right">
-                        <form>
-                            <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey} />
-                            <button>
-                                <i className="fa fa-search"></i>
-                            </button>
-                        </form>
+                    <div className="col-lg-4 col-md-4 col-sm-12 text-right">
+                        <div className="d-inline-block form-group filter-control-group">
+                            <form>
+                                <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey} />
+                                <button>
+                                    <i className="fa fa-search"></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     {/*    <label className="d-inline-block">Sort By:</label>
                             <select className="form-control">
