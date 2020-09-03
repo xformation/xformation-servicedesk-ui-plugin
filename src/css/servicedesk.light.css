@@ -589,6 +589,7 @@ a:hover {
   line-height: 18px;
   font-weight: 600;
   margin-bottom: 0;
+  display: block;
 }
 .contact-popup-container .form-group .form-group-inner label {
   display: none;
@@ -600,13 +601,22 @@ a:hover {
   color: #d1dae2;
   font-size: 13px;
   line-height: 18px;
-  padding: 5px 0;
+  padding: 0.375rem 0;
   width: 100%;
   border-radius: 0;
   text-align: left;
 }
 .contact-popup-container .form-group .form-control:focus {
   outline: none;
+}
+.contact-popup-container .form-group .add-conatct {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3b7cff;
+  line-height: 18px;
+  border: none;
+  background: none;
+  padding: 0;
 }
 
 .contact-popup-container .atleast-fields-box {
@@ -639,6 +649,37 @@ a:hover {
   border-color: #3b7cff;
   background-color: #3b7cff;
   color: #ffffff;
+}
+
+.contact-popup-container .contact-popup-buttons .create-author {
+  padding-right: 5px;
+}
+.contact-popup-container
+  .contact-popup-buttons
+  .create-author
+  .form-check-input {
+  display: inline-block;
+  margin-top: 2px;
+}
+.contact-popup-container
+  .contact-popup-buttons
+  .create-author
+  .form-check-label {
+  font-size: 14px;
+  line-height: 18px;
+  color: #323c47;
+  font-weight: 600;
+  display: inline-block;
+  padding-left: 7px;
+}
+
+.contact-popup-container.new-ticket-container .form-group label {
+  margin-bottom: 5px;
+}
+
+.contact-popup-container.new-ticket-container .form-group .form-control {
+  border: 1px solid #d1dae2;
+  padding: 0.375rem 0.75rem;
 }
 
 @media (max-width: 1200px) {
@@ -682,6 +723,7 @@ a:hover {
   -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, 0);
   box-shadow: 0 0px 0px rgba(0, 0, 0, 0);
   max-width: 992px;
+  background: #ffffff;
 }
 .modal .modal-content {
   padding: 40px;

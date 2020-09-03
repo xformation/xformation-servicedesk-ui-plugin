@@ -136,9 +136,9 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
-                    <div className="d-block width-100 contact-popup-container">
+                    <div className="d-block width-100 contact-popup-container new-ticket-container">
                         <div className="d-block width-100 p-b-20 heading">
-                            <h4 className="d-block"><i className="fa fa-building"></i> New Ticket</h4>
+                            <h4 className="d-block">New Ticket</h4>
                             <span className="d-block">The Contact will receive an Email about this Ticket</span>
                         </div>
                         <div className="row">
@@ -146,6 +146,9 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                                 <div className="form-group">
                                     <label htmlFor="contact">Contact*</label>
                                     <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="contact" id="contact" name="contact" value={contact} arrayData={{ 0: 'abc', 1: 'def', 2: 'ghi' }} onChange={this.handleStateChange} isValid={errorData.contact.isValid} message={errorData.contact.message} />
+                                    <div className="d-block text-right p-t-5">
+                                        <button className="add-conatct">Add a Conatct</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -168,7 +171,11 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
-                                    <label htmlFor="subject">Subject*</label>
+                                    <label htmlFor="subject">Subject*
+                                        <span className="float-right">
+                                            <button className="add-conatct">Recently used</button>
+                                        </span>
+                                    </label>
                                     <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="subjectText" id="subjectText" placeholder="" name="subjectText" value={subjectText} onChange={this.handleStateChange} isValid={errorData.subjectText.isValid} message={errorData.subjectText.message} />
                                 </div>
                             </div>
@@ -191,21 +198,29 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                         </div>
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
-                                <label htmlFor="description">Description*</label>
-                                <CustomTextbox containerClass="form-group-inner" rows="2" inputClass="form-control" htmlFor="description" id="description" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
+                                <div className="form-group">
+                                    <label htmlFor="description">Description*</label>
+                                    <CustomTextbox containerClass="form-group-inner" rows={5} inputClass="form-control" htmlFor="description" id="description" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
+                                </div>
                             </div>
                         </div>
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
-                                <label htmlFor="tags">Tags</label>
-                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="tags" id="tags" name="tags" value={tags} onChange={this.handleStateChange} isValid={errorData.tags.isValid} message={errorData.tags.message} />
+                                <div className="form-group">
+                                    <label htmlFor="tags">Tags</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="tags" id="tags" name="tags" value={tags} onChange={this.handleStateChange} isValid={errorData.tags.isValid} message={errorData.tags.message} />
+                                </div>
                             </div>
                         </div>
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
-                                <div className="d-block text-center p-t-20 contact-popup-buttons">
+                                <div className="d-block text-right p-t-20 contact-popup-buttons">
+                                    <div className="d-inline-block form-check create-author">
+                                        <input type="checkbox" className="form-check-input" id="CreateAuthor" />
+                                        <label className="form-check-label" htmlFor="CreateAuthor">Create Author</label>
+                                    </div>
                                     <button className="cancel" onClick={this.handleClose}>Cancel</button>
-                                    <button className="create" onClick={this.handleSubmit}>Create</button>
+                                    <button className="save create" onClick={this.handleSubmit}>Create</button>
                                 </div>
                             </div>
                         </div>
