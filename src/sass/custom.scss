@@ -587,6 +587,9 @@ a {
             width: 100%;
             border-radius: 0;
             text-align: left;
+            &.textarea{
+                height: 150px;
+            }
             &:focus{
                 outline: none;
             }
@@ -599,6 +602,13 @@ a {
             border: none;
             background: none;
             padding: 0;
+        }
+        .invalid-feedback{
+            color: red;
+            font-size: 13px;
+            line-height: 16px;
+            font-weight: 400;
+            display: block;
         }
     }
     .atleast-fields-box{

@@ -3,6 +3,7 @@ import { Fragment } from 'react';
 import { Modal, ModalBody } from 'reactstrap';
 import { CustomTextbox } from './CustomTextbox';
 import { Customselectbox } from './Customselectbox';
+import { CustomTextareabox } from './CustomTextareabox';
 // import SearchableDropdown from 'react-native-searchable-dropdown';
 
 
@@ -130,9 +131,9 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
-                    <div className="d-block width-100 contact-popup-container">
+                    <div className="d-block width-100 contact-popup-container new-ticket-container">
                         <div className="d-block width-100 p-b-20 heading">
-                            <h4 className="d-block"><i className="fa fa-building"></i>Send an Email</h4>
+                            <h4 className="d-block">Send an Email</h4>
                             <span className="d-block">When you hit send, the Contact will receive an email and a Ticket will be associated with Them</span>
                         </div>
                         <div className="row">
@@ -156,7 +157,11 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
-                                    <label htmlFor="subject">Subject*</label>
+                                    <label htmlFor="subject">Subject*
+                                        <span className="float-right">
+                                            <button className="add-conatct">Recently used</button>
+                                        </span>
+                                    </label>
                                     <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="subject" id="subject" placeholder="" name="subject" value={subject} onChange={this.handleStateChange} isValid={errorData.subject.isValid} message={errorData.subject.message} />
                                 </div>
                             </div>
@@ -165,7 +170,7 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="description">Description*</label>
-                                    <CustomTextbox containerClass="form-group-inner" rows="2" inputClass="form-control" htmlFor="description" id="description" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
+                                    <CustomTextareabox containerClass="form-group-inner" rows={5} inputClass="form-control textarea" htmlFor="description" id="description" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
                                 </div>
                             </div>
                         </div>
@@ -191,9 +196,13 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                         </div>
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
-                                <div className="d-block text-center p-t-20 contact-popup-buttons">
+                                <div className="d-block text-right p-t-20 contact-popup-buttons">
+                                    <div className="d-inline-block form-check create-author">
+                                        <input type="checkbox" className="form-check-input" id="CreateAuthor" />
+                                        <label className="form-check-label" htmlFor="CreateAuthor">Create Author</label>
+                                    </div>
                                     <button className="cancel" onClick={this.handleClose}>Cancel</button>
-                                    <button className="save" onClick={this.handleSubmit}>Save</button>
+                                    <button className="save create" onClick={this.handleSubmit}>Create</button>
                                 </div>
                             </div>
                         </div>

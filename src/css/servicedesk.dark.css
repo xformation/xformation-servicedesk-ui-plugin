@@ -606,6 +606,9 @@ a:hover {
   border-radius: 0;
   text-align: left;
 }
+.contact-popup-container .form-group .form-control.textarea {
+  height: 150px;
+}
 .contact-popup-container .form-group .form-control:focus {
   outline: none;
 }
@@ -617,6 +620,13 @@ a:hover {
   border: none;
   background: none;
   padding: 0;
+}
+.contact-popup-container .form-group .invalid-feedback {
+  color: red;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 400;
+  display: block;
 }
 
 .contact-popup-container .atleast-fields-box {

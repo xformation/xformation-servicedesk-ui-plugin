@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Modal, ModalBody } from 'reactstrap';
 import { CustomTextbox } from './CustomTextbox';
 import { Customselectbox } from './Customselectbox';
+import { CustomTextareabox } from './CustomTextareabox';
 
 export class OpenNewTicketPopup extends React.Component<any, any> {
     steps: any;
@@ -200,7 +201,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="description">Description*</label>
-                                    <CustomTextbox containerClass="form-group-inner" rows={5} inputClass="form-control" htmlFor="description" id="description" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
+                                    <CustomTextareabox containerClass="form-group-inner" rows={5} inputClass="form-control textarea" htmlFor="description" id="description" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
                                 </div>
                             </div>
                         </div>
