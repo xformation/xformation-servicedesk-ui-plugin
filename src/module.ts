@@ -3,7 +3,8 @@ import {
   Tickets,
   AllContacts,
   OpenTickets,
-  AllCompanies
+  AllCompanies,
+  TicketsDetails
 } from "./ui";
 import { ConfigCtrl } from "./ConfigCtrl";
 
@@ -26,5 +27,6 @@ export {
   Tickets,
   AllContacts,
   OpenTickets,
-  AllCompanies
+  AllCompanies,
+  TicketsDetails
 };

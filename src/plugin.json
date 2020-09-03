@@ -51,6 +51,13 @@
       "addToNav": false,
       "defaultNav": false,
       "component": "AllCompanies"
+    },
+    {
+      "type": "page",
+      "name": "TicketsDetails",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "TicketsDetails"
     }
   ],
   "dependencies": {
