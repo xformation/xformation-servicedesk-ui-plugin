@@ -99,23 +99,23 @@ export class TicketsDetails extends React.Component<any, any> {
                                 <button className="white-button"><i className="fa fa-object-group"></i> Merge</button>
                                 <button className="white-button"><i className="fa fa-trash"></i> Detele</button>
                             </div>
-                            <button className="white-button"><i className="fa fa-ellipsis-v"></i></button>
+                            <button className="white-button m-r-0"><i className="fa fa-ellipsis-v"></i></button>
                         </div>
                     </div>
                     <div className="common-container border-bottom-0">
                         <div className="row">
-                            <div className="col-lg-8 col-md-9 col-sm-12">
+                            <div className="col-xl-8 col-sm-12">
                                 <div className="ticket-detail-box">
                                     <div className="ticket-detail-head">
                                         <div className="row">
-                                            <div className="col-lg-7 col-md-6 col-sm-12">
+                                            <div className="col-lg-7 col-sm-12">
                                                 <div className="head-image"></div>
                                                 <div className="head-text">
                                                     <p><strong>Need to cange my shipping Address</strong></p>
                                                     <p><a href="#">Ingredia Nutrisha</a> reported in Issue</p>
                                                 </div>
                                             </div>
-                                            <div className="col-lg-5 col-md-6 col-sm-12 text-right">
+                                            <div className="col-lg-5 col-sm-12 text-right">
                                                 <div className="head-time-text">a day ago ( Wed 08 2018 at 08:15AM )</div>
                                                 <button className="white-button"><i className="fa fa-ellipsis-v"></i></button>
                                             </div>
@@ -130,14 +130,14 @@ export class TicketsDetails extends React.Component<any, any> {
                                 <div className="ticket-detail-box">
                                     <div className="ticket-detail-head">
                                         <div className="row">
-                                            <div className="col-lg-7 col-md-6 col-sm-12">
+                                            <div className="col-lg-7 col-sm-12">
                                                 <div className="head-image"></div>
                                                 <div className="head-text">
                                                     <p><strong>Customer Service</strong></p>
                                                     <p>Replied to <a href="#">nutrisha.21@maxamis.com</a></p>
                                                 </div>
                                             </div>
-                                            <div className="col-lg-5 col-md-6 col-sm-12 text-right">
+                                            <div className="col-lg-5 col-sm-12 text-right">
                                                 <div className="head-time-text">a day ago ( Wed 08 2018 at 08:15AM )</div>
                                                 <button className="white-button"><i className="fa fa-ellipsis-v"></i></button>
                                             </div>
@@ -162,13 +162,13 @@ export class TicketsDetails extends React.Component<any, any> {
                                 <div className="ticket-detail-box">
                                     <div className="ticket-detail-head">
                                         <div className="row">
-                                            <div className="col-lg-7 col-md-6 col-sm-12">
+                                            <div className="col-lg-7 col-sm-12">
                                                 <div className="head-image"></div>
                                                 <div className="head-text">
                                                     <p><strong>Ingredia Nutrisha</strong> Replied to <a href="#">nutrisha.21@maxamis.com</a></p>
                                                 </div>
                                             </div>
-                                            <div className="col-lg-5 col-md-6 col-sm-12 text-right">
+                                            <div className="col-lg-5 col-sm-12 text-right">
                                                 <div className="head-time-text">a day ago ( Wed 08 2018 at 08:15AM )</div>
                                                 <button className="white-button"><i className="fa fa-ellipsis-v"></i></button>
                                             </div>
@@ -183,14 +183,14 @@ export class TicketsDetails extends React.Component<any, any> {
                                 <div className="ticket-detail-box">
                                     <div className="ticket-detail-head">
                                         <div className="row">
-                                            <div className="col-lg-7 col-md-6 col-sm-12">
+                                            <div className="col-lg-7 col-sm-12">
                                                 <div className="head-image"></div>
                                                 <div className="head-text">
                                                     <p><strong>Ingredia Nutrisha</strong> Replied this Conversation</p>
                                                     <p>Survey response for Default survey to Anne Richard</p>
                                                 </div>
                                             </div>
-                                            <div className="col-lg-5 col-md-6 col-sm-12 text-right">
+                                            <div className="col-lg-5 col-sm-12 text-right">
                                                 <div className="head-time-text">
                                                     a day ago ( Wed 08 2018 at 08:15AM )
                                                 </div>
@@ -220,9 +220,25 @@ export class TicketsDetails extends React.Component<any, any> {
                                         <p>I have to leave the city for a week and I’m afraid nobody will be there to collect my order (#248) when it arrives. Is there a way me I can change my shopping address?</p>
                                         <span>Thanks.</span>
                                     </div>
+                                    <div className="d-block ticket-detail-buttons">
+                                        <div className="row">
+                                            <div className="col-lg-4 col-md-4 col-sm-12">
+                                                <button className="white-button"><i className="fa fa-paperclip"></i></button>
+                                                <button className="white-button"><i className="fa fa-font"></i></button>
+                                                <button className="white-button"><i className="fa fa-link"></i></button>
+                                            </div>
+                                            <div className="col-lg-8 col-md-8 col-sm-12">
+                                                <div className="text-right detail-right-buttons">
+                                                    <button className="white-button saved">Saved</button>
+                                                    <button className="white-button trash"><i className="fa fa-trash"></i></button>
+                                                    <button className="blue-button m-r-0">Send</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="col-lg-4 col-md-3 col-sm-12">
+                            <div className="col-xl-4 col-sm-12">
                                 <div className="properties-form">
                                     <h3>Properties</h3>
                                     <form>

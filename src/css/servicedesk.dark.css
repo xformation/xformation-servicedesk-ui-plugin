@@ -1371,6 +1371,31 @@ a:hover {
   }
 }
 
+@media (min-width: 1200px) {
+  .col-xl-8 {
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 66.66667%;
+    -ms-flex: 0 0 66.66667%;
+    flex: 0 0 66.66667%;
+    max-width: 66.66667%;
+  }
+  .col-xl-4 {
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 33.33333%;
+    -ms-flex: 0 0 33.33333%;
+    flex: 0 0 33.33333%;
+    max-width: 33.33333%;
+  }
+}
+
 .ticket-buttons .white-button {
   border: 1px solid #a9b9c6 !important;
   width: auto;
@@ -1512,6 +1537,39 @@ a:hover {
   font-weight: 400;
   padding-bottom: 3px;
 }
+.ticket-detail-box .ticket-detail-buttons {
+  padding-top: 0px;
+  padding-bottom: 10px;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+.ticket-detail-box .ticket-detail-buttons .white-button {
+  padding: 7px 7px !important;
+  width: auto;
+  min-width: inherit;
+  margin-bottom: 0;
+  border-radius: 3px;
+  margin-top: 7px;
+}
+.ticket-detail-box .ticket-detail-buttons .white-button i {
+  color: #a9b9c6 !important;
+}
+.ticket-detail-box .ticket-detail-buttons .white-button.trash {
+  border: 1px solid #e6e6e6;
+  padding: 7px 15px !important;
+}
+.ticket-detail-box .ticket-detail-buttons .white-button.saved {
+  font-size: 13px;
+  font-weight: 600;
+  color: #a9b9c6 !important;
+  padding: 7px 15px !important;
+}
+.ticket-detail-box .ticket-detail-buttons .blue-button {
+  padding: 15px 30px !important;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 0;
+}
 
 .properties-form {
   display: block;
@@ -1561,6 +1619,24 @@ a:hover {
 }
 .properties-form .form-group .blue-button:focus {
   outline: none;
+}
+
+@media (max-width: 992px) {
+  .ticket-buttons .white-button {
+    padding-right: 7px !important;
+    padding-left: 8px !important;
+    font-size: 10px;
+  }
+  .ticket-detail-box .ticket-detail-head .head-time-text {
+    float: left;
+  }
+  .ticket-detail-box .ticket-detail-head .white-button {
+    float: left;
+  }
+  .ticket-detail-box .ticket-detail-buttons .detail-right-buttons {
+    text-align: left;
+    margin-top: 15px;
+  }
 }
 
 /*# sourceMappingURL=servicedesk.dark.css.map */
