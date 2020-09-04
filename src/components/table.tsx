@@ -87,11 +87,11 @@ export class Table extends React.Component<any, any> {
         }
         return (
             <ul>
-                <li className="page-item">
+                <li className="page-item previous">
                     <a className={currentPage === 0 ? 'page-link desable' : 'page-link enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
                 </li>
                 {rows}
-                <li className="page-item">
+                <li className="page-item next">
                     <a className={currentPage === this.state.totalPages - 1 ? 'page-link desable' : 'page-link enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
                 </li>
             </ul>
@@ -234,7 +234,7 @@ export class Table extends React.Component<any, any> {
                         </div>
                     </div>
                     <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                        <div className="d-inline-block form-group filter-control-group">
+                        <div className="d-inline-block form-group filter-search-control">
                             <form>
                                 <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey} />
                                 <button>

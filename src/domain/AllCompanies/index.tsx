@@ -761,7 +761,7 @@ export class AllCompanies extends React.Component<any, any> {
                                     </div>
                                 </div>
                                 <div className="col-lg-3 col-md-12 col-sm-12 text-right">
-                                    <div className="form-group companies-control-group">
+                                    <div className="d-inline-block form-group filter-search-control">
                                         <form>
                                             <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey} />
                                             <button>

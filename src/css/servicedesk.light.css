@@ -395,12 +395,6 @@ a:hover {
   font-weight: 500;
 }
 
-@media only screen and (max-width: 1200px) and (min-width: 992px) {
-  .showing {
-    font-size: 12px;
-  }
-}
-
 .showby {
   border-left: 1px solid #a9b9c6;
   padding-left: 15px;
@@ -426,11 +420,37 @@ a:hover {
   padding-left: 15px;
 }
 
-.filter-control-group {
+@media only screen and (max-width: 1200px) and (min-width: 1050px) {
+  .showing {
+    font-size: 11px;
+  }
+  .showby {
+    padding-left: 10px;
+    margin-left: 10px;
+  }
+  .showby label {
+    font-size: 11px;
+    padding-right: 10px;
+  }
+  .showby span {
+    font-size: 11px;
+    padding-left: 10px;
+  }
+}
+
+@media only screen and (max-width: 1050px) and (min-width: 320px) {
+  .showby {
+    border-left: none;
+    padding-left: 0px;
+    margin-left: 0px;
+  }
+}
+
+.filter-search-control {
   position: relative;
   margin-bottom: 0;
 }
-.filter-control-group .input-group-text {
+.filter-search-control .input-group-text {
   max-width: 100%;
   text-align: left;
   padding-right: 30px;
@@ -440,10 +460,10 @@ a:hover {
   background-color: #ffffff;
   border-radius: 25px;
 }
-.filter-control-group .input-group-text:focus {
+.filter-search-control .input-group-text:focus {
   outline: none;
 }
-.filter-control-group button {
+.filter-search-control button {
   position: absolute;
   right: 0;
   top: 0;
@@ -454,8 +474,15 @@ a:hover {
   width: 34px;
   height: 32px;
 }
-.filter-control-group button:hover {
+.filter-search-control button:hover {
   color: #333333;
+}
+
+@media (max-width: 767px) {
+  .filter-search-control {
+    float: left;
+    margin-top: 15px;
+  }
 }
 
 .pagination ul {
@@ -887,43 +914,63 @@ a:hover {
   vertical-align: top;
 }
 
-.all-ticket-tabel {
+.dashboard-all-ticket-tabel .all-support-ticket-tabel {
   display: grid;
   width: 100%;
 }
-.all-ticket-tabel .heading h2 {
+.dashboard-all-ticket-tabel .all-support-ticket-tabel .heading h2 {
   font-size: 18px;
   line-height: 24px;
   color: #323c47;
   font-weight: 600;
   margin-bottom: 2px;
 }
-.all-ticket-tabel .heading h2 a {
+.dashboard-all-ticket-tabel .all-support-ticket-tabel .heading h2 a {
   color: #323c47;
 }
-.all-ticket-tabel .heading span {
+.dashboard-all-ticket-tabel .all-support-ticket-tabel .heading span {
   font-size: 13px;
   line-height: 16px;
   color: #a9b9c6;
   font-weight: 400;
 }
-.all-ticket-tabel .tickets-tabel {
+.dashboard-all-ticket-tabel .all-support-ticket-tabel .tickets-tabel {
   overflow-x: scroll;
 }
-.all-ticket-tabel .tickets-tabel .ticket-tabel {
+.dashboard-all-ticket-tabel
+  .all-support-ticket-tabel
+  .tickets-tabel
+  .ticket-tabel {
   width: 1200px;
 }
-.all-ticket-tabel .tickets-tabel .ticket-tabel thead tr th {
+.dashboard-all-ticket-tabel
+  .all-support-ticket-tabel
+  .tickets-tabel
+  .ticket-tabel
+  thead
+  tr
+  th {
   color: #a9b9c6;
   font-size: 12px;
   line-height: 16px;
   font-weight: 600;
   padding: 15px;
 }
-.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr {
+.dashboard-all-ticket-tabel
+  .all-support-ticket-tabel
+  .tickets-tabel
+  .ticket-tabel
+  tbody
+  tr {
   border-bottom: 7px solid #ffffff;
 }
-.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td {
+.dashboard-all-ticket-tabel
+  .all-support-ticket-tabel
+  .tickets-tabel
+  .ticket-tabel
+  tbody
+  tr
+  td {
   background-color: #f0f3f7;
   color: #323c47;
   font-size: 12px;
@@ -931,16 +978,41 @@ a:hover {
   font-weight: 600;
   padding: 15px;
 }
-.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.subjects {
+.dashboard-all-ticket-tabel
+  .all-support-ticket-tabel
+  .tickets-tabel
+  .ticket-tabel
+  tbody
+  tr
+  td.subjects {
   font-size: 11px;
 }
-.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.date {
+.dashboard-all-ticket-tabel
+  .all-support-ticket-tabel
+  .tickets-tabel
+  .ticket-tabel
+  tbody
+  tr
+  td.date {
   font-size: 11px;
 }
-.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.there-no-data {
+.dashboard-all-ticket-tabel
+  .all-support-ticket-tabel
+  .tickets-tabel
+  .ticket-tabel
+  tbody
+  tr
+  td.there-no-data {
   font-size: 18px;
 }
-.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .image {
+.dashboard-all-ticket-tabel
+  .all-support-ticket-tabel
+  .tickets-tabel
+  .ticket-tabel
+  tbody
+  tr
+  td
+  .image {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -950,7 +1022,14 @@ a:hover {
   display: inline-block;
   vertical-align: top;
 }
-.all-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .priority {
+.dashboard-all-ticket-tabel
+  .all-support-ticket-tabel
+  .tickets-tabel
+  .ticket-tabel
+  tbody
+  tr
+  td
+  .priority {
   background-color: rgba(169, 185, 198, 0.3);
   padding: 4px 10px;
   color: #a9b9c6;
@@ -1150,10 +1229,6 @@ a:hover {
 .all-contacts-tabel {
   display: grid;
   width: 100%;
-}
-.all-contacts-tabel .select-all {
-  border-right: 1px solid #d6dee5;
-  margin-right: 15px;
 }
 .all-contacts-tabel .select-all .checkbox {
   display: inline-block;

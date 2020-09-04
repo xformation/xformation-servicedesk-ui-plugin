@@ -305,7 +305,7 @@ export class Tickets extends React.Component<any, any> {
                     </div>
                     <div className="common-container border-bottom-0 filter-container">
                         <div className="row">
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Agents">
                                         Agents
@@ -319,7 +319,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Groups">
                                         Groups
@@ -333,7 +333,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Created">
                                         Created
@@ -347,7 +347,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="dueby">
                                         Due by
@@ -361,7 +361,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Status">
                                         Status
@@ -375,7 +375,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Priority">
                                         Priority
@@ -389,7 +389,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Type">
                                         Type
@@ -402,7 +402,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Source">
                                         Source
@@ -415,7 +415,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Tags">
                                         Tags
@@ -427,7 +427,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Companies">
                                         Companies
@@ -439,7 +439,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Contacts">
                                         Contacts
@@ -451,7 +451,7 @@ export class Tickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div>
-                            <div className="col-lg-2 col-md-2 col-sm-2 col-sm-12">
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="p-t-20 form-group">
                                     <a href="#" className="blue-button m-r-0 m-b-0 apply-filters-button">
                                         Apply Filters

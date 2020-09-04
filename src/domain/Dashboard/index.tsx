@@ -504,7 +504,7 @@ export class Dashboard extends React.Component<any, any> {
                         </div>
                     </div>
                     <div className="common-container border-bottom-0">
-                        <div className="d-block p-t-20 all-ticket-tabel">
+                        <div className="d-block p-t-20 dashboard-all-ticket-tabel">
                             <div className="d-block p-b-10 heading">
                                 <h2 className="d-block m-b-0">
                                     <Link to={`${config.basePath}/tickets`}>
