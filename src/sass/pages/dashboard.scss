@@ -158,27 +158,27 @@
 }
 
 .dashboard-all-ticket-tabel{
-    .all-support-ticket-tabel{
-        display: grid;
-        width: 100%;
-        .heading{
-            h2{
-                font-size: 18px;
-                line-height: 24px;
-                color: $all-tickets-text-color;
-                font-weight: 600;
-                margin-bottom: 2px;
-                a{
-                    color: $all-tickets-text-color; 
-                }
-            }
-            span{
-                font-size: 13px;
-                line-height: 16px;
-                color: #A9B9C6;
-                font-weight: 400;
+    .heading{
+        h2{
+            font-size: 18px;
+            line-height: 24px;
+            color: $all-tickets-text-color;
+            font-weight: 600;
+            margin-bottom: 2px;
+            a{
+                color: $all-tickets-text-color; 
             }
         }
+        span{
+            font-size: 13px;
+            line-height: 16px;
+            color: #A9B9C6;
+            font-weight: 400;
+        }
+    }
+    .all-support-ticket-tabel{
+        display: grid;
+        width: 100%;     
         .tickets-tabel{
             overflow-x: scroll;
             .ticket-tabel{
