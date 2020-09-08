@@ -48,16 +48,14 @@ export class Table extends React.Component<any, any> {
         return retData;
     }
     tableBodyData() {
-        const { displayData, perPageLimit, currentPage, columns } = this.state;
+        const { displayData, perPageLimit, currentPage, start_index, ending_index } = this.state;
         const { tableClasses } = this.props;
         const retuData = [];
         const length = displayData.length;
-        const cLength = columns.length;
         if (length > 0) {
             for (let i = 0; i < length; i++) {
-                if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
-                    const row = displayData[i];
-                    console.log(row);
+                const row = displayData[i];
+                if ((i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1)))||(i >= start_index - 1 && i <= ending_index - 1)) {
                     retuData.push(
                         <tr>
                             <td>{row.index}</td>
@@ -72,7 +70,7 @@ export class Table extends React.Component<any, any> {
                             <td>{row.groups} <a href="#" className="float-right"><i className="fa fa-ellipsis-v"></i></a></td>
                         </tr>
                     );
-                }
+                } 
             }
         } else {
             retuData.push(<div className="d-block width-100 there-no-data">There is no data</div>);
@@ -142,15 +140,19 @@ export class Table extends React.Component<any, any> {
                         currentPage: i,
                         start_index: (i * perPageLimit) + 1,
                         ending_index: ((i + 1) * perPageLimit),
-
                     });
-                } else {
+                } else if (displayData.length >= (ending_index + (displayData.length - ending_index))) {
                     this.setState({
                         currentPage: i,
                         start_index: (i * perPageLimit) + 1,
                         ending_index: (ending_index + (displayData.length - ending_index)),
-
                     });
+                } else {
+                    this.setState({
+                        currentPage: i,
+                        start_index: (displayData.length - (displayData.length - ending_index) + 1),
+                        ending_index: (parseInt(ending_index) + parseInt(displayData.length) - parseInt(ending_index)),
+                    })
                 }
                 break;
         }
@@ -217,8 +219,6 @@ export class Table extends React.Component<any, any> {
 
     render() {
         const { displayData, start_index, ending_index, perPageLimit } = this.state;
-        console.log(start_index);
-        console.log(ending_index);
         const { tableClasses } = this.props;
         return (
             <div className={tableClasses.allSupport}>
