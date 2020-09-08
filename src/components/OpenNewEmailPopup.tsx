@@ -4,8 +4,9 @@ import { Modal, ModalBody } from 'reactstrap';
 import { CustomTextbox } from './CustomTextbox';
 import { Customselectbox } from './Customselectbox';
 import { CustomTextareabox } from './CustomTextareabox';
-// import SearchableDropdown from 'react-native-searchable-dropdown';
-
+// import SelectSearch from 'react-select-search';
+// import Select from 'react-select';
+// import Select from 'react-dropdown-select';
 
 export class OpenNewEmailPopup extends React.Component<any, any> {
     steps: any;
@@ -21,6 +22,17 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
             status: '',
             tags: '',
             isSubmitted: false,
+            selectedOption: null,
+            suggestions: [],
+            text: '',
+            options: [
+                { value: 'abc@a.com' },
+                { value: 'xyz@x.com' },
+                { value: 'abc@d.com' },
+                { value: 'xyz@y.com' },
+                { value: 'adc@a.com' },
+                { value: 'xpz@x.com' },
+            ],
         };
     }
 
@@ -125,8 +137,45 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
         });
     };
 
+    onTextChanges = (e: any) => {
+        const { options } = this.state;
+        const value = e.target.value;
+        let suggestion = [];
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].value.indexOf(value) !== -1 || value === '') {
+                suggestion.push(options[i]);
+            } else if (options[i].value.toLowerCase().indexOf(value) !== -1 || value === '') {
+                suggestion.push(options[i]);
+            }
+        }
+        this.setState({
+            suggestions: suggestion
+        })
+    }
+
+    renderSuggestions() {
+        const { suggestions } = this.state;
+        const retuData = [];
+        if (suggestions.length > 0) {
+            for (let i = 0; i < suggestions.length; i++) {
+                const row = suggestions[i];
+                retuData.push(<li onClick={() => this.suggestionSelected(row.value)}>{row.value}</li>)
+            }
+        } else {
+            retuData.push(<li></li>);
+        }
+        return retuData;
+    }
+
+    suggestionSelected(value: any) {
+        this.setState({
+            text: value,
+            suggestions: [],
+        })
+    }
+
     render() {
-        const { modal, from, to, subject, description, priority, status, tags, isSubmitted } = this.state;
+        const { modal, from, to, subject, description, priority, status, tags, isSubmitted, options, text } = this.state;
         const errorData = this.validate(isSubmitted);
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
@@ -139,9 +188,12 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
-                                    <label htmlFor="from">From</label>
-                                    {/* <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="from" id="from" name="from" value={from} arrayData={{ 0: 'abc@a.com', 1: 'def@b.com', 2: 'ghi@a.com' }} onChange={this.handleStateChange} isValid={errorData.from.isValid} message={errorData.from.message} /> */}
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="from" id="from" placeholder="RK Fabrication Company (support@ramkaumr1578.maxamis.com)" name="from" value={from} onChange={this.handleStateChange} isValid={errorData.from.isValid} message={errorData.from.message} />
+                                    <label htmlFor="from">From*</label>
+                                    {/* <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="email" id="to" placeholder="" name="to" value={to} onChange={this.handleStateChange} isValid={errorData.to.isValid} message={errorData.to.message} /> */}
+                                    <input type="text" className="form-control" onChange={this.onTextChanges} value={text} placeholder="RK Fabrication Company (support@ramkaumr1578.maxamis.com)"/>
+                                    <ul>
+                                        {this.renderSuggestions()}
+                                    </ul>
                                 </div>
                             </div>
                         </div>
