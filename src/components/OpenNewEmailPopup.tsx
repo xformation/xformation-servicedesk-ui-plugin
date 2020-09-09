@@ -7,6 +7,7 @@ import { CustomTextareabox } from './CustomTextareabox';
 // import SelectSearch from 'react-select-search';
 // import Select from 'react-select';
 // import Select from 'react-dropdown-select';
+import {Multiselect} from 'multiselect-react-dropdown';
 
 export class OpenNewEmailPopup extends React.Component<any, any> {
     steps: any;
@@ -25,14 +26,22 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
             selectedOption: null,
             suggestions: [],
             text: '',
-            options: [
-                { value: 'abc@a.com' },
-                { value: 'xyz@x.com' },
-                { value: 'abc@d.com' },
-                { value: 'xyz@y.com' },
-                { value: 'adc@a.com' },
-                { value: 'xpz@x.com' },
+            option: [
+                { name: 'abc@a.com', id: 1 },
+                { name: 'xyz@x.com', id: 2 },
+                { name: 'abc@d.com', id: 3 },
+                { name: 'xyz@y.com', id: 4 },
+                { name: 'adc@a.com', id: 5 },
+                { name: 'xpz@x.com', id: 6 },
             ],
+            // options: [
+            //     { value: 'abc@a.com' },
+            //     { value: 'xyz@x.com' },
+            //     { value: 'abc@d.com' },
+            //     { value: 'xyz@y.com' },
+            //     { value: 'adc@a.com' },
+            //     { value: 'xpz@x.com' },
+            // ],
         };
     }
 
@@ -138,19 +147,19 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
     };
 
     onTextChanges = (e: any) => {
-        const { options } = this.state;
-        const value = e.target.value;
-        let suggestion = [];
-        for (let i = 0; i < options.length; i++) {
-            if (options[i].value.indexOf(value) !== -1 || value === '') {
-                suggestion.push(options[i]);
-            } else if (options[i].value.toLowerCase().indexOf(value) !== -1 || value === '') {
-                suggestion.push(options[i]);
-            }
-        }
-        this.setState({
-            suggestions: suggestion
-        })
+        // const { options } = this.state;
+        // const value = e.target.value;
+        // let suggestion = [];
+        // for (let i = 0; i < options.length; i++) {
+        //     if (options[i].value.indexOf(value) !== -1 || value === '') {
+        //         suggestion.push(options[i]);
+        //     } else if (options[i].value.toLowerCase().indexOf(value) !== -1 || value === '') {
+        //         suggestion.push(options[i]);
+        //     }
+        // }
+        // this.setState({
+        //     suggestions: suggestion
+        // })
     }
 
     renderSuggestions() {
@@ -174,6 +183,14 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
         })
     }
 
+    onSelect() {
+        console.log("fghfghf");
+    }
+
+    onRemove() {
+        console.log("remove");
+    }
+
     render() {
         const { modal, from, to, subject, description, priority, status, tags, isSubmitted, options, text } = this.state;
         const errorData = this.validate(isSubmitted);
@@ -190,10 +207,17 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                                 <div className="form-group">
                                     <label htmlFor="from">From*</label>
                                     {/* <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="email" id="to" placeholder="" name="to" value={to} onChange={this.handleStateChange} isValid={errorData.to.isValid} message={errorData.to.message} /> */}
-                                    <input type="text" className="form-control" onChange={this.onTextChanges} value={text} placeholder="RK Fabrication Company (support@ramkaumr1578.maxamis.com)"/>
+                                    {/* <input type="text" className="form-control" onChange={this.onTextChanges} value={text} placeholder="RK Fabrication Company (support@ramkaumr1578.maxamis.com)"/>
                                     <ul>
                                         {this.renderSuggestions()}
-                                    </ul>
+                                    </ul> */}
+                                    <Multiselect
+                                        options={this.state.option}
+                                        selectedValues={this.state.selectedValue}
+                                        onSelect={this.onSelect}
+                                        onRemove={this.onRemove}
+                                        displayValue="name"
+                                    />
                                 </div>
                             </div>
                         </div>
