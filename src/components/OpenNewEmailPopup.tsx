@@ -139,12 +139,36 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
         });
     };
 
-    onSelect() {
-        console.log("fghfghf");
+    onSelect() { }
+
+    onRemove() { }
+
+    onChangeEmail = (e: any) => {
+        let lastId = 0;
+        let newEmail = this.state.option;
+        if (e.target.value != '') {
+            for (let i = 0; i < this.state.option.length; i++) {
+                lastId = this.state.option[i].id;
+            }
+            newEmail.push({ 'name': e.target.value, id: lastId + 1 })
+        }
+        this.setState({
+            option: newEmail
+        })
     }
 
-    onRemove() {
-        console.log("remove");
+    onChangeToEmail = (e: any) => {
+        let lastToId = 0;
+        let newToEmail = this.state.toOptions;
+        if (e.target.value != '') {
+            for (let i = 0; i < this.state.toOptions.length; i++) {
+                lastToId = this.state.toOptions[i].id;
+            }
+            newToEmail.push({ 'name': e.target.value, id: lastToId + 1 })
+        }
+        this.setState({
+            toOptions: newToEmail
+        })
     }
 
     render() {
@@ -172,7 +196,7 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                                         selectedValues={this.state.selectedValue}
                                         onSelect={this.onSelect}
                                         onRemove={this.onRemove}
-                                        // onChange={this.getSelectedValue}
+                                        onKeyPress={this.onChangeEmail}
                                         closeIcon="close"
                                         displayValue="name"
                                     />
@@ -188,6 +212,7 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                                         selectedValues={this.state.selectedValue}
                                         onSelect={this.onSelect}
                                         onRemove={this.onRemove}
+                                        onKeyPress={this.onChangeToEmail}
                                         closeIcon="close"
                                         displayValue="name"
                                     />
