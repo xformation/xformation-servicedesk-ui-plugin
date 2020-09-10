@@ -29,7 +29,7 @@ module.exports = {
     "slate-react",
     "react",
     "react-dom",
-    function(context, request, callback) {
+    function (context, request, callback) {
       var prefix = "grafana/";
       if (request.indexOf(prefix) === 0) {
         return callback(null, request.substr(prefix.length));
@@ -84,7 +84,7 @@ module.exports = {
         loaders: [
           {
             loader: "babel-loader",
-            options: { presets: ["env"] }
+            options: { presets: ["@babel/preset-react"] }
           }
         ],
         exclude: /(node_modules)/
@@ -110,13 +110,19 @@ module.exports = {
         ]
       },
       {
-        test: /\.(png|jpe?g|gif)$/i,
+        test: /\.(png|jpe?g|gif|svg)$/i,
         use: [
           {
             loader: "url-loader"
           }
         ]
-      }
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|otf)$/,
+        use: [
+          'file-loader',
+        ],
+      },
     ]
   }
 };

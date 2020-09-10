@@ -18,13 +18,17 @@
   "author": "",
   "license": "ISC",
   "lint-staged": {
-    "*.{js,ts,json,css,md}": ["prettier --write", "git add"]
+    "*.{js,ts,json,css,md}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "bugs": {
     "url": "https://github.com/raintank/app-plugin-worldping/issues"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
+    "@babel/preset-react": "^7.10.4",
     "@grafana/ui": "^6.7.0",
     "@types/grafana": "github:CorpGlory/types-grafana",
     "@types/jest": "^22.2.3",
@@ -39,6 +43,7 @@
     "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "^4.5.1",
     "css-loader": "^0.28.11",
+    "file-loader": "^6.1.0",
     "grafana-sdk-mocks": "github:grafana/grafana-sdk-mocks",
     "graphql-tag": "^2.10.0",
     "grunt": "^1.1.0",
