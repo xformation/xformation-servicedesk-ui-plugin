@@ -58,6 +58,13 @@
       "addToNav": false,
       "defaultNav": false,
       "component": "TicketsDetails"
+    },
+    {
+      "type": "page",
+      "name": "Reports",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "Reports"
     }
   ],
   "dependencies": {
