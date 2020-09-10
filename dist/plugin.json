@@ -30,6 +30,34 @@
       "addToNav": false,
       "defaultNav": false,
       "component": "Tickets"
+    },
+    {
+      "type": "page",
+      "name": "AllContacts",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "AllContacts"
+    },
+    {
+      "type": "page",
+      "name": "OpenTickets",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "OpenTickets"
+    },
+    {
+      "type": "page",
+      "name": "AllCompanies",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "AllCompanies"
+    },
+    {
+      "type": "page",
+      "name": "TicketsDetails",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "TicketsDetails"
     }
   ],
   "dependencies": {
