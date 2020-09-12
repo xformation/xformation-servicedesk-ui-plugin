@@ -19,6 +19,33 @@ export class Reports extends React.Component<any, any> {
     constructor(props: any) {
         super(props);
         this.state = {
+            InsightsData: [
+                {
+                    NoOfTickets: '365',
+                    TicketsPersentage: '35%',
+                    description: 'Many modern alternatives often incorporate humor or other content that actually purpose of filler.'
+                },
+                {
+                    NoOfTickets: '120',
+                    TicketsPersentage: '27%',
+                    description: 'All Tickets and no break? Consider staffing up to resolve more issue high fives, team i ssuper resonsive todays!'
+                },
+                {
+                    NoOfTickets: '2h 15m',
+                    TicketsPersentage: '20%',
+                    description: 'Surprisingly, there is a very vocal faction of the design community that wants to see filler text banished to the original sources. C/O https://placeholder.com/text/.'
+                },
+                {
+                    NoOfTickets: '15h 25m',
+                    TicketsPersentage: '32%',
+                    description: 'Your team is on fire today'
+                },
+                {
+                    NoOfTickets: '30m 14s',
+                    TicketsPersentage: '26%',
+                    description: 'Those opposed to using filler text of any sort counter by saying: The ultimate purpose of any digital product. C/O https://placeholder.com/text/.'
+                },
+            ],
         };
         this.breadCrumbs = [
             {
@@ -30,6 +57,33 @@ export class Reports extends React.Component<any, any> {
                 isCurrentPage: true
             }
         ];
+    }
+
+    displayTodayInsights = () => {
+        let retData = [];
+        const { InsightsData } = this.state;
+        for (let i = 0; i < InsightsData.length; i++) {
+            let row = InsightsData[i];
+            retData.push(
+                <div className="d-block insight-box">
+                    <div className="row">
+                        <div className="col-lg-9 col-sm-12 p-r-0">
+                            <div className="d-block text-left p-t-5 insight-heading">
+                                <strong>{row.NoOfTickets}</strong> Received Tickets
+                        </div>
+                        </div>
+                        <div className="col-lg-3 col-sm-12 p-l-0">
+                            {/* <div className="d-block text-right insight-heading-right-text red">27%</div> */}
+                            <div className="d-block text-right insight-heading-right-text">{row.TicketsPersentage}</div>
+                        </div>
+                    </div>
+                    <div className="d-block p-t-10 insight-text">
+                        {row.description}
+                    </div>
+                </div>
+            );
+        }
+        return retData;
     }
 
     render() {
@@ -170,81 +224,7 @@ export class Reports extends React.Component<any, any> {
                                 </div>
                                 <div className="row p-t-10">
                                     <div className="col-sm-12">
-                                        <div className="d-block insight-box">
-                                            <div className="row">
-                                                <div className="col-lg-9 col-sm-12 p-r-0">
-                                                    <div className="d-block text-left p-t-5 insight-heading">
-                                                        <strong>365</strong> Received Tickets
-                                                    </div>
-                                                </div>
-                                                <div className="col-lg-3 col-sm-12 p-l-0">
-                                                    <div className="d-block text-right insight-heading-right-text">35%</div>
-                                                </div>
-                                            </div>
-                                            <div className="d-block p-t-10 insight-text">
-                                                Many modern alternatives often incorporate humor or other content that actually purpose of filler.
-                                            </div>
-                                        </div>
-                                        <div className="d-block insight-box">
-                                            <div className="row">
-                                                <div className="col-lg-9 col-sm-12p-r-0">
-                                                    <div className="d-block text-left p-t-5 insight-heading">
-                                                        <strong>120</strong> Resolved Tickets
-                                                    </div>
-                                                </div>
-                                                <div className="col-lg-3 col-sm-12 p-l-0">
-                                                    <div className="d-block text-right insight-heading-right-text red">27%</div>
-                                                </div>
-                                            </div>
-                                            <div className="d-block p-t-10 insight-text">
-                                                All Tickets and no break? Consider staffing up to resolve more issue high fives, team i ssuper resonsive todays!
-                                            </div>
-                                        </div>
-                                        <div className="d-block insight-box">
-                                            <div className="row">
-                                                <div className="col-lg-9 col-sm-12 p-r-0">
-                                                    <div className="d-block text-left p-t-5 insight-heading">
-                                                        <strong>2h 15m</strong> Average Response time
-                                                    </div>
-                                                </div>
-                                                <div className="col-lg-3 col-sm-12 p-l-0">
-                                                    <div className="d-block text-right insight-heading-right-text">20%</div>
-                                                </div>
-                                            </div>
-                                            <div className="d-block p-t-10 insight-text">
-                                                Surprisingly, there is a very vocal faction of the design community that wants to see filler text banished to the original sources.
-                                            </div>
-                                        </div>
-                                        <div className="d-block insight-box">
-                                            <div className="row">
-                                                <div className="col-lg-9 col-sm-12 p-r-0">
-                                                    <div className="d-block text-left p-t-5 insight-heading">
-                                                        <strong>15h 25m</strong> Average Resolution Time
-                                                    </div>
-                                                </div>
-                                                <div className="col-lg-3 col-sm-12 p-l-0">
-                                                    <div className="d-block text-right insight-heading-right-text">32%</div>
-                                                </div>
-                                            </div>
-                                            <div className="d-block p-t-10 insight-text">
-                                                Your team is on fire today
-                                            </div>
-                                        </div>
-                                        <div className="d-block insight-box">
-                                            <div className="row">
-                                                <div className="col-lg-9 col-sm-12 p-r-0">
-                                                    <div className="d-block text-left p-t-5 insight-heading">
-                                                        <strong>30m 14s</strong> Average first assign Time
-                                                    </div>
-                                                </div>
-                                                <div className="col-lg-3 col-sm-12 p-l-0">
-                                                    <div className="d-block text-right insight-heading-right-text">26%</div>
-                                                </div>
-                                            </div>
-                                            <div className="d-block p-t-10 insight-text">
-                                                Those opposed to using filler text of any sort counter by saying: The ultimate purpose of any digital product.
-                                            </div>
-                                        </div>
+                                        {this.displayTodayInsights()}
                                     </div>
                                 </div>
                             </div>
