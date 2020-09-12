@@ -17,6 +17,53 @@ export class ReportHelpdesh extends React.Component<any, any> {
         super(props);
         this.state = {
             openCreateMenu: false,
+            TicketsData: [
+                {
+                    NoOfTickets: '500',
+                    TicketStatus: 'Created Tickets'
+                },
+                {
+                    NoOfTickets: '200',
+                    TicketStatus: 'Resolved Tickets'
+                },
+                {
+                    NoOfTickets: '100',
+                    TicketStatus: 'Unresolved Tickets'
+                },
+                {
+                    NoOfTickets: '150',
+                    TicketStatus: 'Reopen Tickets'
+                },
+                {
+                    NoOfTickets: '2 Min 3 Sec',
+                    TicketStatus: 'Average 1St Response Time'
+                },
+                {
+                    NoOfTickets: '5 Min 20 Sec',
+                    TicketStatus: 'Average Response Time'
+                },
+                
+                {
+                    NoOfTickets: '23 Min 10 Sec',
+                    TicketStatus: 'Average Resolution Time'
+                },
+                {
+                    NoOfTickets: '10 Min 2 Sec',
+                    TicketStatus: 'Average 1st Assign Time'
+                },
+                {
+                    NoOfTickets: '20%',
+                    TicketStatus: 'First Contact Resolution'
+                },
+                {
+                    NoOfTickets: ' 90%',
+                    TicketStatus: 'First response SLA'
+                },
+                {
+                    NoOfTickets: '50%',
+                    TicketStatus: 'Resolution SLA'
+                }
+            ]
         };
         this.breadCrumbs = [
             {
@@ -62,6 +109,28 @@ export class ReportHelpdesh extends React.Component<any, any> {
         });
     }
 
+    displayTicketData = () => {
+        const { TicketsData } = this.state;
+        let retData = [];
+        for (let i = 0; i < TicketsData.length; i++) {
+            let row = TicketsData[i];
+            retData.push(
+                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                    <div className="d-block text-center desk-box">
+                        <div className="d-block text-right icon">
+                            <button className="white-button min-width-inherit width-auto m-r-0">
+                                <i className="fa fa-eye"></i>
+                            </button>
+                        </div>
+                        <div className="d-block number">{row.NoOfTickets}</div>
+                        <div className="d-block text">{row.TicketStatus}</div>
+                    </div>
+                </div>
+            );
+        }
+        return retData;
+    }
+
     render() {
         const { openCreateMenu } = this.state;
         return (
@@ -97,7 +166,7 @@ export class ReportHelpdesh extends React.Component<any, any> {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="common-container border-bottom-0 filter-container">
                         <div className="row">
                             <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
@@ -180,7 +249,7 @@ export class ReportHelpdesh extends React.Component<any, any> {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="common-container border-bottom-0 desk-depth-container">
                         <div className="d-block p-b-20">
                             <div className="row">
@@ -201,18 +270,8 @@ export class ReportHelpdesh extends React.Component<any, any> {
                         </div>
                         <div className="d-block">
                             <div className="row">
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">500</div>
-                                        <div className="d-block text">Created Tickets</div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                                {this.displayTicketData()}
+                                {/* <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
                                     <div className="d-block text-center desk-box">
                                         <div className="d-block text-right icon">
                                             <button className="white-button min-width-inherit width-auto m-r-0">
@@ -321,7 +380,7 @@ export class ReportHelpdesh extends React.Component<any, any> {
                                         <div className="d-block number">50%</div>
                                         <div className="d-block text">Resolution<br></br> SLA</div>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>
