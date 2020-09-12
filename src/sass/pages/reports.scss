@@ -85,5 +85,54 @@
                 }
             }
         }
+        .build-reports-text{
+            border-top: 1px solid #D1DAE2;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            p{
+                font-size: 12px;
+                line-height: 16px;
+                color: #A9B9C6;
+                font-weight: 500;
+                margin-bottom: 3px;
+            }
+            strong{
+                font-size: 12px;
+                line-height: 16px;
+                color: #438AFB;
+                font-weight: 600;
+                a{
+                    color: #438AFB;
+                }
+            }
+        }
+    }
+    .reports-right{
+        background-color: #F0F3F7;
+        border-radius: 3px;
+        padding: 20px 15px 30px;
+        .heading{
+            h3{
+                font-size: 16px;
+                line-height: 22px;
+                color: #323C47;
+                font-weight: 600;
+            }
+            p{
+                font-size: 11px;
+                line-height: 16px;
+                color: #A9B9C6;
+                font-weight: 500;
+            }
+        }
+        .customize-link{
+            font-size: 12px;
+            line-height: 16px;
+            color: #438AFB;
+            font-weight: 600;
+            a{
+                color: #438AFB;
+            }
+        }
     }
 }

@@ -6,3 +6,4 @@ export * from "./AllCompanies";
 export * from "./TicketsDetails";
 export * from "./Reports";
 export * from "./ReportHelpdesh";
+export * from "./Charts";

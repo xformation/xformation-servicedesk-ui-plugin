@@ -72,6 +72,13 @@
       "addToNav": false,
       "defaultNav": false,
       "component": "ReportHelpdesh"
+    },
+    {
+      "type": "page",
+      "name": "Charts",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "Charts"
     }
   ],
   "dependencies": {

@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
+import { Link } from 'react-router-dom';
+import { config } from '../../config';
 import { OpenNewContactPopup } from '../../components/OpenNewContactPopup';
 import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
 import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
@@ -117,13 +119,15 @@ export class ReportHelpdesh extends React.Component<any, any> {
             retData.push(
                 <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
                     <div className="d-block text-center desk-box">
-                        <div className="d-block text-right icon">
-                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                <i className="fa fa-eye"></i>
-                            </button>
-                        </div>
-                        <div className="d-block number">{row.NoOfTickets}</div>
-                        <div className="d-block text">{row.TicketStatus}</div>
+                        <Link to={`${config.basePath}/charts`} className="d-block text-center">
+                            <div className="d-block text-right icon">
+                                <button className="white-button min-width-inherit width-auto m-r-0">
+                                    <i className="fa fa-eye"></i>
+                                </button>
+                            </div>
+                            <div className="d-block number">{row.NoOfTickets}</div>
+                            <div className="d-block text">{row.TicketStatus}</div>
+                        </Link>
                     </div>
                 </div>
             );
@@ -245,6 +249,13 @@ export class ReportHelpdesh extends React.Component<any, any> {
                                         <option>High</option>
                                         <option>Urgent</option>
                                     </select>
+                                </div>
+                            </div>
+                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
+                                <div className="p-t-20 form-group">
+                                    <a href="#" className="blue-button m-r-0 m-b-0 apply-filters-button">
+                                        Apply Filters
+                                    </a>
                                 </div>
                             </div>
                         </div>

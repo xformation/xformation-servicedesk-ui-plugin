@@ -6,7 +6,8 @@ import {
   AllCompanies,
   TicketsDetails,
   Reports,
-  ReportHelpdesh
+  ReportHelpdesh,
+  Charts
 } from "./ui";
 import { ConfigCtrl } from "./ConfigCtrl";
 
@@ -32,5 +33,6 @@ export {
   AllCompanies,
   TicketsDetails,
   Reports,
-  ReportHelpdesh
+  ReportHelpdesh,
+  Charts
 };

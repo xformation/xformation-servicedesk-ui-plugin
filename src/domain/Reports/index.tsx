@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
+import { Link } from 'react-router-dom';
+import { config } from '../../config';
 
 export class Reports extends React.Component<any, any> {
     breadCrumbs: any;
@@ -25,7 +27,7 @@ export class Reports extends React.Component<any, any> {
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
                 <div className="servicedesk-page-container reports-page-container">
                     <div className="row">
-                        <div className="col-lg-8 col-md-12 col-md-12">
+                        <div className="col-lg-8 col-md-12 col-sm-12">
                             <div className="reports-left">
                                 <div className="d-block p-b-15 heading">Reports</div>
                                 <div className="d-block ask-question">Ask me a question about your Helpdesk</div>
@@ -33,10 +35,10 @@ export class Reports extends React.Component<any, any> {
                                     <div className="d-block helpdesk-heading">Helpdesk Analysic</div>
                                     <ul className="d-block">
                                         <li className="d-inline-block">
-                                            <a href="#" className="d-block text-center">
+                                            <Link to={`${config.basePath}/reporthelpdesh`} className="d-block text-center">
                                                 <span className="d-block"><i className="fa fa-users"></i></span>
                                                 <strong className="d-block">HELPDESK IN-DEPTH</strong>
-                                            </a>
+                                            </Link>
                                         </li>
                                         <li className="d-inline-block">
                                             <a href="#" className="d-block text-center">
@@ -110,9 +112,36 @@ export class Reports extends React.Component<any, any> {
                                         </li>
                                     </ul>
                                 </div>
+                                <div className="d-block build-reports-text">
+                                    <p className="d-block">Want to build custom reports?</p>
+                                    <strong className="d-block">
+                                        <a href="#">Schedule an export</a>
+                                    </strong>
+                                </div>
                             </div>
                         </div>
-                        <div className="col-lg-4 col-md-12 col-md-12"></div>
+                        <div className="col-lg-4 col-md-12 col-sm-12">
+                            <div className="reports-right">
+                                <div className="row">
+                                    <div className="col-lg-8 col-md-6 col-sm-6">
+                                        <div className="heading">
+                                            <h3 className="d-block m-b-0">Today’s Insights</h3>
+                                            <p className="d-block m-b-0">Last Updated 37 Minutes ago</p>
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-4 col-md-6 col-sm-6">
+                                        <div className="d-block text-right customize-link">
+                                            <a href="#">Customize</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-sm-12">
+                                        <div className="d-block"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1845,6 +1845,53 @@ a:hover {
   color: #323c47;
   text-transform: uppercase;
 }
+.reports-page-container .reports-left .build-reports-text {
+  border-top: 1px solid #d1dae2;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.reports-page-container .reports-left .build-reports-text p {
+  font-size: 12px;
+  line-height: 16px;
+  color: #a9b9c6;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+.reports-page-container .reports-left .build-reports-text strong {
+  font-size: 12px;
+  line-height: 16px;
+  color: #438afb;
+  font-weight: 600;
+}
+.reports-page-container .reports-left .build-reports-text strong a {
+  color: #438afb;
+}
+.reports-page-container .reports-right {
+  background-color: #f0f3f7;
+  border-radius: 3px;
+  padding: 20px 15px 30px;
+}
+.reports-page-container .reports-right .heading h3 {
+  font-size: 16px;
+  line-height: 22px;
+  color: #323c47;
+  font-weight: 600;
+}
+.reports-page-container .reports-right .heading p {
+  font-size: 11px;
+  line-height: 16px;
+  color: #a9b9c6;
+  font-weight: 500;
+}
+.reports-page-container .reports-right .customize-link {
+  font-size: 12px;
+  line-height: 16px;
+  color: #438afb;
+  font-weight: 600;
+}
+.reports-page-container .reports-right .customize-link a {
+  color: #438afb;
+}
 
 .desk-depth-container .heading h2 {
   font-size: 18px;
@@ -1886,9 +1933,11 @@ a:hover {
   background-color: #f0f3f7;
   box-shadow: 0px 1px 5px #00000029;
   border-radius: 5px;
+  margin-bottom: 30px;
+}
+.desk-depth-container .desk-box a {
   padding: 10px;
   padding-bottom: 20px;
-  margin-bottom: 30px;
   min-height: 150px;
 }
 .desk-depth-container .desk-box .icon {
@@ -1929,6 +1978,18 @@ a:hover {
   .desk-depth-container .filters-buttons {
     text-align: left;
   }
+}
+
+.charts-boxs {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+.charts-boxs .chart-box {
+  background: #f0f3f7 0% 0% no-repeat padding-box;
+  box-shadow: 0px 1px 5px #00000029;
+  border-radius: 5px;
+  min-height: 400px;
+  margin-bottom: 30px;
 }
 
 /*# sourceMappingURL=servicedesk.light.css.map */
