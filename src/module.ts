@@ -5,7 +5,8 @@ import {
   OpenTickets,
   AllCompanies,
   TicketsDetails,
-  Reports
+  Reports,
+  ReportHelpdesh
 } from "./ui";
 import { ConfigCtrl } from "./ConfigCtrl";
 
@@ -30,5 +31,6 @@ export {
   OpenTickets,
   AllCompanies,
   TicketsDetails,
-  Reports
+  Reports,
+  ReportHelpdesh
 };

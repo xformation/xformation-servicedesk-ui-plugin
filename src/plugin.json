@@ -65,6 +65,13 @@
       "addToNav": false,
       "defaultNav": false,
       "component": "Reports"
+    },
+    {
+      "type": "page",
+      "name": "ReportHelpdesh",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "ReportHelpdesh"
     }
   ],
   "dependencies": {

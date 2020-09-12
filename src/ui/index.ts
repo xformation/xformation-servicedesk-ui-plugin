@@ -5,3 +5,4 @@ export * from "./OpenTickets";
 export * from "./AllCompanies";
 export * from "./TicketsDetails";
 export * from "./Reports";
+export * from "./ReportHelpdesh";

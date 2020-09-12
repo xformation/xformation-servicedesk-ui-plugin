@@ -1,22 +1,11 @@
 import * as React from 'react';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
-import { Bar } from 'react-chartjs-2';
-import { OpenNewContactPopup } from '../../components/OpenNewContactPopup';
-import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
-import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
-import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
-import Table from './../../components/table';
 
 export class Reports extends React.Component<any, any> {
     breadCrumbs: any;
-    openNewContactRef: any;
-    openNewCompanyRef: any;
-    openNewEmailRef: any;
-    openNewTicketRef: any;
     constructor(props: any) {
         super(props);
         this.state = {
-            openCreateMenu: false,
         };
         this.breadCrumbs = [
             {
@@ -28,304 +17,104 @@ export class Reports extends React.Component<any, any> {
                 isCurrentPage: true
             }
         ];
-        this.openNewContactRef = React.createRef();
-        this.openNewCompanyRef = React.createRef();
-        this.openNewEmailRef = React.createRef();
-        this.openNewTicketRef = React.createRef();
     }
-
-    onClickOpenNewContact = (e: any) => {
-        this.openNewContactRef.current.toggle();
-    };
-
-    onClickOpenNewCompany = (e: any) => {
-        this.openNewCompanyRef.current.toggle();
-    };
-
-    onClickOpenNewEmail = (e: any) => {
-        this.openNewEmailRef.current.toggle();
-    };
-
-    onClickOpenNewTicket = (e: any) => {
-        this.openNewTicketRef.current.toggle();
-    };
-
-    onClickOpenSubLink = () => {
-        let menu = !this.state.openCreateMenu;
-        this.setState({
-            openCreateMenu: menu,
-        });
-    }
-
 
     render() {
-        const { openCreateMenu } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
-                <div className="servicedesk-page-container">
-                    <div className="common-container">
-                        <div className="row">
-                            <div className="col-lg-8 col-md-8 col-sm-12">
-                                <div className="page-heading">
-                                    <h1>Reports</h1>
+                <div className="servicedesk-page-container reports-page-container">
+                    <div className="row">
+                        <div className="col-lg-8 col-md-12 col-md-12">
+                            <div className="reports-left">
+                                <div className="d-block p-b-15 heading">Reports</div>
+                                <div className="d-block ask-question">Ask me a question about your Helpdesk</div>
+                                <div className="d-block helpdesk-box">
+                                    <div className="d-block helpdesk-heading">Helpdesk Analysic</div>
+                                    <ul className="d-block">
+                                        <li className="d-inline-block">
+                                            <a href="#" className="d-block text-center">
+                                                <span className="d-block"><i className="fa fa-users"></i></span>
+                                                <strong className="d-block">HELPDESK IN-DEPTH</strong>
+                                            </a>
+                                        </li>
+                                        <li className="d-inline-block">
+                                            <a href="#" className="d-block text-center">
+                                                <span className="d-block"><i className="fa fa-money"></i></span>
+                                                <strong className="d-block">TICKET VOLUME TRENDS</strong>
+                                            </a>
+                                        </li>
+                                        <li className="d-inline-block">
+                                            <a href="#" className="d-block text-center">
+                                                <span className="d-block"><i className="fa fa-phone"></i></span>
+                                                <strong className="d-block">PHONE SUMMARY</strong>
+                                            </a>
+                                        </li>
+                                        <li className="d-inline-block">
+                                            <a href="#" className="d-block text-center">
+                                                <span className="d-block"><i className="fa fa-comments-o"></i></span>
+                                                <strong className="d-block">CHAT SUMMARY</strong>
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                                <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto create-btn">
-                                    Create
-                                </a>
-                                {openCreateMenu == true && <div className="text-center open-create-menu">
-                                    <a onClick={this.onClickOpenNewTicket}>
-                                        Ticket
-                                    </a>
-                                    <a onClick={this.onClickOpenNewEmail}>
-                                        Email
-                                    </a>
-                                    <a onClick={this.onClickOpenNewContact}>
-                                        Contact
-                                    </a>
-                                    <a onClick={this.onClickOpenNewCompany}>
-                                        Company
-                                    </a>
+                                <div className="d-block helpdesk-box productivity">
+                                    <div className="d-block helpdesk-heading">Productivity</div>
+                                    <ul className="d-block">
+                                        <li className="d-inline-block">
+                                            <a href="#" className="d-block text-center">
+                                                <span className="d-block"><i className="fa fa-users"></i></span>
+                                                <strong className="d-block">AGENT PERFORMANCE</strong>
+                                            </a>
+                                        </li>
+                                        <li className="d-inline-block">
+                                            <a href="#" className="d-block text-center">
+                                                <span className="d-block"><i className="fa fa-money"></i></span>
+                                                <strong className="d-block">GROUP PERFORMANCE</strong>
+                                            </a>
+                                        </li>
+                                        <li className="d-inline-block">
+                                            <a href="#" className="d-block text-center">
+                                                <span className="d-block"><i className="fa fa-phone"></i></span>
+                                                <strong className="d-block">PERFORMANCE DISTRIBUTION</strong>
+                                            </a>
+                                        </li>
+                                        <li className="d-inline-block">
+                                            <a href="#" className="d-block text-center">
+                                                <span className="d-block"><i className="fa fa-comments-o"></i></span>
+                                                <strong className="d-block">TIME SHEET SUMMARY</strong>
+                                            </a>
+                                        </li>
+                                        <li className="d-inline-block">
+                                            <a href="#" className="d-block text-center">
+                                                <span className="d-block"><i className="fa fa-comments-o"></i></span>
+                                                <strong className="d-block">TICKET LIFECYCLE</strong>
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div className="common-container border-bottom-0 filter-container">
-                        <div className="row">
-                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
-                                <div className="form-group filter-control-group">
-                                    <label htmlFor="selecttimeperiod">Select Time Period</label>
-                                    <input type="text" className="form-control" placeholder="1 Sept 2020 - 31 Sept 2020" />
-                                </div>
-                            </div>
-                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
-                                <div className="form-group filter-control-group">
-                                    <label htmlFor="agents">Agents</label>
-                                    <select className="form-control">
-                                        <option>Select Agents</option>
-                                        <option>Jeremy Griffin</option>
-                                        <option>Timothy Dean</option>
-                                        <option>Andreea Baker</option>
-                                        <option>Kevin Reyes</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
-                                <div className="form-group filter-control-group">
-                                    <label htmlFor="groups">Groups</label>
-                                    <select className="form-control">
-                                        <option>Select Groups</option>
-                                        <option>Billings</option>
-                                        <option>Escalations</option>
-                                        <option>Product Management</option>
-                                        <option>QA</option>
-                                        <option>Replacements</option>
-                                        <option>Sales</option>
-                                        <option>Unassigned</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
-                                <div className="form-group filter-control-group">
-                                    <label htmlFor="customer">Customer</label>
-                                    <select className="form-control">
-                                        <option>Select Due by</option>
-                                        <option>Customer 1</option>
-                                        <option>Customer 2</option>
-                                        <option>Customer 3</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
-                                <div className="form-group filter-control-group">
-                                    <label htmlFor="type">Type</label>
-                                    <select className="form-control">
-                                        <option>Select Type</option>
-                                        <option>None</option>
-                                        <option>Question</option>
-                                        <option>Problem</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
-                                <div className="form-group filter-control-group">
-                                    <label htmlFor="source">Source</label>
-                                    <select className="form-control">
-                                        <option>Select Source</option>
-                                        <option>Email</option>
-                                        <option>Portal</option>
-                                        <option>Forum</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
-                                <div className="form-group filter-control-group">
-                                    <label htmlFor="priority">Priority</label>
-                                    <select className="form-control">
-                                        <option>Select Priority</option>
-                                        <option>Low</option>
-                                        <option>Medium</option>
-                                        <option>High</option>
-                                        <option>Urgent</option>
-                                    </select>
+                                <div className="d-block helpdesk-box happiness">
+                                    <div className="d-block helpdesk-heading">Customer Happiness</div>
+                                    <ul className="d-block">
+                                        <li className="d-inline-block">
+                                            <a href="#" className="d-block text-center">
+                                                <span className="d-block"><i className="fa fa-users"></i></span>
+                                                <strong className="d-block">TOP CUSTOMER ANALYSIS</strong>
+                                            </a>
+                                        </li>
+                                        <li className="d-inline-block">
+                                            <a href="#" className="d-block text-center">
+                                                <span className="d-block"><i className="fa fa-money"></i></span>
+                                                <strong className="d-block">SATISFACTION SURVEY</strong>
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div className="common-container border-bottom-0 desk-depth-container">
-                        <div className="d-block p-b-20">
-                            <div className="row">
-                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                                    <div className="d-block p-b-10 heading">
-                                        <h2 className="d-block m-b-0">Help Desk In-Depth</h2>
-                                        <span className="d-block">Last update 30 mins ago</span>
-                                    </div>
-                                </div>
-                                <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                                    <div className="d-block text-right filters-buttons">
-                                        <button className="blue-button min-width-inherit width-auto">Hide Filters</button>
-                                        <button className="white-button min-width-inherit width-auto"><i className="fa fa-file"></i></button>
-                                        <button className="white-button min-width-inherit width-auto m-r-0"><i className="fa fa-calendar"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="d-block">
-                            <div className="row">
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">500</div>
-                                        <div className="d-block text">Created Tickets</div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">200</div>
-                                        <div className="d-block text">Resolved Tickets</div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">100</div>
-                                        <div className="d-block text">Unresolved Tickets</div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">150</div>
-                                        <div className="d-block text">Reopen Tickets</div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">2 Min 3 Sec</div>
-                                        <div className="d-block text">Average 1<sup>st</sup><br></br> Response Time</div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">5 Min 20 Sec</div>
-                                        <div className="d-block text">Average<br></br> Response Time</div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">23 Min 10 Sec</div>
-                                        <div className="d-block text">Average<br></br> Resolution Time</div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">10 Min 2 Sec</div>
-                                        <div className="d-block text">Average 1<sup>st</sup><br></br> Assign Time</div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">20%</div>
-                                        <div className="d-block text">First Contact<br></br> Resolution</div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">90%</div>
-                                        <div className="d-block text">First response<br></br> SLA</div>
-                                    </div>
-                                </div>
-                                <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                                    <div className="d-block text-center desk-box">
-                                        <div className="d-block text-right icon">
-                                            <button className="white-button min-width-inherit width-auto m-r-0">
-                                                <i className="fa fa-eye"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-block number">50%</div>
-                                        <div className="d-block text">Resolution<br></br> SLA</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <div className="col-lg-4 col-md-12 col-md-12"></div>
                     </div>
                 </div>
-                <OpenNewContactPopup ref={this.openNewContactRef} />
-                <OpenNewCompanyPopup ref={this.openNewCompanyRef} />
-                <OpenNewEmailPopup ref={this.openNewEmailRef} />
-                <OpenNewTicketPopup ref={this.openNewTicketRef} />
             </div>
         );
     }
