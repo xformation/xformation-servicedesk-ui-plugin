@@ -22,48 +22,48 @@ export class ReportHelpdesh extends React.Component<any, any> {
             TicketsData: [
                 {
                     NoOfTickets: '500',
-                    TicketStatus: 'Created Tickets'
+                    TicketStatus: 'Created Tickets',
                 },
                 {
                     NoOfTickets: '200',
-                    TicketStatus: 'Resolved Tickets'
+                    TicketStatus: 'Resolved Tickets',
                 },
                 {
                     NoOfTickets: '100',
-                    TicketStatus: 'Unresolved Tickets'
+                    TicketStatus: 'Unresolved Tickets',
                 },
                 {
                     NoOfTickets: '150',
-                    TicketStatus: 'Reopen Tickets'
+                    TicketStatus: 'Reopen Tickets',
                 },
                 {
                     NoOfTickets: '2 Min 3 Sec',
-                    TicketStatus: 'Average 1St Response Time'
+                    TicketStatus: 'Average 1st Response Time',
                 },
                 {
                     NoOfTickets: '5 Min 20 Sec',
-                    TicketStatus: 'Average Response Time'
+                    TicketStatus: 'Average Response Time',
                 },
                 
                 {
                     NoOfTickets: '23 Min 10 Sec',
-                    TicketStatus: 'Average Resolution Time'
+                    TicketStatus: 'Average Resolution Time',
                 },
                 {
                     NoOfTickets: '10 Min 2 Sec',
-                    TicketStatus: 'Average 1st Assign Time'
+                    TicketStatus: 'Average 1st Assign Time',
                 },
                 {
                     NoOfTickets: '20%',
-                    TicketStatus: 'First Contact Resolution'
+                    TicketStatus: 'First Contact Resolution',
                 },
                 {
                     NoOfTickets: ' 90%',
-                    TicketStatus: 'First response SLA'
+                    TicketStatus: 'First response SLA',
                 },
                 {
                     NoOfTickets: '50%',
-                    TicketStatus: 'Resolution SLA'
+                    TicketStatus: 'Resolution SLA',
                 }
             ]
         };

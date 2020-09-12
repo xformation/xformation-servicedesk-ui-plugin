@@ -1984,7 +1984,7 @@ a:hover {
 .desk-depth-container .desk-box a {
   padding: 10px;
   padding-bottom: 20px;
-  min-height: 150px;
+  min-height: 160px;
 }
 .desk-depth-container .desk-box .icon {
   font-size: 16px;
@@ -2036,6 +2036,7 @@ a:hover {
   border-radius: 5px;
   min-height: 400px;
   margin-bottom: 30px;
+  padding: 30px;
 }
 
 /*# sourceMappingURL=servicedesk.light.css.map */

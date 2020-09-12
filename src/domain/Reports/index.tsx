@@ -33,7 +33,7 @@ export class Reports extends React.Component<any, any> {
                 {
                     NoOfTickets: '2h 15m',
                     TicketsPersentage: '20%',
-                    description: 'Surprisingly, there is a very vocal faction of the design community that wants to see filler text banished to the original sources. C/O https://placeholder.com/text/.'
+                    description: 'Surprisingly, there is a very vocal faction of the design community that wants to see filler text banished to the original sources.'
                 },
                 {
                     NoOfTickets: '15h 25m',
@@ -43,7 +43,7 @@ export class Reports extends React.Component<any, any> {
                 {
                     NoOfTickets: '30m 14s',
                     TicketsPersentage: '26%',
-                    description: 'Those opposed to using filler text of any sort counter by saying: The ultimate purpose of any digital product. C/O https://placeholder.com/text/.'
+                    description: 'Those opposed to using filler text of any sort counter by saying: The ultimate purpose of any digital product.'
                 },
             ],
         };
