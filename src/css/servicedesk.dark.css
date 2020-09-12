@@ -1822,13 +1822,15 @@ a:hover {
   margin-right: 30px;
   width: 100px;
   vertical-align: top;
+  margin-bottom: 10px;
 }
 .reports-page-container .reports-left .helpdesk-box ul li:last-child {
   margin-right: 0;
 }
 .reports-page-container .reports-left .helpdesk-box ul li span {
-  width: 100%;
+  width: 80px;
   height: 80px;
+  line-height: 80px;
   background-color: rgba(72, 199, 65, 0.1);
   border-radius: 3px;
   margin-bottom: 5px;
@@ -1870,6 +1872,7 @@ a:hover {
   background-color: #f0f3f7;
   border-radius: 3px;
   padding: 20px 15px 30px;
+  min-height: 777px;
 }
 .reports-page-container .reports-right .heading h3 {
   font-size: 16px;
@@ -1891,6 +1894,49 @@ a:hover {
 }
 .reports-page-container .reports-right .customize-link a {
   color: #438afb;
+}
+.reports-page-container .reports-right .insight-box {
+  border: 1px solid #d1dae2;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+}
+.reports-page-container .reports-right .insight-box .insight-heading {
+  color: #d1dae2;
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 500;
+}
+.reports-page-container .reports-right .insight-box .insight-heading strong {
+  color: #3b7cff;
+  font-size: 13px;
+  font-weight: 600;
+}
+.reports-page-container
+  .reports-right
+  .insight-box
+  .insight-heading-right-text {
+  color: #3b7cff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+.reports-page-container
+  .reports-right
+  .insight-box
+  .insight-heading-right-text.red {
+  color: #f67373;
+}
+.reports-page-container .reports-right .insight-box .insight-text {
+  color: #a9b9c6;
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 500;
+}
+
+@media (max-width: 1200px) {
+  .reports-page-container .reports-right {
+    margin-top: 30px;
+  }
 }
 
 .desk-depth-container .heading h2 {
