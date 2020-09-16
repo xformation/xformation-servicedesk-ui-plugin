@@ -792,6 +792,10 @@ export class AllCompanies extends React.Component<any, any> {
                         </div>
                     </div>
                 </div>
+                <OpenNewContactPopup ref={this.openNewContactRef} />
+                <OpenNewCompanyPopup ref={this.openNewCompanyRef} />
+                <OpenNewEmailPopup ref={this.openNewEmailRef} />
+                <OpenNewTicketPopup ref={this.openNewTicketRef} />
             </div>
         );
     }

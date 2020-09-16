@@ -169,9 +169,9 @@ export class Tickets extends React.Component<any, any> {
         };
         this.perPageLimit = 3,
         this.checkboxValue = false,
-            this.state = {
-                openCreateMenu: false,
-            };
+        this.state = {
+            openCreateMenu: false,
+        };
         this.breadCrumbs = [
             {
                 label: "Home",

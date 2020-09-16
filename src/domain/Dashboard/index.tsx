@@ -288,59 +288,59 @@ export class Dashboard extends React.Component<any, any> {
             ],
         };
         this.perPageLimit = 6,
-        this.checkboxValue = true,
-            this.state = {
-                openCreateMenu: false,
-                ticketingData: [
-                    {
-                        ticketingImage: '',
-                        ticketingNumber: '560',
-                        ticketingname: 'Open Tickets',
-                    },
-                    {
-                        ticketingImage: '',
-                        ticketingNumber: '284',
-                        ticketingname: 'Due Today',
-                    },
-                    {
-                        ticketingImage: '',
-                        ticketingNumber: '24',
-                        ticketingname: 'Unassigned',
-                    },
-                    {
-                        ticketingImage: '',
-                        ticketingNumber: '50',
-                        ticketingname: 'Unresolved',
-                    },
-                    {
-                        ticketingImage: '',
-                        ticketingNumber: '10',
-                        ticketingname: 'Overdue',
-                    },
-                ],
-                performerAgentsData: [
-                    {
-                        agentName: 'Spruce Springclean',
-                        ticket: '89',
-                        responseRate: '91',
-                    },
-                    {
-                        agentName: 'Archibald Northbottom',
-                        ticket: '75',
-                        responseRate: '85',
-                    },
-                    {
-                        agentName: 'Rodney Artichoke',
-                        ticket: '60',
-                        responseRate: '70',
-                    },
-                    {
-                        agentName: 'Gustav Purpleson',
-                        ticket: '53',
-                        responseRate: '63',
-                    },
-                ],
-            };
+        this.checkboxValue = false,
+        this.state = {
+            openCreateMenu: false,
+            ticketingData: [
+                {
+                    ticketingImage: '',
+                    ticketingNumber: '560',
+                    ticketingname: 'Open Tickets',
+                },
+                {
+                    ticketingImage: '',
+                    ticketingNumber: '284',
+                    ticketingname: 'Due Today',
+                },
+                {
+                    ticketingImage: '',
+                    ticketingNumber: '24',
+                    ticketingname: 'Unassigned',
+                },
+                {
+                    ticketingImage: '',
+                    ticketingNumber: '50',
+                    ticketingname: 'Unresolved',
+                },
+                {
+                    ticketingImage: '',
+                    ticketingNumber: '10',
+                    ticketingname: 'Overdue',
+                },
+            ],
+            performerAgentsData: [
+                {
+                    agentName: 'Spruce Springclean',
+                    ticket: '89',
+                    responseRate: '91',
+                },
+                {
+                    agentName: 'Archibald Northbottom',
+                    ticket: '75',
+                    responseRate: '85',
+                },
+                {
+                    agentName: 'Rodney Artichoke',
+                    ticket: '60',
+                    responseRate: '70',
+                },
+                {
+                    agentName: 'Gustav Purpleson',
+                    ticket: '53',
+                    responseRate: '63',
+                },
+            ],
+        };
         this.breadCrumbs = [
             {
                 label: "Home",

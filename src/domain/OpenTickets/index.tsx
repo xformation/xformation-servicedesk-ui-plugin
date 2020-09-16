@@ -14,23 +14,62 @@ export class OpenTickets extends React.Component<any, any> {
     openNewCompanyRef: any;
     openNewEmailRef: any;
     openNewTicketRef: any;
-
+    checkboxValue: any;
     constructor(props: any) {
         super(props);
-        this.perPageLimit = 3;
+        this.perPageLimit = 6;
+        this.checkboxValue = false,
         this.tableValue = {
             columns: [
-                { label: 'ID', key: 'id' },
-                { label: 'Requester Name', key: 'requestername' },
-                { label: 'Subjects', key: 'subjects' },
-                { label: 'Status', key: 'status' },
-                { label: 'Priority', key: 'priority' },
-                { label: 'Assignee', key: 'assignee' },
-                { label: 'Create Date', key: 'createDate' },
-                { label: 'Agents', key: 'agents' },
-                { label: 'Groups', key: 'groups' }
+                {
+                    label: 'ID',
+                    key: 'index'
+                },
+                {
+                    label: 'Requester Name',
+                    key: 'requesterName'
+                },
+                {
+                    label: 'Subjects',
+                    key: 'subject'
+                },
+                {
+                    label: 'Status',
+                    key: 'status',
+                    renderCallback: (value: any) => {
+                        let strClass = "";
+                        if (value === "Open") {
+                            strClass = "yellow-green";
+                        } else if (value === "Closed") {
+                            strClass = "red";
+                        } else if (value === "Pending") {
+                            strClass = "orange";
+                        }
+                        return <td><span className={strClass}>{value}</span></td>
+                    }
+                },
+                {
+                    label: 'Priority',
+                    key: 'priority'
+                },
+                {
+                    label: 'Assignee',
+                    key: 'Assignee'
+                },
+                {
+                    label: 'Create Date',
+                    key: 'createDate'
+                },
+                {
+                    label: 'Agents',
+                    key: 'agents'
+                },
+                {
+                    label: 'Groups',
+                    key: 'groups'
+                },
             ],
-            TicketsData: [
+            data: [
                 {
                     index: '#27',
                     requesterName: 'Rodney Artichoke',
@@ -40,7 +79,8 @@ export class OpenTickets extends React.Component<any, any> {
                     Assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#39',
@@ -51,7 +91,8 @@ export class OpenTickets extends React.Component<any, any> {
                     Assignee: 'Bodrum Salvador',
                     createDate: '12 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#47',
@@ -62,7 +103,8 @@ export class OpenTickets extends React.Component<any, any> {
                     Assignee: 'Inverness McKenzie',
                     createDate: '15 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#52',
@@ -73,7 +115,8 @@ export class OpenTickets extends React.Component<any, any> {
                     Assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#87',
@@ -84,7 +127,8 @@ export class OpenTickets extends React.Component<any, any> {
                     Assignee: 'Fergus Douchebag',
                     createDate: '19 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#92',
@@ -95,7 +139,8 @@ export class OpenTickets extends React.Component<any, any> {
                     Assignee: 'Jarvis Pepperspray',
                     createDate: '22 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#27',
@@ -106,7 +151,8 @@ export class OpenTickets extends React.Component<any, any> {
                     Assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#27',
@@ -117,7 +163,8 @@ export class OpenTickets extends React.Component<any, any> {
                     Assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 }
             ]
         };
@@ -366,8 +413,9 @@ export class OpenTickets extends React.Component<any, any> {
                     </div>
                     <div className="common-container border-bottom-0">
                         <div className="d-block all-open-ticket-tabel">
-                            <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit}
-                                tableClasses={{ ticketTable: "open-ticket-tabel", ticketsTable: "d-block p-t-5 open-tickets-tabel", allSupport: "all-open-ticket-tabel", Classfafarrow: "fa fa-chevron-down" }} />
+                            <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
+                                tableClasses={{ table: "open-ticket-tabel", tableParent: "d-block p-t-5 open-tickets-tabel", parentClass: "all-open-ticket-tabel" }} searchKey="subject" showingLine = "Latest Tickets (Showing %start% to %end% of %total% Tickets)" />
+                            
                         </div>
                     </div>
                 </div>

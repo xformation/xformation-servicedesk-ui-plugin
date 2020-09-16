@@ -36,7 +36,9 @@ export class Table extends React.Component<any, any> {
                     const tdJSX = [];
                     if (visibleCheckbox == true) {
                         tdJSX.push(
-                            <input type="checkbox" checked={displayData[i].checkStatus} className="checkbox" onChange={(e) => { this.onChangeParentCheckbox(e, i) }} />
+                            <td>
+                                <input type="checkbox" checked={displayData[i].checkStatus} className="checkbox" onChange={(e) => { this.onChangeParentCheckbox(e, i) }} />
+                            </td>
                         );
                     }
                     const row = displayData[i];
