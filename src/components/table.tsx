@@ -1,5 +1,5 @@
 import * as React from 'react';
-
+import './table.css';
 const sortEnum = {
     NONE: 0,
     ASCENDING: 1,
@@ -10,19 +10,46 @@ export class Table extends React.Component<any, any> {
     constructor(props: any) {
         super(props);
         this.state = {
-            displayData: this.props.valueFromData.TicketsData,
-            searchData: this.props.valueFromData.TicketsData,
+            data: this.props.valueFromData.data,
+            displayData: this.props.valueFromData.data,
             perPageLimit: this.props.perPageLimit,
-            noOfRecordPerPage: this.props.perPageLimit,
             columns: this.props.valueFromData.columns,
-            storeColumsData: this.props.valueFromData.columns,
             totalPages: '',
             currentPage: 0,
-            start_index: 1,
             searchKey: '',
-            ending_index: this.props.perPageLimit,
+            sortType: sortEnum.NONE,
+            sortKey: '',
         }
     };
+
+    tableBodyData() {
+        const { displayData, searchKey, perPageLimit, currentPage, columns } = this.state;
+        // let table_row;
+        const retData = [];
+        const length = displayData.length;
+        const cLength = columns.length;
+        if (length > 0) {
+            for (let i = 0; i < length; i++) {
+                if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
+                    const tdJSX = [];
+                    const row = displayData[i];
+                    for (let j = 0; j < cLength; j++) {
+                        const column = columns[j];
+                        if (column.renderCallback) {
+                            const jsx = column.renderCallback(row[column.key]);
+                            tdJSX.push(jsx);
+                        } else {
+                            tdJSX.push(<td>{row[column.key]}</td>);
+                        }
+                    }
+                    retData.push(<tr key={i}>{tdJSX}</tr>);
+                }
+            }
+        } else {
+            retData.push(<tr ><td colSpan={cLength} style={{ textAlign: "center" }}>There is no data</td></tr>);
+        }
+        return retData;
+    }
 
     componentDidMount() {
         this.calculateTotalPages(this.state.displayData);
@@ -35,52 +62,31 @@ export class Table extends React.Component<any, any> {
             totalPages: indexOfLastData,
         });
     }
+
     tableHeader() {
-        const { columns } = this.state;
+        const { sortType, sortKey, columns } = this.state;
         const length = columns.length;
         const retData = [];
         for (let i = 0; i < length; i++) {
             const item = columns[i];
+            let icon = "sort-none";
+            let onClickSortType = sortEnum.ASCENDING;
+            if (sortType === sortEnum.ASCENDING && sortKey === item.key) {
+                icon = "sort-ascending";
+                onClickSortType = sortEnum.DESCENDING;
+            } else if (sortType === sortEnum.DESCENDING && sortKey === item.key) {
+                icon = "sort-descending";
+                onClickSortType = sortEnum.ASCENDING;
+            }
             retData.push(
-                <th key={i}>{item.label}</th>
+                <th key={i}>{item.label}
+                    <span onClick={(e) => { this.sortTable(item.key, e, onClickSortType) }} className={`sort-icon ${icon}`}></span>
+                </th>
             );
         }
         return retData;
     }
-    tableBodyData() {
-        const { displayData, perPageLimit, currentPage, start_index, ending_index } = this.state;
-        const { tableClasses } = this.props;
-        const retuData = [];
-        const length = displayData.length;
-        if (length > 0) {
-            for (let i = 0; i < length; i++) {
-                const row = displayData[i];
-                if ((i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1)))||(i >= start_index - 1 && i <= ending_index - 1)) {
-                    retuData.push(
-                        <tr>
-                            <td>{row.index}</td>
-                            <td><span className="image"></span>{row.requesterName}</td>
-                            <td className="subjects">{row.subject}</td>
-                            {(tableClasses.statusClassOpen != undefined && tableClasses.statusClassClose != undefined && tableClasses.statusClassPendding != undefined) && <td><span className={row.status == 'Open' ? tableClasses.statusClassOpen : row.status == 'Closed' ? tableClasses.statusClassClose : tableClasses.statusClassPendding}>{row.status}</span></td>}
-                            {tableClasses.Classfafarrow != undefined && <td>{row.status} <i className="fa fa-chevron-down"></i></td>}
-                            <td><span className="priority">{row.priority}</span></td>
-                            <td>{row.Assignee}</td>
-                            <td className="date">{row.createDate}</td>
-                            <td>{row.agents}</td>
-                            <td>{row.groups} <a href="#" className="float-right"><i className="fa fa-ellipsis-v"></i></a></td>
-                        </tr>
-                    );
-                } 
-            }
-        } else {
-            retuData.push(
-                <tr>
-                    <td className="there-no-data" colSpan={7}>There is no data</td>
-                </tr>
-            );
-        }
-        return retuData;
-    }
+
     peginationOfTable() {
         const { currentPage, totalPages } = this.state;
         let rows = [];
@@ -100,64 +106,28 @@ export class Table extends React.Component<any, any> {
         );
     }
 
-    navigatePage(target: any, e: any, i: any) {
-        const { totalPages, currentPage, start_index, perPageLimit, ending_index, displayData } = this.state;
+    navigatePage(target: any, e: any, i: any = null) {
+        const { totalPages, currentPage } = this.state;
         e.preventDefault();
         switch (target) {
             case 'pre':
                 if (currentPage !== 0) {
                     this.setState({
                         currentPage: currentPage - 1,
-                        start_index: start_index - perPageLimit,
                     });
-                    if (ending_index != displayData.length) {
-                        this.setState({
-                            ending_index: ending_index - perPageLimit,
-                        });
-                    } else {
-                        this.setState({
-                            ending_index: ending_index - (displayData.length - start_index + 1),
-                        });
-                    }
                 }
                 break;
             case 'next':
                 if (currentPage !== totalPages - 1) {
                     this.setState({
                         currentPage: currentPage + 1,
-                        start_index: start_index + perPageLimit,
                     });
-                    if ((ending_index + perPageLimit) < displayData.length) {
-                        this.setState({
-                            ending_index: ending_index + perPageLimit,
-                        });
-                    } else {
-                        this.setState({
-                            ending_index: ending_index + (displayData.length - ending_index),
-                        });
-                    }
                 }
                 break;
             case 'btn-click':
-                if ((i + 1) * perPageLimit < displayData.length) {
-                    this.setState({
-                        currentPage: i,
-                        start_index: (i * perPageLimit) + 1,
-                        ending_index: ((i + 1) * perPageLimit),
-                    });
-                } else if (displayData.length >= (ending_index + (displayData.length - ending_index))) {
-                    this.setState({
-                        currentPage: i,
-                        start_index: (i * perPageLimit) + 1,
-                        ending_index: (ending_index + (displayData.length - ending_index)),
-                    });
-                } else {
-                    this.setState({
-                        currentPage: i,
-                        start_index: (displayData.length - (displayData.length - ending_index) + 1),
-                        ending_index: (parseInt(ending_index) + parseInt(displayData.length) - parseInt(ending_index)),
-                    })
-                }
+                this.setState({
+                    currentPage: i
+                });
                 break;
         }
     }
@@ -188,21 +158,22 @@ export class Table extends React.Component<any, any> {
         const { value } = e.target;
         this.setState({
             searchKey: value,
+            currentPage: 0,
+            sortType: sortEnum.NONE,
+            sortKey: '',
         });
-        const { searchData } = this.state;
-        var searchResult = [];
-        for (let i = 0; i < searchData.length; i++) {
-            if (searchData[i].requesterName.indexOf(value) !== -1 || value === '') {
-                searchResult.push(searchData[i]);
-            } else if (searchData[i].requesterName.toLowerCase().indexOf(value) !== -1 || value === '') {
-                searchResult.push(searchData[i]);
+        const { data } = this.state;
+        const { searchKey } = this.props;
+        var queryResult = [];
+        for (let i = 0; i < data.length; i++) {
+            if (data[i][searchKey].indexOf(value) !== -1 || value === '') {
+                queryResult.push(data[i]);
             }
         }
-        this.calculateTotalPages(searchResult);
         this.setState({
-            displayData: searchResult,
-            currentPage: 0
+            displayData: queryResult,
         });
+        this.calculateTotalPages(queryResult);
     }
 
     displayShowPageLimit() {
@@ -221,14 +192,41 @@ export class Table extends React.Component<any, any> {
         return pageData;
     }
 
+    sortTable(sortkey: any, e: any, sortVal: any) {
+        this.setState({
+            sortType: sortVal,
+            sortKey: sortkey
+        });
+        e.preventDefault();
+        const data = this.props.valueFromData.data;
+        if (sortVal === sortEnum.ASCENDING) {
+            data.sort((a: any, b: any) => a[sortkey].localeCompare(b[sortkey]))
+        } else if (sortVal === sortEnum.DESCENDING) {
+            data.sort((a: any, b: any) => a[sortkey].localeCompare(b[sortkey])).reverse()
+        }
+        this.setState({
+            displayData: data,
+        })
+    }
+
     render() {
-        const { displayData, start_index, ending_index, perPageLimit } = this.state;
-        const { tableClasses } = this.props;
+        const { displayData, perPageLimit, currentPage } = this.state;
+        let { tableClasses, showingLine } = this.props;
+        let startIndex = perPageLimit * currentPage + 1;
+        let endIndex = perPageLimit * (currentPage + 1);
+        if (endIndex > displayData.length) {
+            endIndex = displayData.length;
+        }
+        if (showingLine) {
+            showingLine = showingLine.replace("%start%", startIndex);
+            showingLine = showingLine.replace("%end%", endIndex);
+            showingLine = showingLine.replace("%total%", displayData.length);
+        }
         return (
-            <div className={tableClasses.allSupport}>
+            <div className={`${tableClasses.parentClass} custom-table`}>
                 <div className="row">
                     <div className="col-lg-8 col-md-8 col-sm-12">
-                        <div className="d-inline-block showing">Latest Tickets (Showing {start_index} to {ending_index} of {displayData.length} Tickets)</div>
+                        <div className="d-inline-block showing">{showingLine}</div>
                         <div className="d-inline-block showby">
                             <label className="d-inline-block">Show</label>
                             <select onChange={this.handleChange} className="form-control">
@@ -247,21 +245,9 @@ export class Table extends React.Component<any, any> {
                             </form>
                         </div>
                     </div>
-                    {/*    <label className="d-inline-block">Sort By:</label>
-                            <select className="form-control">
-                                <option>Created Date</option>
-                                <option>Due by time</option>
-                                <option>Last modified</option>
-                                <option>Priority</option>
-                                <option>Status</option>
-                                <option>Ascending</option>
-                                <option>Descending</option>
-                            </select>
-                        </div>
-                    </div> */}
                 </div>
-                <div className={tableClasses.ticketsTable}>
-                    <table className={tableClasses.ticketTable}>
+                <div className={tableClasses.tableParent}>
+                    <table className={tableClasses.table}>
                         <thead>
                             <tr>
                                 {this.tableHeader()}

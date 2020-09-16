@@ -23,22 +23,54 @@ export class Dashboard extends React.Component<any, any> {
         super(props);
         this.tableValue = {
             columns: [
-                { label: 'ID', key: 'id' },
-                { label: 'Requester Name', key: 'requestername' },
-                { label: 'Subjects', key: 'subjects' },
-                { label: 'Status', key: 'status' },
-                { label: 'Priority', key: 'priority' },
-                { label: 'Assignee', key: 'assignee' },
-                { label: 'Create Date', key: 'createDate' },
+                {
+                    label: 'ID',
+                    key: 'index'
+                },
+                {
+                    label: 'Requester Name',
+                    key: 'requesterName'
+                },
+                {
+                    label: 'Subjects',
+                    key: 'subject'
+                },
+                {
+                    label: 'Status',
+                    key: 'status',
+                    renderCallback: (value: any) => {
+                        let strClass = "";
+                        if (value === "Open") {
+                            strClass = "yellow-green";
+                        } else if (value === "Closed") {
+                            strClass = "red";
+                        } else if (value === "Pending") {
+                            strClass = "orange";
+                        }
+                        return <td><span className={strClass}>{value}</span></td>
+                    }
+                },
+                {
+                    label: 'Priority',
+                    key: 'priority'
+                },
+                {
+                    label: 'Assignee',
+                    key: 'assignee'
+                },
+                {
+                    label: 'Create Date',
+                    key: 'createDate'
+                },
             ],
-            TicketsData: [
+            data: [
                 {
                     index: '#27',
                     requesterName: 'Rodney Artichoke',
                     subject: 'I need help with aading a New Contact....',
                     status: 'Open',
                     priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
+                    assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
                 },
                 {
@@ -47,7 +79,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact data to be pre...',
                     status: 'Closed',
                     priority: 'Medium',
-                    Assignee: 'Bodrum Salvador',
+                    assignee: 'Bodrum Salvador',
                     createDate: '12 July 2020',
                 },
                 {
@@ -56,7 +88,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Mobile Campaign',
                     status: 'Pending',
                     priority: 'Low',
-                    Assignee: 'Inverness McKenzie',
+                    assignee: 'Inverness McKenzie',
                     createDate: '15 July 2020',
                 },
                 {
@@ -65,7 +97,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Service related announcements',
                     status: 'Open',
                     priority: 'Hign',
-                    Assignee: 'Abraham Pigeon',
+                    assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
                 },
                 {
@@ -74,7 +106,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact....',
                     status: 'Closed',
                     priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
+                    assignee: 'Fergus Douchebag',
                     createDate: '19 July 2020',
                 },
                 {
@@ -83,7 +115,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Adding a payment methods',
                     status: 'Pending',
                     priority: 'Medium',
-                    Assignee: 'Jarvis Pepperspray',
+                    assignee: 'Jarvis Pepperspray',
                     createDate: '22 July 2020',
                 },
                 {
@@ -92,7 +124,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Service related announcements',
                     status: 'Open',
                     priority: 'Hign',
-                    Assignee: 'Abraham Pigeon',
+                    assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
                 },
                 {
@@ -101,7 +133,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact....',
                     status: 'Closed',
                     priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
+                    assignee: 'Fergus Douchebag',
                     createDate: '19 July 2020',
                 },
                 {
@@ -110,7 +142,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Adding a payment methods',
                     status: 'Pending',
                     priority: 'Medium',
-                    Assignee: 'Jarvis Pepperspray',
+                    assignee: 'Jarvis Pepperspray',
                     createDate: '22 July 2020',
                 },
                 {
@@ -119,7 +151,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact data to be pre...',
                     status: 'Closed',
                     priority: 'Medium',
-                    Assignee: 'Bodrum Salvador',
+                    assignee: 'Bodrum Salvador',
                     createDate: '12 July 2020',
                 },
                 {
@@ -128,7 +160,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Mobile Campaign',
                     status: 'Pending',
                     priority: 'Low',
-                    Assignee: 'Inverness McKenzie',
+                    assignee: 'Inverness McKenzie',
                     createDate: '15 July 2020',
                 },
                 {
@@ -137,7 +169,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Service related announcements',
                     status: 'Open',
                     priority: 'Hign',
-                    Assignee: 'Abraham Pigeon',
+                    assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
                 },
                 {
@@ -146,7 +178,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Mobile Campaign',
                     status: 'Pending',
                     priority: 'Low',
-                    Assignee: 'Inverness McKenzie',
+                    assignee: 'Inverness McKenzie',
                     createDate: '15 July 2020',
                 },
                 {
@@ -155,7 +187,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Service related announcements',
                     status: 'Open',
                     priority: 'Hign',
-                    Assignee: 'Abraham Pigeon',
+                    assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
                 },
                 {
@@ -164,7 +196,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact....',
                     status: 'Closed',
                     priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
+                    assignee: 'Fergus Douchebag',
                     createDate: '19 July 2020',
                 },
                 {
@@ -173,7 +205,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Adding a payment methods',
                     status: 'Pending',
                     priority: 'Medium',
-                    Assignee: 'Jarvis Pepperspray',
+                    assignee: 'Jarvis Pepperspray',
                     createDate: '22 July 2020',
                 },
                 {
@@ -182,7 +214,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Service related announcements',
                     status: 'Open',
                     priority: 'Hign',
-                    Assignee: 'Abraham Pigeon',
+                    assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
                 },
                 {
@@ -191,7 +223,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact....',
                     status: 'Closed',
                     priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
+                    assignee: 'Fergus Douchebag',
                     createDate: '19 July 2020',
                 },
                 {
@@ -200,7 +232,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'Adding a payment methods',
                     status: 'Pending',
                     priority: 'Medium',
-                    Assignee: 'Jarvis Pepperspray',
+                    assignee: 'Jarvis Pepperspray',
                     createDate: '22 July 2020',
                 },
                 {
@@ -209,7 +241,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact data to be pre...',
                     status: 'Closed',
                     priority: 'Medium',
-                    Assignee: 'Bodrum Salvador',
+                    assignee: 'Bodrum Salvador',
                     createDate: '12 July 2020',
                 },
                 {
@@ -218,7 +250,7 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact....',
                     status: 'Open',
                     priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
+                    assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
                 },
                 {
@@ -227,64 +259,64 @@ export class Dashboard extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact data to be pre...',
                     status: 'Closed',
                     priority: 'Medium',
-                    Assignee: 'Bodrum Salvador',
+                    assignee: 'Bodrum Salvador',
                     createDate: '12 July 2020',
                 },
             ],
         };
         this.perPageLimit = 6,
-        this.state = {
-            openCreateMenu: false,
-            ticketingData: [
-                {
-                    ticketingImage: '',
-                    ticketingNumber: '560',
-                    ticketingname: 'Open Tickets',
-                },
-                {
-                    ticketingImage: '',
-                    ticketingNumber: '284',
-                    ticketingname: 'Due Today',
-                },
-                {
-                    ticketingImage: '',
-                    ticketingNumber: '24',
-                    ticketingname: 'Unassigned',
-                },
-                {
-                    ticketingImage: '',
-                    ticketingNumber: '50',
-                    ticketingname: 'Unresolved',
-                },
-                {
-                    ticketingImage: '',
-                    ticketingNumber: '10',
-                    ticketingname: 'Overdue',
-                },
-            ],
-            performerAgentsData: [
-                {
-                    agentName: 'Spruce Springclean',
-                    ticket: '89',
-                    responseRate: '91',
-                },
-                {
-                    agentName: 'Archibald Northbottom',
-                    ticket: '75',
-                    responseRate: '85',
-                },
-                {
-                    agentName: 'Rodney Artichoke',
-                    ticket: '60',
-                    responseRate: '70',
-                },
-                {
-                    agentName: 'Gustav Purpleson',
-                    ticket: '53',
-                    responseRate: '63',
-                },
-            ],
-        };
+            this.state = {
+                openCreateMenu: false,
+                ticketingData: [
+                    {
+                        ticketingImage: '',
+                        ticketingNumber: '560',
+                        ticketingname: 'Open Tickets',
+                    },
+                    {
+                        ticketingImage: '',
+                        ticketingNumber: '284',
+                        ticketingname: 'Due Today',
+                    },
+                    {
+                        ticketingImage: '',
+                        ticketingNumber: '24',
+                        ticketingname: 'Unassigned',
+                    },
+                    {
+                        ticketingImage: '',
+                        ticketingNumber: '50',
+                        ticketingname: 'Unresolved',
+                    },
+                    {
+                        ticketingImage: '',
+                        ticketingNumber: '10',
+                        ticketingname: 'Overdue',
+                    },
+                ],
+                performerAgentsData: [
+                    {
+                        agentName: 'Spruce Springclean',
+                        ticket: '89',
+                        responseRate: '91',
+                    },
+                    {
+                        agentName: 'Archibald Northbottom',
+                        ticket: '75',
+                        responseRate: '85',
+                    },
+                    {
+                        agentName: 'Rodney Artichoke',
+                        ticket: '60',
+                        responseRate: '70',
+                    },
+                    {
+                        agentName: 'Gustav Purpleson',
+                        ticket: '53',
+                        responseRate: '63',
+                    },
+                ],
+            };
         this.breadCrumbs = [
             {
                 label: "Home",
@@ -514,7 +546,7 @@ export class Dashboard extends React.Component<any, any> {
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
                             <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit}
-                                tableClasses={{ ticketTable: "ticket-tabel", ticketsTable: "d-block p-t-5 tickets-tabel", allSupport: "all-support-ticket-tabel", statusClassOpen: "yellow-green", statusClassClose: "red", statusClassPendding: "orange" }} />
+                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="subject" showingLine = "Latest Tickets (Showing %start% to %end% of %total% Tickets)"/>
                             {/* <div className="row"> */}
                             {/* <div className="col-lg-6 col-md-6 col-sm-12 text-right">
                                     <div className="sortby">
