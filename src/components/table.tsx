@@ -55,7 +55,7 @@ export class Table extends React.Component<any, any> {
                 }
             }
         } else {
-            retData.push(<tr ><td colSpan={cLength} style={{ textAlign: "center" }}>There is no data</td></tr>);
+            retData.push(<tr><td colSpan={cLength} style={{ textAlign: "center" }}>There is no data</td></tr>);
         }
         return retData;
     }
