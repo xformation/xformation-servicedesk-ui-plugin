@@ -13,6 +13,7 @@ export class Table extends React.Component<any, any> {
             data: this.props.valueFromData.data,
             displayData: this.props.valueFromData.data,
             perPageLimit: this.props.perPageLimit,
+            noOfRecordPerPage: this.props.perPageLimit,
             columns: this.props.valueFromData.columns,
             totalPages: '',
             currentPage: 0,
