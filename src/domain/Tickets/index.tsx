@@ -19,24 +19,62 @@ export class Tickets extends React.Component<any, any> {
         super(props);
         this.tableValue = {
             columns: [
-                { label: 'ID', key: 'id' },
-                { label: 'Requester Name', key: 'requestername' },
-                { label: 'Subjects', key: 'subjects' },
-                { label: 'Status', key: 'status' },
-                { label: 'Priority', key: 'priority' },
-                { label: 'Assignee', key: 'assignee' },
-                { label: 'Create Date', key: 'createDate' },
-                { label: 'Agents', key: 'agents' },
-                { label: 'Groups', key: 'groups' }
+                {
+                    label: 'ID',
+                    key: 'index'
+                },
+                {
+                    label: 'Requester Name',
+                    key: 'requesterName'
+                },
+                {
+                    label: 'Subjects',
+                    key: 'subject'
+                },
+                {
+                    label: 'Status',
+                    key: 'status',
+                    renderCallback: (value: any) => {
+                        let strClass = "";
+                        if (value === "Open") {
+                            strClass = "yellow-green";
+                        } else if (value === "Closed") {
+                            strClass = "red";
+                        } else if (value === "Pending") {
+                            strClass = "orange";
+                        }
+                        return <td><span className={strClass}>{value}</span></td>
+                    }
+                },
+                {
+                    label: 'Priority',
+                    key: 'priority'
+                },
+                {
+                    label: 'Assignee',
+                    key: 'assignee'
+                },
+                {
+                    label: 'Create Date',
+                    key: 'createDate'
+                },
+                {
+                    label: 'Agents',
+                    key: 'agents'
+                },
+                {
+                    label: 'Groups',
+                    key: 'groups'
+                },
             ],
-            TicketsData: [
+            data: [
                 {
                     index: '#27',
                     requesterName: 'Rodney Artichoke',
                     subject: 'I need help with aading a New Contact....',
                     status: 'Open',
                     priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
+                    assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
                     agents: 'Jacob Jones',
                     groups: 'Billings'
@@ -47,7 +85,7 @@ export class Tickets extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact data to be pre...',
                     status: 'Closed',
                     priority: 'Medium',
-                    Assignee: 'Bodrum Salvador',
+                    assignee: 'Bodrum Salvador',
                     createDate: '12 July 2020',
                     agents: 'Jacob Jones',
                     groups: 'Billings'
@@ -58,7 +96,7 @@ export class Tickets extends React.Component<any, any> {
                     subject: 'Mobile Campaign',
                     status: 'Pending',
                     priority: 'Low',
-                    Assignee: 'Inverness McKenzie',
+                    assignee: 'Inverness McKenzie',
                     createDate: '15 July 2020',
                     agents: 'Jacob Jones',
                     groups: 'Billings'
@@ -69,7 +107,7 @@ export class Tickets extends React.Component<any, any> {
                     subject: 'Service related announcements',
                     status: 'Open',
                     priority: 'Hign',
-                    Assignee: 'Abraham Pigeon',
+                    assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
                     agents: 'Jacob Jones',
                     groups: 'Billings'
@@ -80,7 +118,7 @@ export class Tickets extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact....',
                     status: 'Closed',
                     priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
+                    assignee: 'Fergus Douchebag',
                     createDate: '19 July 2020',
                     agents: 'Jacob Jones',
                     groups: 'Billings'
@@ -91,7 +129,7 @@ export class Tickets extends React.Component<any, any> {
                     subject: 'Adding a payment methods',
                     status: 'Pending',
                     priority: 'Low',
-                    Assignee: 'Jarvis Pepperspray',
+                    assignee: 'Jarvis Pepperspray',
                     createDate: '22 July 2020',
                     agents: 'Jacob Jones',
                     groups: 'Billings'
@@ -102,7 +140,7 @@ export class Tickets extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact....',
                     status: 'Open',
                     priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
+                    assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
                     agents: 'Jacob Jones',
                     groups: 'Billings'
@@ -113,12 +151,12 @@ export class Tickets extends React.Component<any, any> {
                     subject: 'I need help with aading a New Contact....',
                     status: 'Open',
                     priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
+                    assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
                     agents: 'Jacob Jones',
                     groups: 'Billings'
                 }
-            ]
+            ],
         };
         this.perPageLimit = 3,
             this.state = {
@@ -467,7 +505,10 @@ export class Tickets extends React.Component<any, any> {
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
                             <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit}
-                                tableClasses={{ ticketTable: "ticket-tabel", ticketsTable: "d-block p-t-5 tickets-tabel", allSupport: "all-support-ticket-tabel", statusClassOpen: "yellow-green", statusClassClose: "red", statusClassPendding: "orange" }} />
+                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="subject" showingLine = "Latest Tickets (Showing %start% to %end% of %total% Tickets)"/>
+                         
+                            {/* <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} */}
+                                {/* tableClasses={{ ticketTable: "ticket-tabel", ticketsTable: "d-block p-t-5 tickets-tabel", allSupport: "all-support-ticket-tabel", statusClassOpen: "yellow-green", statusClassClose: "red", statusClassPendding: "orange" }} /> */}
                         </div>
                     </div>
                 </div>
