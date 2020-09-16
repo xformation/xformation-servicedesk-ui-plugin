@@ -206,6 +206,7 @@ export class Table extends React.Component<any, any> {
 
     onSearchChange = (e: any) => {
         const { value } = e.target;
+        console.log(value);
         this.setState({
             searchKey: value,
             currentPage: 0,
@@ -214,9 +215,13 @@ export class Table extends React.Component<any, any> {
         });
         const { data } = this.state;
         const { searchKey } = this.props;
+        console.log(searchKey);
         var queryResult = [];
+        console.log(data);
         for (let i = 0; i < data.length; i++) {
             if (data[i][searchKey].indexOf(value) !== -1 || value === '') {
+                queryResult.push(data[i]);
+            }else if(data[i][searchKey].toLowerCase().indexOf(value) !== -1 || value === ''){
                 queryResult.push(data[i]);
             }
         }
