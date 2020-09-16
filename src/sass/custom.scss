@@ -429,6 +429,7 @@ a {
         border: 1px solid #ced4da;
         background-color: #ffffff;
         border-radius: 25px;
+        padding-top: 0.399rem;
         &:focus{
             outline: none;
         }
@@ -442,7 +443,7 @@ a {
         border: none;
         background-color: transparent;
         width: 34px;
-        height: 32px;
+        height: 34px;
         &:hover {
             color: #333333;
         }
@@ -704,4 +705,8 @@ a {
             float: left;
         }
     }
+}
+
+.there-no-data {
+    text-align: center;
 }

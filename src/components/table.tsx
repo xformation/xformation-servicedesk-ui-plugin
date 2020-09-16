@@ -73,7 +73,11 @@ export class Table extends React.Component<any, any> {
                 } 
             }
         } else {
-            retuData.push(<div className="d-block width-100 there-no-data">There is no data</div>);
+            retuData.push(
+                <tr>
+                    <td className="there-no-data" colSpan={7}>There is no data</td>
+                </tr>
+            );
         }
         return retuData;
     }
