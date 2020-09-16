@@ -19,6 +19,7 @@ export class Dashboard extends React.Component<any, any> {
     openNewCompanyRef: any;
     openNewEmailRef: any;
     openNewTicketRef: any;
+    checkboxValue: any;
     constructor(props: any) {
         super(props);
         this.tableValue = {
@@ -72,6 +73,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Low',
                     assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#39',
@@ -81,6 +83,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Medium',
                     assignee: 'Bodrum Salvador',
                     createDate: '12 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#47',
@@ -90,6 +93,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Low',
                     assignee: 'Inverness McKenzie',
                     createDate: '15 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#52',
@@ -99,6 +103,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Hign',
                     assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#87',
@@ -108,6 +113,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Low',
                     assignee: 'Fergus Douchebag',
                     createDate: '19 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#92',
@@ -117,6 +123,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Medium',
                     assignee: 'Jarvis Pepperspray',
                     createDate: '22 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#52',
@@ -126,6 +133,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Hign',
                     assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#87',
@@ -135,6 +143,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Low',
                     assignee: 'Fergus Douchebag',
                     createDate: '19 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#92',
@@ -144,6 +153,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Medium',
                     assignee: 'Jarvis Pepperspray',
                     createDate: '22 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#39',
@@ -153,6 +163,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Medium',
                     assignee: 'Bodrum Salvador',
                     createDate: '12 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#47',
@@ -162,6 +173,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Low',
                     assignee: 'Inverness McKenzie',
                     createDate: '15 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#52',
@@ -171,6 +183,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Hign',
                     assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#47',
@@ -180,6 +193,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Low',
                     assignee: 'Inverness McKenzie',
                     createDate: '15 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#52',
@@ -189,6 +203,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Hign',
                     assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#87',
@@ -198,6 +213,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Low',
                     assignee: 'Fergus Douchebag',
                     createDate: '19 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#92',
@@ -207,6 +223,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Medium',
                     assignee: 'Jarvis Pepperspray',
                     createDate: '22 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#52',
@@ -216,6 +233,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Hign',
                     assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#87',
@@ -225,6 +243,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Low',
                     assignee: 'Fergus Douchebag',
                     createDate: '19 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#92',
@@ -234,6 +253,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Medium',
                     assignee: 'Jarvis Pepperspray',
                     createDate: '22 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#39',
@@ -243,6 +263,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Medium',
                     assignee: 'Bodrum Salvador',
                     createDate: '12 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#27',
@@ -252,6 +273,7 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Low',
                     assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
+                    checkStatus: false
                 },
                 {
                     index: '#39',
@@ -261,10 +283,12 @@ export class Dashboard extends React.Component<any, any> {
                     priority: 'Medium',
                     assignee: 'Bodrum Salvador',
                     createDate: '12 July 2020',
+                    checkStatus: false
                 },
             ],
         };
         this.perPageLimit = 6,
+        this.checkboxValue = true,
             this.state = {
                 openCreateMenu: false,
                 ticketingData: [
@@ -545,7 +569,7 @@ export class Dashboard extends React.Component<any, any> {
                                 </h2>
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
-                            <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit}
+                            <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
                                 tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="subject" showingLine = "Latest Tickets (Showing %start% to %end% of %total% Tickets)"/>
                             {/* <div className="row"> */}
                             {/* <div className="col-lg-6 col-md-6 col-sm-12 text-right">

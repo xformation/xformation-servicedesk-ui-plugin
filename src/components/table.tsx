@@ -20,12 +20,13 @@ export class Table extends React.Component<any, any> {
             searchKey: '',
             sortType: sortEnum.NONE,
             sortKey: '',
+            isAllChecked: false,
+            visibleCheckbox: this.props.visiblecheckboxStatus,
         }
     };
 
     tableBodyData() {
-        const { displayData, searchKey, perPageLimit, currentPage, columns } = this.state;
-        // let table_row;
+        const { displayData, searchKey, perPageLimit, currentPage, columns, visibleCheckbox } = this.state;
         const retData = [];
         const length = displayData.length;
         const cLength = columns.length;
@@ -33,6 +34,11 @@ export class Table extends React.Component<any, any> {
             for (let i = 0; i < length; i++) {
                 if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
                     const tdJSX = [];
+                    if (visibleCheckbox == true) {
+                        tdJSX.push(
+                            <input type="checkbox" checked={displayData[i].checkStatus} className="checkbox" onChange={(e) => { this.onChangeParentCheckbox(e, i) }} />
+                        );
+                    }
                     const row = displayData[i];
                     for (let j = 0; j < cLength; j++) {
                         const column = columns[j];
@@ -65,9 +71,12 @@ export class Table extends React.Component<any, any> {
     }
 
     tableHeader() {
-        const { sortType, sortKey, columns } = this.state;
+        const { sortType, sortKey, columns, visibleCheckbox } = this.state;
         const length = columns.length;
         const retData = [];
+        if (visibleCheckbox == true) {
+            retData.push(<th><input type="checkbox" checked={this.state.isAllChecked} onChange={this.checkAllAlerts} className="checkbox" /></th>);
+        }
         for (let i = 0; i < length; i++) {
             const item = columns[i];
             let icon = "sort-none";
@@ -80,12 +89,50 @@ export class Table extends React.Component<any, any> {
                 onClickSortType = sortEnum.ASCENDING;
             }
             retData.push(
-                <th key={i}>{item.label}
+                <th key={i}>
+                    {item.label}
                     <span onClick={(e) => { this.sortTable(item.key, e, onClickSortType) }} className={`sort-icon ${icon}`}></span>
                 </th>
             );
         }
+
         return retData;
+    }
+
+    checkAllAlerts = (e: any) => {
+        const checked = e.target.checked;
+        const { displayData } = this.state;
+        for (let j = 0; j < displayData.length; j++) {
+            displayData[j].checkStatus = checked;
+        }
+        this.setState({
+            displayData,
+            isAllChecked: checked
+        });
+    }
+
+    onChangeParentCheckbox = (e: any, index: any) => {
+        const { displayData } = this.state;
+        const checked = e.target.checked;
+        let status = false;
+        let countCheckedCheckbox = 0;
+        displayData[index].checkStatus = checked;
+        for (let j = 0; j < displayData.length; j++) {
+            if (displayData[j].checkStatus == true) {
+                countCheckedCheckbox++;
+            } else {
+                countCheckedCheckbox--;
+            }
+        }
+        if (countCheckedCheckbox == displayData.length) {
+            status = true;
+        } else {
+            status = false;
+        }
+        this.setState({
+            displayData,
+            isAllChecked: status
+        })
     }
 
     peginationOfTable() {

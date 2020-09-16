@@ -15,6 +15,7 @@ export class Tickets extends React.Component<any, any> {
     openNewTicketRef: any;
     tableValue: any;
     perPageLimit: any;
+    checkboxValue: any;
     constructor(props: any) {
         super(props);
         this.tableValue = {
@@ -77,7 +78,8 @@ export class Tickets extends React.Component<any, any> {
                     assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#39',
@@ -88,7 +90,8 @@ export class Tickets extends React.Component<any, any> {
                     assignee: 'Bodrum Salvador',
                     createDate: '12 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#47',
@@ -99,7 +102,8 @@ export class Tickets extends React.Component<any, any> {
                     assignee: 'Inverness McKenzie',
                     createDate: '15 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#52',
@@ -110,7 +114,8 @@ export class Tickets extends React.Component<any, any> {
                     assignee: 'Abraham Pigeon',
                     createDate: '16 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#87',
@@ -121,7 +126,8 @@ export class Tickets extends React.Component<any, any> {
                     assignee: 'Fergus Douchebag',
                     createDate: '19 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#92',
@@ -132,7 +138,8 @@ export class Tickets extends React.Component<any, any> {
                     assignee: 'Jarvis Pepperspray',
                     createDate: '22 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#27',
@@ -143,7 +150,8 @@ export class Tickets extends React.Component<any, any> {
                     assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 },
                 {
                     index: '#27',
@@ -154,11 +162,13 @@ export class Tickets extends React.Component<any, any> {
                     assignee: 'Fergus Douchebag',
                     createDate: '10 July 2020',
                     agents: 'Jacob Jones',
-                    groups: 'Billings'
+                    groups: 'Billings',
+                    checkStatus: false
                 }
             ],
         };
         this.perPageLimit = 3,
+        this.checkboxValue = false,
             this.state = {
                 openCreateMenu: false,
             };
@@ -504,7 +514,7 @@ export class Tickets extends React.Component<any, any> {
                                 <h2 className="d-block m-b-0">All Support Tickets</h2>
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
-                            <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit}
+                            <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
                                 tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="subject" showingLine = "Latest Tickets (Showing %start% to %end% of %total% Tickets)"/>
                          
                             {/* <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} */}
