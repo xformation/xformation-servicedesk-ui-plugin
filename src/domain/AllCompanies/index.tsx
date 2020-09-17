@@ -352,7 +352,7 @@ export class AllCompanies extends React.Component<any, any> {
                         <div className="d-block p-t-20 all-companies-tabel">
                             {/* <div className="d-block p-t-5 companies-main-tabel"> */}
                             <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
-                                tableClasses={{ table: "companies-tabel", tableParent: "d-block  p-t-5 companies-main-tabel", parentClass: "d-block p-t-20 all-companies-tabel" }} searchKey="company" showingLine="Latest Tickets (Showing %start% to %end% of %total% Tickets)" />
+                                tableClasses={{ table: "companies-tabel", tableParent: "d-block  p-t-5 companies-main-tabel", parentClass: "d-block p-t-20 all-companies-tabel" }} searchKey="company" showingLine="Latest Companies (Showing %start% to %end% of %total% Companies)" />
                             {/* <table className="companies-tabel">
                             {/* </div> */}
                         </div>
