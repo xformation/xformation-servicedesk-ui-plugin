@@ -570,7 +570,7 @@ export class Dashboard extends React.Component<any, any> {
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
                             <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
-                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="subject" showingLine = "Latest Tickets (Showing %start% to %end% of %total% Tickets)"/>
+                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="requesterName" showingLine = "Latest Tickets (Showing %start% to %end% of %total% Tickets)"/>
                             {/* <div className="row"> */}
                             {/* <div className="col-lg-6 col-md-6 col-sm-12 text-right">
                                     <div className="sortby">
