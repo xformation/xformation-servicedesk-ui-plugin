@@ -414,7 +414,7 @@ export class OpenTickets extends React.Component<any, any> {
                     <div className="common-container border-bottom-0">
                         <div className="d-block all-open-ticket-tabel">
                             <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
-                                tableClasses={{ table: "open-ticket-tabel", tableParent: "d-block p-t-5 open-tickets-tabel", parentClass: "all-open-ticket-tabel" }} searchKey="subject" showingLine = "Latest Tickets (Showing %start% to %end% of %total% Tickets)" />
+                                tableClasses={{ table: "open-ticket-tabel", tableParent: "d-block p-t-5 open-tickets-tabel", parentClass: "all-open-ticket-tabel" }} searchKey="subject" showingLine = "Showing %start% to %end% of %total% Tickets" />
                             
                         </div>
                     </div>
