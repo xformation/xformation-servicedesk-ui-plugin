@@ -187,7 +187,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         for (let i = 0; i < contacts.length; i++) {
             const error = errorList[i];
             retData.push(
-                <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="contact" id={i} name="contact" value={contacts[i].value} arrayData={{ 0: 'abc', 1: 'def', 2: 'ghi' }} onChange={this.handleStateChange} isValid={error.isValid} message={error.message} />
+                <Customselectbox containerClass="form-group-inner p-b-10" inputClass="form-control" htmlFor="contact" id={i} name="contact" value={contacts[i].value} arrayData={{ 0: 'abc', 1: 'def', 2: 'ghi' }} onChange={this.handleStateChange} isValid={error.isValid} message={error.message} />
             );
         }
         return retData;
@@ -210,7 +210,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                                     <label htmlFor="contact">Contact*</label>
                                     {/* <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="contact" id="contact" name="contact" value={contact} arrayData={{ 0: 'abc', 1: 'def', 2: 'ghi' }} onChange={this.handleStateChange} isValid={errorData.contact.isValid} message={errorData.contact.message} /> */}
                                     {this.displayContact()}
-                                    <div className="d-block text-right p-t-5">
+                                    <div className="d-block text-right" style={{marginTop: '-5px'}}>
                                         <button className="add-conatct" onClick={() => this.addContact()}>Add a Conatct</button>
                                     </div>
                                 </div>
