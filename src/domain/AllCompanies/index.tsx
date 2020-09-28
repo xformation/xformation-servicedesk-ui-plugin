@@ -319,7 +319,7 @@ export class AllCompanies extends React.Component<any, any> {
             <div className="servicedesk-dashboard-container" >
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
                 <div className="servicedesk-page-container all-contacts-container">
-                    <div className="common-container border-bottom-0 p-b-0">
+                    <div className="common-container p-b-0">
                         <div className="row">
                             <div className="col-lg-8 col-md-8 col-sm-12">
                                 <div className="page-heading">
@@ -350,11 +350,8 @@ export class AllCompanies extends React.Component<any, any> {
                     </div>
                     <div className="common-container border-bottom-0 p-t-0">
                         <div className="d-block p-t-20 all-companies-tabel">
-                            {/* <div className="d-block p-t-5 companies-main-tabel"> */}
                             <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
-                                tableClasses={{ table: "companies-tabel", tableParent: "d-block  p-t-5 companies-main-tabel", parentClass: "d-block p-t-20 all-companies-tabel" }} searchKey="company" showingLine="Latest Companies (Showing %start% to %end% of %total% Companies)" />
-                            {/* <table className="companies-tabel">
-                            {/* </div> */}
+                                tableClasses={{ table: "companies-tabel", tableParent: "d-block  p-t-5 companies-main-tabel", parentClass: "d-block p-t-20 all-companies-tabel" }} searchKey="company" showingLine="Showing %start% to %end% of %total% Companies" />
                         </div>
                     </div>
                 </div>

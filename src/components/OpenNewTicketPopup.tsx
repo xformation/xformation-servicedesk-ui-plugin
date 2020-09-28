@@ -22,7 +22,11 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             assign: '',
             description: '',
             tags: '',
-            isSubmitted: false
+            isSubmitted: false,
+            contacts: [
+                { index: '', value: '' }
+            ],
+            totalContact: 1,
         };
     }
     async componentDidMount() {
@@ -65,7 +69,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             isSubmitted: true
         });
         const errorData = this.validate(true);
-        if (errorData.contact.isValid && errorData.subject.isValid && errorData.type.isValid && errorData.subjectText.isValid && errorData.priority.isValid && errorData.assign.isValid && errorData.description.isValid && errorData.tags.isValid) {
+        if (errorData.subject.isValid && errorData.type.isValid && errorData.subjectText.isValid && errorData.priority.isValid && errorData.assign.isValid && errorData.description.isValid && errorData.tags.isValid) {
             const { contact, subject, type, subjectText, priority, assign, description, tags } = this.state;
             let sendData:any = {
                 contact,
@@ -111,7 +115,6 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             message: ""
         };
         const retData = {
-            contact: validObj,
             subject: validObj,
             type: validObj,
             subjectText: validObj,
@@ -121,13 +124,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             tags: validObj,
         };
         if (isSubmitted) {
-            const { contact, subject, type, subjectText, priority, assign, description, tags } = this.state;
-            if (!contact) {
-                retData.contact = {
-                    isValid: false,
-                    message: "Contact Name is required"
-                };
-            }
+            const { subject, type, subjectText, priority, assign, description, tags } = this.state;
             if (!subject) {
                 retData.subject = {
                     isValid: false,
@@ -174,12 +171,78 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         return retData;
     };
 
-    handleStateChange = (e: any) => {
-        const { name, value } = e.target;
-        this.setState({
-            [name]: value
-        });
+    validateContacts = (isSubmitted: any) => {
+        const retData = [];
+        const { contacts } = this.state;
+        const length = contacts.length;
+        let isValid = true;
+        for (let i = 0; i < length; i++) {
+            retData.push({
+                isValid: true,
+                message: ""
+            });
+        }
+        if (isSubmitted) {
+            if (length > 0) {
+                for (let i = 0; i < length; i++) {
+                    if (contacts[i].value == '') {
+                        retData[i] = {
+                            isValid: false,
+                            message: "Contact Name is required"
+                        };
+                    }
+                }
+            }
+            isValid = false;
+        }
+        return {
+            errorList: retData,
+            isValid
+        };
     };
+
+    handleStateChange = (e: any) => {
+        const { name, value, id } = e.target;
+        let data = [];
+        if (name == 'contact') {
+            for (let i = 0; i < this.state.contacts.length; i++) {
+                if (id == i) {
+                    data.push({ index: i, value: value })
+                } else {
+                    data.push(this.state.contacts[i])
+                }
+            }
+            this.setState({
+                contacts: data
+            });
+        } else {
+            this.setState({
+                [name]: value
+            });
+        }
+    };
+
+    addContact = () => {
+        let optionArray = this.state.contacts;
+        optionArray.push({ index: '', value: '' });
+        this.setState({
+            contacts: optionArray
+        })
+    }
+
+    displayContact = () => {
+        const { contact, isSubmitted, totalContact, contacts } = this.state;
+        const contactValidation = this.validateContacts(isSubmitted);
+        const errorList = contactValidation.errorList;
+        let retData = [];
+        for (let i = 0; i < contacts.length; i++) {
+            const error = errorList[i];
+            retData.push(
+                <Customselectbox containerClass="form-group-inner p-b-10" inputClass="form-control" htmlFor="contact" id={i} name="contact" value={contacts[i].value} arrayData={{ 0: 'abc', 1: 'def', 2: 'ghi' }} onChange={this.handleStateChange} isValid={error.isValid} message={error.message} />
+            );
+        }
+        return retData;
+    }
 
     render() {
         const { conatctFullNameList, contactIndexsList, modal, contact, subject, type, subjectText, priority, assign, description, tags, isSubmitted } = this.state;

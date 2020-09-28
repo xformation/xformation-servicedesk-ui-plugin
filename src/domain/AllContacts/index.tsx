@@ -315,7 +315,7 @@ export class AllContacts extends React.Component<any, any> {
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
                 <div className="servicedesk-page-container all-contacts-container">
-                    <div className="common-container border-bottom-0 p-b-0">
+                    <div className="common-container p-b-0">
                         <div className="row">
                             <div className="col-lg-8 col-md-8 col-sm-12">
                                 <div className="page-heading">
@@ -346,8 +346,7 @@ export class AllContacts extends React.Component<any, any> {
                     </div>
 
                     <div className="common-container border-bottom-0 p-t-0">
-                        <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
-                            tableClasses={{ table: "contact-tabel", tableParent: "d-block p-t-5 contacts-tabel", parentClass: "d-block p-t-20 all-contacts-tabel" }} searchKey="contact" showingLine = "All Contacts (Showing %start% to %end% of %total% Contacts)"/>
+                        <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue} tableClasses={{ table: "contact-tabel", tableParent: "d-block p-t-5 contacts-tabel", parentClass: "d-block p-t-20 all-contacts-tabel" }} searchKey="contact" showingLine = "Showing %start% to %end% of %total% Contacts"/>
                     </div>
                 </div>
                 <OpenNewContactPopup ref={this.openNewContactRef} />
