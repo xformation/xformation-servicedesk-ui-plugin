@@ -1,6 +1,8 @@
 import * as React from 'react';
-import { Modal, ModalBody } from 'reactstrap';
+import { CustomInput, Modal, ModalBody } from 'reactstrap';
 import { CustomTextbox } from './CustomTextbox';
+import axios from 'axios'
+import { config } from "../config";
 
 export class OpenNewCompanyPopup extends React.Component<any, any> {
     steps: any;
@@ -8,6 +10,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
         super(props);
         this.state = {
             modal: false,
+            companyLogo: null,
             companyName: '',
             description: '',
             notes: '',
@@ -31,15 +34,16 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
         });
     }
 
-    handleSubmit = (event: any) => {
+    handleSubmit = async (event: any) => {
         event.preventDefault();
         this.setState({
             isSubmitted: true
         });
         const errorData = this.validate(true);
         if (errorData.companyName.isValid && errorData.description.isValid && errorData.notes.isValid && errorData.healthCare.isValid && errorData.company.isValid && errorData.accountTier.isValid && errorData.renewalDate.isValid && errorData.industry.isValid) {
-            const { companyName, description, notes, company, healthCare, accountTier, renewalDate, industry } = this.state;
+            const { companyLogo, companyName, description, notes, company, healthCare, accountTier, renewalDate, industry } = this.state;
             const sendData = {
+                companyLogo,
                 companyName,
                 description,
                 notes,
@@ -50,6 +54,34 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                 industry,
             };
             console.log(sendData);
+            let formData = new FormData();
+            formData.append("logo",companyLogo);
+            formData.append("companyName", companyName);
+            formData.append("description", description);
+            formData.append("notes", notes);
+            formData.append("company", company);
+            formData.append("healthScore", healthCare);
+            formData.append("accountTier", accountTier);
+            formData.append("renewalDate", renewalDate);
+            formData.append("industry", industry);
+            const data = {
+                "companyName": companyName,
+                "description": description,
+                "notes": notes,
+                "company": company,
+                "healthScore": healthCare,
+                "accountTier": accountTier,
+                "renewalDate": renewalDate,
+                "industry": industry,
+            }
+            axios.post(config.SERVICEDESK_API_URL+"/api/companies", formData, {
+                headers: {
+                  'content-type': 'multipart/form-data'
+                }
+              })
+                  .then(res => {
+                    console.log(res.data);
+                  }).catch(err => console.log(err))
         }
     };
 
@@ -128,9 +160,15 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
             [name]: value
         });
     };
+    handleImageChange = (e: any) => {
+        console.log("file=",e.target.files[0])
+        this.setState({
+            companyLogo : e.target.files[0]
+        })
+    };
 
     render() {
-        const { modal, companyName, description, notes, company, healthCare, accountTier, renewalDate, industry, isSubmitted } = this.state;
+        const { modal, companyLogo, companyName, description, notes, company, healthCare, accountTier, renewalDate, industry, isSubmitted } = this.state;
         const errorData = this.validate(isSubmitted);
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
@@ -146,6 +184,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                             </div>
                             <div className="d-inline-block v-a-top">
                                 <strong className="d-block">Upload Logo</strong>
+                                <input type="file" id="companyLogo" name="companyLogo" onChange={this.handleImageChange} />
                                 <p className="d-block">An image of the person, it's best if it has the same length and height</p>
                             </div>
                         </div>

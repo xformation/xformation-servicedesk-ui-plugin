@@ -466,6 +466,2077 @@ define(["moment", "react", "react-dom"], function(
           /***/
         },
 
+      /***/ "../node_modules/axios/index.js":
+        /*!**************************************!*\
+  !*** ../node_modules/axios/index.js ***!
+  \**************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          module.exports = __webpack_require__(
+            /*! ./lib/axios */ "../node_modules/axios/lib/axios.js"
+          );
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/adapters/xhr.js":
+        /*!*************************************************!*\
+  !*** ../node_modules/axios/lib/adapters/xhr.js ***!
+  \*************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ./../utils */ "../node_modules/axios/lib/utils.js"
+          );
+          var settle = __webpack_require__(
+            /*! ./../core/settle */ "../node_modules/axios/lib/core/settle.js"
+          );
+          var cookies = __webpack_require__(
+            /*! ./../helpers/cookies */ "../node_modules/axios/lib/helpers/cookies.js"
+          );
+          var buildURL = __webpack_require__(
+            /*! ./../helpers/buildURL */ "../node_modules/axios/lib/helpers/buildURL.js"
+          );
+          var buildFullPath = __webpack_require__(
+            /*! ../core/buildFullPath */ "../node_modules/axios/lib/core/buildFullPath.js"
+          );
+          var parseHeaders = __webpack_require__(
+            /*! ./../helpers/parseHeaders */ "../node_modules/axios/lib/helpers/parseHeaders.js"
+          );
+          var isURLSameOrigin = __webpack_require__(
+            /*! ./../helpers/isURLSameOrigin */ "../node_modules/axios/lib/helpers/isURLSameOrigin.js"
+          );
+          var createError = __webpack_require__(
+            /*! ../core/createError */ "../node_modules/axios/lib/core/createError.js"
+          );
+
+          module.exports = function xhrAdapter(config) {
+            return new Promise(function dispatchXhrRequest(resolve, reject) {
+              var requestData = config.data;
+              var requestHeaders = config.headers;
+
+              if (utils.isFormData(requestData)) {
+                delete requestHeaders["Content-Type"]; // Let the browser set it
+              }
+
+              if (
+                (utils.isBlob(requestData) || utils.isFile(requestData)) &&
+                requestData.type
+              ) {
+                delete requestHeaders["Content-Type"]; // Let the browser set it
+              }
+
+              var request = new XMLHttpRequest();
+
+              // HTTP basic authentication
+              if (config.auth) {
+                var username = config.auth.username || "";
+                var password =
+                  unescape(encodeURIComponent(config.auth.password)) || "";
+                requestHeaders.Authorization =
+                  "Basic " + btoa(username + ":" + password);
+              }
+
+              var fullPath = buildFullPath(config.baseURL, config.url);
+              request.open(
+                config.method.toUpperCase(),
+                buildURL(fullPath, config.params, config.paramsSerializer),
+                true
+              );
+
+              // Set the request timeout in MS
+              request.timeout = config.timeout;
+
+              // Listen for ready state
+              request.onreadystatechange = function handleLoad() {
+                if (!request || request.readyState !== 4) {
+                  return;
+                }
+
+                // The request errored out and we didn't get a response, this will be
+                // handled by onerror instead
+                // With one exception: request that using file: protocol, most browsers
+                // will return status as 0 even though it's a successful request
+                if (
+                  request.status === 0 &&
+                  !(
+                    request.responseURL &&
+                    request.responseURL.indexOf("file:") === 0
+                  )
+                ) {
+                  return;
+                }
+
+                // Prepare the response
+                var responseHeaders =
+                  "getAllResponseHeaders" in request
+                    ? parseHeaders(request.getAllResponseHeaders())
+                    : null;
+                var responseData =
+                  !config.responseType || config.responseType === "text"
+                    ? request.responseText
+                    : request.response;
+                var response = {
+                  data: responseData,
+                  status: request.status,
+                  statusText: request.statusText,
+                  headers: responseHeaders,
+                  config: config,
+                  request: request
+                };
+
+                settle(resolve, reject, response);
+
+                // Clean up request
+                request = null;
+              };
+
+              // Handle browser request cancellation (as opposed to a manual cancellation)
+              request.onabort = function handleAbort() {
+                if (!request) {
+                  return;
+                }
+
+                reject(
+                  createError(
+                    "Request aborted",
+                    config,
+                    "ECONNABORTED",
+                    request
+                  )
+                );
+
+                // Clean up request
+                request = null;
+              };
+
+              // Handle low level network errors
+              request.onerror = function handleError() {
+                // Real errors are hidden from us by the browser
+                // onerror should only fire if it's a network error
+                reject(createError("Network Error", config, null, request));
+
+                // Clean up request
+                request = null;
+              };
+
+              // Handle timeout
+              request.ontimeout = function handleTimeout() {
+                var timeoutErrorMessage =
+                  "timeout of " + config.timeout + "ms exceeded";
+                if (config.timeoutErrorMessage) {
+                  timeoutErrorMessage = config.timeoutErrorMessage;
+                }
+                reject(
+                  createError(
+                    timeoutErrorMessage,
+                    config,
+                    "ECONNABORTED",
+                    request
+                  )
+                );
+
+                // Clean up request
+                request = null;
+              };
+
+              // Add xsrf header
+              // This is only done if running in a standard browser environment.
+              // Specifically not if we're in a web worker, or react-native.
+              if (utils.isStandardBrowserEnv()) {
+                // Add xsrf header
+                var xsrfValue =
+                  (config.withCredentials || isURLSameOrigin(fullPath)) &&
+                  config.xsrfCookieName
+                    ? cookies.read(config.xsrfCookieName)
+                    : undefined;
+
+                if (xsrfValue) {
+                  requestHeaders[config.xsrfHeaderName] = xsrfValue;
+                }
+              }
+
+              // Add headers to the request
+              if ("setRequestHeader" in request) {
+                utils.forEach(requestHeaders, function setRequestHeader(
+                  val,
+                  key
+                ) {
+                  if (
+                    typeof requestData === "undefined" &&
+                    key.toLowerCase() === "content-type"
+                  ) {
+                    // Remove Content-Type if data is undefined
+                    delete requestHeaders[key];
+                  } else {
+                    // Otherwise add header to the request
+                    request.setRequestHeader(key, val);
+                  }
+                });
+              }
+
+              // Add withCredentials to request if needed
+              if (!utils.isUndefined(config.withCredentials)) {
+                request.withCredentials = !!config.withCredentials;
+              }
+
+              // Add responseType to request if needed
+              if (config.responseType) {
+                try {
+                  request.responseType = config.responseType;
+                } catch (e) {
+                  // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+                  // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+                  if (config.responseType !== "json") {
+                    throw e;
+                  }
+                }
+              }
+
+              // Handle progress if needed
+              if (typeof config.onDownloadProgress === "function") {
+                request.addEventListener("progress", config.onDownloadProgress);
+              }
+
+              // Not all browsers support upload events
+              if (
+                typeof config.onUploadProgress === "function" &&
+                request.upload
+              ) {
+                request.upload.addEventListener(
+                  "progress",
+                  config.onUploadProgress
+                );
+              }
+
+              if (config.cancelToken) {
+                // Handle cancellation
+                config.cancelToken.promise.then(function onCanceled(cancel) {
+                  if (!request) {
+                    return;
+                  }
+
+                  request.abort();
+                  reject(cancel);
+                  // Clean up request
+                  request = null;
+                });
+              }
+
+              if (!requestData) {
+                requestData = null;
+              }
+
+              // Send the request
+              request.send(requestData);
+            });
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/axios.js":
+        /*!******************************************!*\
+  !*** ../node_modules/axios/lib/axios.js ***!
+  \******************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ./utils */ "../node_modules/axios/lib/utils.js"
+          );
+          var bind = __webpack_require__(
+            /*! ./helpers/bind */ "../node_modules/axios/lib/helpers/bind.js"
+          );
+          var Axios = __webpack_require__(
+            /*! ./core/Axios */ "../node_modules/axios/lib/core/Axios.js"
+          );
+          var mergeConfig = __webpack_require__(
+            /*! ./core/mergeConfig */ "../node_modules/axios/lib/core/mergeConfig.js"
+          );
+          var defaults = __webpack_require__(
+            /*! ./defaults */ "../node_modules/axios/lib/defaults.js"
+          );
+
+          /**
+           * Create an instance of Axios
+           *
+           * @param {Object} defaultConfig The default config for the instance
+           * @return {Axios} A new instance of Axios
+           */
+          function createInstance(defaultConfig) {
+            var context = new Axios(defaultConfig);
+            var instance = bind(Axios.prototype.request, context);
+
+            // Copy axios.prototype to instance
+            utils.extend(instance, Axios.prototype, context);
+
+            // Copy context to instance
+            utils.extend(instance, context);
+
+            return instance;
+          }
+
+          // Create the default instance to be exported
+          var axios = createInstance(defaults);
+
+          // Expose Axios class to allow class inheritance
+          axios.Axios = Axios;
+
+          // Factory for creating new instances
+          axios.create = function create(instanceConfig) {
+            return createInstance(mergeConfig(axios.defaults, instanceConfig));
+          };
+
+          // Expose Cancel & CancelToken
+          axios.Cancel = __webpack_require__(
+            /*! ./cancel/Cancel */ "../node_modules/axios/lib/cancel/Cancel.js"
+          );
+          axios.CancelToken = __webpack_require__(
+            /*! ./cancel/CancelToken */ "../node_modules/axios/lib/cancel/CancelToken.js"
+          );
+          axios.isCancel = __webpack_require__(
+            /*! ./cancel/isCancel */ "../node_modules/axios/lib/cancel/isCancel.js"
+          );
+
+          // Expose all/spread
+          axios.all = function all(promises) {
+            return Promise.all(promises);
+          };
+          axios.spread = __webpack_require__(
+            /*! ./helpers/spread */ "../node_modules/axios/lib/helpers/spread.js"
+          );
+
+          module.exports = axios;
+
+          // Allow use of default import syntax in TypeScript
+          module.exports.default = axios;
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/cancel/Cancel.js":
+        /*!**************************************************!*\
+  !*** ../node_modules/axios/lib/cancel/Cancel.js ***!
+  \**************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          /**
+           * A `Cancel` is an object that is thrown when an operation is canceled.
+           *
+           * @class
+           * @param {string=} message The message.
+           */
+          function Cancel(message) {
+            this.message = message;
+          }
+
+          Cancel.prototype.toString = function toString() {
+            return "Cancel" + (this.message ? ": " + this.message : "");
+          };
+
+          Cancel.prototype.__CANCEL__ = true;
+
+          module.exports = Cancel;
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/cancel/CancelToken.js":
+        /*!*******************************************************!*\
+  !*** ../node_modules/axios/lib/cancel/CancelToken.js ***!
+  \*******************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var Cancel = __webpack_require__(
+            /*! ./Cancel */ "../node_modules/axios/lib/cancel/Cancel.js"
+          );
+
+          /**
+           * A `CancelToken` is an object that can be used to request cancellation of an operation.
+           *
+           * @class
+           * @param {Function} executor The executor function.
+           */
+          function CancelToken(executor) {
+            if (typeof executor !== "function") {
+              throw new TypeError("executor must be a function.");
+            }
+
+            var resolvePromise;
+            this.promise = new Promise(function promiseExecutor(resolve) {
+              resolvePromise = resolve;
+            });
+
+            var token = this;
+            executor(function cancel(message) {
+              if (token.reason) {
+                // Cancellation has already been requested
+                return;
+              }
+
+              token.reason = new Cancel(message);
+              resolvePromise(token.reason);
+            });
+          }
+
+          /**
+           * Throws a `Cancel` if cancellation has been requested.
+           */
+          CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+            if (this.reason) {
+              throw this.reason;
+            }
+          };
+
+          /**
+           * Returns an object that contains a new `CancelToken` and a function that, when called,
+           * cancels the `CancelToken`.
+           */
+          CancelToken.source = function source() {
+            var cancel;
+            var token = new CancelToken(function executor(c) {
+              cancel = c;
+            });
+            return {
+              token: token,
+              cancel: cancel
+            };
+          };
+
+          module.exports = CancelToken;
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/cancel/isCancel.js":
+        /*!****************************************************!*\
+  !*** ../node_modules/axios/lib/cancel/isCancel.js ***!
+  \****************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          module.exports = function isCancel(value) {
+            return !!(value && value.__CANCEL__);
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/core/Axios.js":
+        /*!***********************************************!*\
+  !*** ../node_modules/axios/lib/core/Axios.js ***!
+  \***********************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ./../utils */ "../node_modules/axios/lib/utils.js"
+          );
+          var buildURL = __webpack_require__(
+            /*! ../helpers/buildURL */ "../node_modules/axios/lib/helpers/buildURL.js"
+          );
+          var InterceptorManager = __webpack_require__(
+            /*! ./InterceptorManager */ "../node_modules/axios/lib/core/InterceptorManager.js"
+          );
+          var dispatchRequest = __webpack_require__(
+            /*! ./dispatchRequest */ "../node_modules/axios/lib/core/dispatchRequest.js"
+          );
+          var mergeConfig = __webpack_require__(
+            /*! ./mergeConfig */ "../node_modules/axios/lib/core/mergeConfig.js"
+          );
+
+          /**
+           * Create a new instance of Axios
+           *
+           * @param {Object} instanceConfig The default config for the instance
+           */
+          function Axios(instanceConfig) {
+            this.defaults = instanceConfig;
+            this.interceptors = {
+              request: new InterceptorManager(),
+              response: new InterceptorManager()
+            };
+          }
+
+          /**
+           * Dispatch a request
+           *
+           * @param {Object} config The config specific for this request (merged with this.defaults)
+           */
+          Axios.prototype.request = function request(config) {
+            /*eslint no-param-reassign:0*/
+            // Allow for axios('example/url'[, config]) a la fetch API
+            if (typeof config === "string") {
+              config = arguments[1] || {};
+              config.url = arguments[0];
+            } else {
+              config = config || {};
+            }
+
+            config = mergeConfig(this.defaults, config);
+
+            // Set config.method
+            if (config.method) {
+              config.method = config.method.toLowerCase();
+            } else if (this.defaults.method) {
+              config.method = this.defaults.method.toLowerCase();
+            } else {
+              config.method = "get";
+            }
+
+            // Hook up interceptors middleware
+            var chain = [dispatchRequest, undefined];
+            var promise = Promise.resolve(config);
+
+            this.interceptors.request.forEach(
+              function unshiftRequestInterceptors(interceptor) {
+                chain.unshift(interceptor.fulfilled, interceptor.rejected);
+              }
+            );
+
+            this.interceptors.response.forEach(
+              function pushResponseInterceptors(interceptor) {
+                chain.push(interceptor.fulfilled, interceptor.rejected);
+              }
+            );
+
+            while (chain.length) {
+              promise = promise.then(chain.shift(), chain.shift());
+            }
+
+            return promise;
+          };
+
+          Axios.prototype.getUri = function getUri(config) {
+            config = mergeConfig(this.defaults, config);
+            return buildURL(
+              config.url,
+              config.params,
+              config.paramsSerializer
+            ).replace(/^\?/, "");
+          };
+
+          // Provide aliases for supported request methods
+          utils.forEach(
+            ["delete", "get", "head", "options"],
+            function forEachMethodNoData(method) {
+              /*eslint func-names:0*/
+              Axios.prototype[method] = function(url, config) {
+                return this.request(
+                  mergeConfig(config || {}, {
+                    method: method,
+                    url: url
+                  })
+                );
+              };
+            }
+          );
+
+          utils.forEach(
+            ["post", "put", "patch"],
+            function forEachMethodWithData(method) {
+              /*eslint func-names:0*/
+              Axios.prototype[method] = function(url, data, config) {
+                return this.request(
+                  mergeConfig(config || {}, {
+                    method: method,
+                    url: url,
+                    data: data
+                  })
+                );
+              };
+            }
+          );
+
+          module.exports = Axios;
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/core/InterceptorManager.js":
+        /*!************************************************************!*\
+  !*** ../node_modules/axios/lib/core/InterceptorManager.js ***!
+  \************************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ./../utils */ "../node_modules/axios/lib/utils.js"
+          );
+
+          function InterceptorManager() {
+            this.handlers = [];
+          }
+
+          /**
+           * Add a new interceptor to the stack
+           *
+           * @param {Function} fulfilled The function to handle `then` for a `Promise`
+           * @param {Function} rejected The function to handle `reject` for a `Promise`
+           *
+           * @return {Number} An ID used to remove interceptor later
+           */
+          InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+            this.handlers.push({
+              fulfilled: fulfilled,
+              rejected: rejected
+            });
+            return this.handlers.length - 1;
+          };
+
+          /**
+           * Remove an interceptor from the stack
+           *
+           * @param {Number} id The ID that was returned by `use`
+           */
+          InterceptorManager.prototype.eject = function eject(id) {
+            if (this.handlers[id]) {
+              this.handlers[id] = null;
+            }
+          };
+
+          /**
+           * Iterate over all the registered interceptors
+           *
+           * This method is particularly useful for skipping over any
+           * interceptors that may have become `null` calling `eject`.
+           *
+           * @param {Function} fn The function to call for each interceptor
+           */
+          InterceptorManager.prototype.forEach = function forEach(fn) {
+            utils.forEach(this.handlers, function forEachHandler(h) {
+              if (h !== null) {
+                fn(h);
+              }
+            });
+          };
+
+          module.exports = InterceptorManager;
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/core/buildFullPath.js":
+        /*!*******************************************************!*\
+  !*** ../node_modules/axios/lib/core/buildFullPath.js ***!
+  \*******************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var isAbsoluteURL = __webpack_require__(
+            /*! ../helpers/isAbsoluteURL */ "../node_modules/axios/lib/helpers/isAbsoluteURL.js"
+          );
+          var combineURLs = __webpack_require__(
+            /*! ../helpers/combineURLs */ "../node_modules/axios/lib/helpers/combineURLs.js"
+          );
+
+          /**
+           * Creates a new URL by combining the baseURL with the requestedURL,
+           * only when the requestedURL is not already an absolute URL.
+           * If the requestURL is absolute, this function returns the requestedURL untouched.
+           *
+           * @param {string} baseURL The base URL
+           * @param {string} requestedURL Absolute or relative URL to combine
+           * @returns {string} The combined full path
+           */
+          module.exports = function buildFullPath(baseURL, requestedURL) {
+            if (baseURL && !isAbsoluteURL(requestedURL)) {
+              return combineURLs(baseURL, requestedURL);
+            }
+            return requestedURL;
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/core/createError.js":
+        /*!*****************************************************!*\
+  !*** ../node_modules/axios/lib/core/createError.js ***!
+  \*****************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var enhanceError = __webpack_require__(
+            /*! ./enhanceError */ "../node_modules/axios/lib/core/enhanceError.js"
+          );
+
+          /**
+           * Create an Error with the specified message, config, error code, request and response.
+           *
+           * @param {string} message The error message.
+           * @param {Object} config The config.
+           * @param {string} [code] The error code (for example, 'ECONNABORTED').
+           * @param {Object} [request] The request.
+           * @param {Object} [response] The response.
+           * @returns {Error} The created error.
+           */
+          module.exports = function createError(
+            message,
+            config,
+            code,
+            request,
+            response
+          ) {
+            var error = new Error(message);
+            return enhanceError(error, config, code, request, response);
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/core/dispatchRequest.js":
+        /*!*********************************************************!*\
+  !*** ../node_modules/axios/lib/core/dispatchRequest.js ***!
+  \*********************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ./../utils */ "../node_modules/axios/lib/utils.js"
+          );
+          var transformData = __webpack_require__(
+            /*! ./transformData */ "../node_modules/axios/lib/core/transformData.js"
+          );
+          var isCancel = __webpack_require__(
+            /*! ../cancel/isCancel */ "../node_modules/axios/lib/cancel/isCancel.js"
+          );
+          var defaults = __webpack_require__(
+            /*! ../defaults */ "../node_modules/axios/lib/defaults.js"
+          );
+
+          /**
+           * Throws a `Cancel` if cancellation has been requested.
+           */
+          function throwIfCancellationRequested(config) {
+            if (config.cancelToken) {
+              config.cancelToken.throwIfRequested();
+            }
+          }
+
+          /**
+           * Dispatch a request to the server using the configured adapter.
+           *
+           * @param {object} config The config that is to be used for the request
+           * @returns {Promise} The Promise to be fulfilled
+           */
+          module.exports = function dispatchRequest(config) {
+            throwIfCancellationRequested(config);
+
+            // Ensure headers exist
+            config.headers = config.headers || {};
+
+            // Transform request data
+            config.data = transformData(
+              config.data,
+              config.headers,
+              config.transformRequest
+            );
+
+            // Flatten headers
+            config.headers = utils.merge(
+              config.headers.common || {},
+              config.headers[config.method] || {},
+              config.headers
+            );
+
+            utils.forEach(
+              ["delete", "get", "head", "post", "put", "patch", "common"],
+              function cleanHeaderConfig(method) {
+                delete config.headers[method];
+              }
+            );
+
+            var adapter = config.adapter || defaults.adapter;
+
+            return adapter(config).then(
+              function onAdapterResolution(response) {
+                throwIfCancellationRequested(config);
+
+                // Transform response data
+                response.data = transformData(
+                  response.data,
+                  response.headers,
+                  config.transformResponse
+                );
+
+                return response;
+              },
+              function onAdapterRejection(reason) {
+                if (!isCancel(reason)) {
+                  throwIfCancellationRequested(config);
+
+                  // Transform response data
+                  if (reason && reason.response) {
+                    reason.response.data = transformData(
+                      reason.response.data,
+                      reason.response.headers,
+                      config.transformResponse
+                    );
+                  }
+                }
+
+                return Promise.reject(reason);
+              }
+            );
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/core/enhanceError.js":
+        /*!******************************************************!*\
+  !*** ../node_modules/axios/lib/core/enhanceError.js ***!
+  \******************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          /**
+           * Update an Error with the specified config, error code, and response.
+           *
+           * @param {Error} error The error to update.
+           * @param {Object} config The config.
+           * @param {string} [code] The error code (for example, 'ECONNABORTED').
+           * @param {Object} [request] The request.
+           * @param {Object} [response] The response.
+           * @returns {Error} The error.
+           */
+          module.exports = function enhanceError(
+            error,
+            config,
+            code,
+            request,
+            response
+          ) {
+            error.config = config;
+            if (code) {
+              error.code = code;
+            }
+
+            error.request = request;
+            error.response = response;
+            error.isAxiosError = true;
+
+            error.toJSON = function toJSON() {
+              return {
+                // Standard
+                message: this.message,
+                name: this.name,
+                // Microsoft
+                description: this.description,
+                number: this.number,
+                // Mozilla
+                fileName: this.fileName,
+                lineNumber: this.lineNumber,
+                columnNumber: this.columnNumber,
+                stack: this.stack,
+                // Axios
+                config: this.config,
+                code: this.code
+              };
+            };
+            return error;
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/core/mergeConfig.js":
+        /*!*****************************************************!*\
+  !*** ../node_modules/axios/lib/core/mergeConfig.js ***!
+  \*****************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ../utils */ "../node_modules/axios/lib/utils.js"
+          );
+
+          /**
+           * Config-specific merge-function which creates a new config-object
+           * by merging two configuration objects together.
+           *
+           * @param {Object} config1
+           * @param {Object} config2
+           * @returns {Object} New object resulting from merging config2 to config1
+           */
+          module.exports = function mergeConfig(config1, config2) {
+            // eslint-disable-next-line no-param-reassign
+            config2 = config2 || {};
+            var config = {};
+
+            var valueFromConfig2Keys = ["url", "method", "data"];
+            var mergeDeepPropertiesKeys = [
+              "headers",
+              "auth",
+              "proxy",
+              "params"
+            ];
+            var defaultToConfig2Keys = [
+              "baseURL",
+              "transformRequest",
+              "transformResponse",
+              "paramsSerializer",
+              "timeout",
+              "timeoutMessage",
+              "withCredentials",
+              "adapter",
+              "responseType",
+              "xsrfCookieName",
+              "xsrfHeaderName",
+              "onUploadProgress",
+              "onDownloadProgress",
+              "decompress",
+              "maxContentLength",
+              "maxBodyLength",
+              "maxRedirects",
+              "transport",
+              "httpAgent",
+              "httpsAgent",
+              "cancelToken",
+              "socketPath",
+              "responseEncoding"
+            ];
+            var directMergeKeys = ["validateStatus"];
+
+            function getMergedValue(target, source) {
+              if (utils.isPlainObject(target) && utils.isPlainObject(source)) {
+                return utils.merge(target, source);
+              } else if (utils.isPlainObject(source)) {
+                return utils.merge({}, source);
+              } else if (utils.isArray(source)) {
+                return source.slice();
+              }
+              return source;
+            }
+
+            function mergeDeepProperties(prop) {
+              if (!utils.isUndefined(config2[prop])) {
+                config[prop] = getMergedValue(config1[prop], config2[prop]);
+              } else if (!utils.isUndefined(config1[prop])) {
+                config[prop] = getMergedValue(undefined, config1[prop]);
+              }
+            }
+
+            utils.forEach(valueFromConfig2Keys, function valueFromConfig2(
+              prop
+            ) {
+              if (!utils.isUndefined(config2[prop])) {
+                config[prop] = getMergedValue(undefined, config2[prop]);
+              }
+            });
+
+            utils.forEach(mergeDeepPropertiesKeys, mergeDeepProperties);
+
+            utils.forEach(defaultToConfig2Keys, function defaultToConfig2(
+              prop
+            ) {
+              if (!utils.isUndefined(config2[prop])) {
+                config[prop] = getMergedValue(undefined, config2[prop]);
+              } else if (!utils.isUndefined(config1[prop])) {
+                config[prop] = getMergedValue(undefined, config1[prop]);
+              }
+            });
+
+            utils.forEach(directMergeKeys, function merge(prop) {
+              if (prop in config2) {
+                config[prop] = getMergedValue(config1[prop], config2[prop]);
+              } else if (prop in config1) {
+                config[prop] = getMergedValue(undefined, config1[prop]);
+              }
+            });
+
+            var axiosKeys = valueFromConfig2Keys
+              .concat(mergeDeepPropertiesKeys)
+              .concat(defaultToConfig2Keys)
+              .concat(directMergeKeys);
+
+            var otherKeys = Object.keys(config1)
+              .concat(Object.keys(config2))
+              .filter(function filterAxiosKeys(key) {
+                return axiosKeys.indexOf(key) === -1;
+              });
+
+            utils.forEach(otherKeys, mergeDeepProperties);
+
+            return config;
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/core/settle.js":
+        /*!************************************************!*\
+  !*** ../node_modules/axios/lib/core/settle.js ***!
+  \************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var createError = __webpack_require__(
+            /*! ./createError */ "../node_modules/axios/lib/core/createError.js"
+          );
+
+          /**
+           * Resolve or reject a Promise based on response status.
+           *
+           * @param {Function} resolve A function that resolves the promise.
+           * @param {Function} reject A function that rejects the promise.
+           * @param {object} response The response.
+           */
+          module.exports = function settle(resolve, reject, response) {
+            var validateStatus = response.config.validateStatus;
+            if (
+              !response.status ||
+              !validateStatus ||
+              validateStatus(response.status)
+            ) {
+              resolve(response);
+            } else {
+              reject(
+                createError(
+                  "Request failed with status code " + response.status,
+                  response.config,
+                  null,
+                  response.request,
+                  response
+                )
+              );
+            }
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/core/transformData.js":
+        /*!*******************************************************!*\
+  !*** ../node_modules/axios/lib/core/transformData.js ***!
+  \*******************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ./../utils */ "../node_modules/axios/lib/utils.js"
+          );
+
+          /**
+           * Transform the data for a request or a response
+           *
+           * @param {Object|String} data The data to be transformed
+           * @param {Array} headers The headers for the request or response
+           * @param {Array|Function} fns A single function or Array of functions
+           * @returns {*} The resulting transformed data
+           */
+          module.exports = function transformData(data, headers, fns) {
+            /*eslint no-param-reassign:0*/
+            utils.forEach(fns, function transform(fn) {
+              data = fn(data, headers);
+            });
+
+            return data;
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/defaults.js":
+        /*!*********************************************!*\
+  !*** ../node_modules/axios/lib/defaults.js ***!
+  \*********************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+          /* WEBPACK VAR INJECTION */ (function(process) {
+            var utils = __webpack_require__(
+              /*! ./utils */ "../node_modules/axios/lib/utils.js"
+            );
+            var normalizeHeaderName = __webpack_require__(
+              /*! ./helpers/normalizeHeaderName */ "../node_modules/axios/lib/helpers/normalizeHeaderName.js"
+            );
+
+            var DEFAULT_CONTENT_TYPE = {
+              "Content-Type": "application/x-www-form-urlencoded"
+            };
+
+            function setContentTypeIfUnset(headers, value) {
+              if (
+                !utils.isUndefined(headers) &&
+                utils.isUndefined(headers["Content-Type"])
+              ) {
+                headers["Content-Type"] = value;
+              }
+            }
+
+            function getDefaultAdapter() {
+              var adapter;
+              if (typeof XMLHttpRequest !== "undefined") {
+                // For browsers use XHR adapter
+                adapter = __webpack_require__(
+                  /*! ./adapters/xhr */ "../node_modules/axios/lib/adapters/xhr.js"
+                );
+              } else if (
+                typeof process !== "undefined" &&
+                Object.prototype.toString.call(process) === "[object process]"
+              ) {
+                // For node use HTTP adapter
+                adapter = __webpack_require__(
+                  /*! ./adapters/http */ "../node_modules/axios/lib/adapters/xhr.js"
+                );
+              }
+              return adapter;
+            }
+
+            var defaults = {
+              adapter: getDefaultAdapter(),
+
+              transformRequest: [
+                function transformRequest(data, headers) {
+                  normalizeHeaderName(headers, "Accept");
+                  normalizeHeaderName(headers, "Content-Type");
+                  if (
+                    utils.isFormData(data) ||
+                    utils.isArrayBuffer(data) ||
+                    utils.isBuffer(data) ||
+                    utils.isStream(data) ||
+                    utils.isFile(data) ||
+                    utils.isBlob(data)
+                  ) {
+                    return data;
+                  }
+                  if (utils.isArrayBufferView(data)) {
+                    return data.buffer;
+                  }
+                  if (utils.isURLSearchParams(data)) {
+                    setContentTypeIfUnset(
+                      headers,
+                      "application/x-www-form-urlencoded;charset=utf-8"
+                    );
+                    return data.toString();
+                  }
+                  if (utils.isObject(data)) {
+                    setContentTypeIfUnset(
+                      headers,
+                      "application/json;charset=utf-8"
+                    );
+                    return JSON.stringify(data);
+                  }
+                  return data;
+                }
+              ],
+
+              transformResponse: [
+                function transformResponse(data) {
+                  /*eslint no-param-reassign:0*/
+                  if (typeof data === "string") {
+                    try {
+                      data = JSON.parse(data);
+                    } catch (e) {
+                      /* Ignore */
+                    }
+                  }
+                  return data;
+                }
+              ],
+
+              /**
+               * A timeout in milliseconds to abort a request. If set to 0 (default) a
+               * timeout is not created.
+               */
+              timeout: 0,
+
+              xsrfCookieName: "XSRF-TOKEN",
+              xsrfHeaderName: "X-XSRF-TOKEN",
+
+              maxContentLength: -1,
+              maxBodyLength: -1,
+
+              validateStatus: function validateStatus(status) {
+                return status >= 200 && status < 300;
+              }
+            };
+
+            defaults.headers = {
+              common: {
+                Accept: "application/json, text/plain, */*"
+              }
+            };
+
+            utils.forEach(
+              ["delete", "get", "head"],
+              function forEachMethodNoData(method) {
+                defaults.headers[method] = {};
+              }
+            );
+
+            utils.forEach(
+              ["post", "put", "patch"],
+              function forEachMethodWithData(method) {
+                defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+              }
+            );
+
+            module.exports = defaults;
+
+            /* WEBPACK VAR INJECTION */
+          }.call(
+            this,
+            __webpack_require__(
+              /*! ./../../process/browser.js */ "../node_modules/process/browser.js"
+            )
+          ));
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/helpers/bind.js":
+        /*!*************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/bind.js ***!
+  \*************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          module.exports = function bind(fn, thisArg) {
+            return function wrap() {
+              var args = new Array(arguments.length);
+              for (var i = 0; i < args.length; i++) {
+                args[i] = arguments[i];
+              }
+              return fn.apply(thisArg, args);
+            };
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/helpers/buildURL.js":
+        /*!*****************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/buildURL.js ***!
+  \*****************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ./../utils */ "../node_modules/axios/lib/utils.js"
+          );
+
+          function encode(val) {
+            return encodeURIComponent(val)
+              .replace(/%3A/gi, ":")
+              .replace(/%24/g, "$")
+              .replace(/%2C/gi, ",")
+              .replace(/%20/g, "+")
+              .replace(/%5B/gi, "[")
+              .replace(/%5D/gi, "]");
+          }
+
+          /**
+           * Build a URL by appending params to the end
+           *
+           * @param {string} url The base of the url (e.g., http://www.google.com)
+           * @param {object} [params] The params to be appended
+           * @returns {string} The formatted url
+           */
+          module.exports = function buildURL(url, params, paramsSerializer) {
+            /*eslint no-param-reassign:0*/
+            if (!params) {
+              return url;
+            }
+
+            var serializedParams;
+            if (paramsSerializer) {
+              serializedParams = paramsSerializer(params);
+            } else if (utils.isURLSearchParams(params)) {
+              serializedParams = params.toString();
+            } else {
+              var parts = [];
+
+              utils.forEach(params, function serialize(val, key) {
+                if (val === null || typeof val === "undefined") {
+                  return;
+                }
+
+                if (utils.isArray(val)) {
+                  key = key + "[]";
+                } else {
+                  val = [val];
+                }
+
+                utils.forEach(val, function parseValue(v) {
+                  if (utils.isDate(v)) {
+                    v = v.toISOString();
+                  } else if (utils.isObject(v)) {
+                    v = JSON.stringify(v);
+                  }
+                  parts.push(encode(key) + "=" + encode(v));
+                });
+              });
+
+              serializedParams = parts.join("&");
+            }
+
+            if (serializedParams) {
+              var hashmarkIndex = url.indexOf("#");
+              if (hashmarkIndex !== -1) {
+                url = url.slice(0, hashmarkIndex);
+              }
+
+              url += (url.indexOf("?") === -1 ? "?" : "&") + serializedParams;
+            }
+
+            return url;
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/helpers/combineURLs.js":
+        /*!********************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/combineURLs.js ***!
+  \********************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          /**
+           * Creates a new URL by combining the specified URLs
+           *
+           * @param {string} baseURL The base URL
+           * @param {string} relativeURL The relative URL
+           * @returns {string} The combined URL
+           */
+          module.exports = function combineURLs(baseURL, relativeURL) {
+            return relativeURL
+              ? baseURL.replace(/\/+$/, "") +
+                  "/" +
+                  relativeURL.replace(/^\/+/, "")
+              : baseURL;
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/helpers/cookies.js":
+        /*!****************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/cookies.js ***!
+  \****************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ./../utils */ "../node_modules/axios/lib/utils.js"
+          );
+
+          module.exports = utils.isStandardBrowserEnv()
+            ? // Standard browser envs support document.cookie
+              (function standardBrowserEnv() {
+                return {
+                  write: function write(
+                    name,
+                    value,
+                    expires,
+                    path,
+                    domain,
+                    secure
+                  ) {
+                    var cookie = [];
+                    cookie.push(name + "=" + encodeURIComponent(value));
+
+                    if (utils.isNumber(expires)) {
+                      cookie.push("expires=" + new Date(expires).toGMTString());
+                    }
+
+                    if (utils.isString(path)) {
+                      cookie.push("path=" + path);
+                    }
+
+                    if (utils.isString(domain)) {
+                      cookie.push("domain=" + domain);
+                    }
+
+                    if (secure === true) {
+                      cookie.push("secure");
+                    }
+
+                    document.cookie = cookie.join("; ");
+                  },
+
+                  read: function read(name) {
+                    var match = document.cookie.match(
+                      new RegExp("(^|;\\s*)(" + name + ")=([^;]*)")
+                    );
+                    return match ? decodeURIComponent(match[3]) : null;
+                  },
+
+                  remove: function remove(name) {
+                    this.write(name, "", Date.now() - 86400000);
+                  }
+                };
+              })()
+            : // Non standard browser env (web workers, react-native) lack needed support.
+              (function nonStandardBrowserEnv() {
+                return {
+                  write: function write() {},
+                  read: function read() {
+                    return null;
+                  },
+                  remove: function remove() {}
+                };
+              })();
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/helpers/isAbsoluteURL.js":
+        /*!**********************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \**********************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          /**
+           * Determines whether the specified URL is absolute
+           *
+           * @param {string} url The URL to test
+           * @returns {boolean} True if the specified URL is absolute, otherwise false
+           */
+          module.exports = function isAbsoluteURL(url) {
+            // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+            // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+            // by any combination of letters, digits, plus, period, or hyphen.
+            return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/helpers/isURLSameOrigin.js":
+        /*!************************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
+  \************************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ./../utils */ "../node_modules/axios/lib/utils.js"
+          );
+
+          module.exports = utils.isStandardBrowserEnv()
+            ? // Standard browser envs have full support of the APIs needed to test
+              // whether the request URL is of the same origin as current location.
+              (function standardBrowserEnv() {
+                var msie = /(msie|trident)/i.test(navigator.userAgent);
+                var urlParsingNode = document.createElement("a");
+                var originURL;
+
+                /**
+                 * Parse a URL to discover it's components
+                 *
+                 * @param {String} url The URL to be parsed
+                 * @returns {Object}
+                 */
+                function resolveURL(url) {
+                  var href = url;
+
+                  if (msie) {
+                    // IE needs attribute set twice to normalize properties
+                    urlParsingNode.setAttribute("href", href);
+                    href = urlParsingNode.href;
+                  }
+
+                  urlParsingNode.setAttribute("href", href);
+
+                  // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+                  return {
+                    href: urlParsingNode.href,
+                    protocol: urlParsingNode.protocol
+                      ? urlParsingNode.protocol.replace(/:$/, "")
+                      : "",
+                    host: urlParsingNode.host,
+                    search: urlParsingNode.search
+                      ? urlParsingNode.search.replace(/^\?/, "")
+                      : "",
+                    hash: urlParsingNode.hash
+                      ? urlParsingNode.hash.replace(/^#/, "")
+                      : "",
+                    hostname: urlParsingNode.hostname,
+                    port: urlParsingNode.port,
+                    pathname:
+                      urlParsingNode.pathname.charAt(0) === "/"
+                        ? urlParsingNode.pathname
+                        : "/" + urlParsingNode.pathname
+                  };
+                }
+
+                originURL = resolveURL(window.location.href);
+
+                /**
+                 * Determine if a URL shares the same origin as the current location
+                 *
+                 * @param {String} requestURL The URL to test
+                 * @returns {boolean} True if URL shares the same origin, otherwise false
+                 */
+                return function isURLSameOrigin(requestURL) {
+                  var parsed = utils.isString(requestURL)
+                    ? resolveURL(requestURL)
+                    : requestURL;
+                  return (
+                    parsed.protocol === originURL.protocol &&
+                    parsed.host === originURL.host
+                  );
+                };
+              })()
+            : // Non standard browser envs (web workers, react-native) lack needed support.
+              (function nonStandardBrowserEnv() {
+                return function isURLSameOrigin() {
+                  return true;
+                };
+              })();
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/helpers/normalizeHeaderName.js":
+        /*!****************************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
+  \****************************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ../utils */ "../node_modules/axios/lib/utils.js"
+          );
+
+          module.exports = function normalizeHeaderName(
+            headers,
+            normalizedName
+          ) {
+            utils.forEach(headers, function processHeader(value, name) {
+              if (
+                name !== normalizedName &&
+                name.toUpperCase() === normalizedName.toUpperCase()
+              ) {
+                headers[normalizedName] = value;
+                delete headers[name];
+              }
+            });
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/helpers/parseHeaders.js":
+        /*!*********************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \*********************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var utils = __webpack_require__(
+            /*! ./../utils */ "../node_modules/axios/lib/utils.js"
+          );
+
+          // Headers whose duplicates are ignored by node
+          // c.f. https://nodejs.org/api/http.html#http_message_headers
+          var ignoreDuplicateOf = [
+            "age",
+            "authorization",
+            "content-length",
+            "content-type",
+            "etag",
+            "expires",
+            "from",
+            "host",
+            "if-modified-since",
+            "if-unmodified-since",
+            "last-modified",
+            "location",
+            "max-forwards",
+            "proxy-authorization",
+            "referer",
+            "retry-after",
+            "user-agent"
+          ];
+
+          /**
+           * Parse headers into an object
+           *
+           * ```
+           * Date: Wed, 27 Aug 2014 08:58:49 GMT
+           * Content-Type: application/json
+           * Connection: keep-alive
+           * Transfer-Encoding: chunked
+           * ```
+           *
+           * @param {String} headers Headers needing to be parsed
+           * @returns {Object} Headers parsed into an object
+           */
+          module.exports = function parseHeaders(headers) {
+            var parsed = {};
+            var key;
+            var val;
+            var i;
+
+            if (!headers) {
+              return parsed;
+            }
+
+            utils.forEach(headers.split("\n"), function parser(line) {
+              i = line.indexOf(":");
+              key = utils.trim(line.substr(0, i)).toLowerCase();
+              val = utils.trim(line.substr(i + 1));
+
+              if (key) {
+                if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+                  return;
+                }
+                if (key === "set-cookie") {
+                  parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+                } else {
+                  parsed[key] = parsed[key] ? parsed[key] + ", " + val : val;
+                }
+              }
+            });
+
+            return parsed;
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/helpers/spread.js":
+        /*!***************************************************!*\
+  !*** ../node_modules/axios/lib/helpers/spread.js ***!
+  \***************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          /**
+           * Syntactic sugar for invoking a function and expanding an array for arguments.
+           *
+           * Common use case would be to use `Function.prototype.apply`.
+           *
+           *  ```js
+           *  function f(x, y, z) {}
+           *  var args = [1, 2, 3];
+           *  f.apply(null, args);
+           *  ```
+           *
+           * With `spread` this example can be re-written.
+           *
+           *  ```js
+           *  spread(function(x, y, z) {})([1, 2, 3]);
+           *  ```
+           *
+           * @param {Function} callback
+           * @returns {Function}
+           */
+          module.exports = function spread(callback) {
+            return function wrap(arr) {
+              return callback.apply(null, arr);
+            };
+          };
+
+          /***/
+        },
+
+      /***/ "../node_modules/axios/lib/utils.js":
+        /*!******************************************!*\
+  !*** ../node_modules/axios/lib/utils.js ***!
+  \******************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var bind = __webpack_require__(
+            /*! ./helpers/bind */ "../node_modules/axios/lib/helpers/bind.js"
+          );
+
+          /*global toString:true*/
+
+          // utils is a library of generic helper functions non-specific to axios
+
+          var toString = Object.prototype.toString;
+
+          /**
+           * Determine if a value is an Array
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is an Array, otherwise false
+           */
+          function isArray(val) {
+            return toString.call(val) === "[object Array]";
+          }
+
+          /**
+           * Determine if a value is undefined
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if the value is undefined, otherwise false
+           */
+          function isUndefined(val) {
+            return typeof val === "undefined";
+          }
+
+          /**
+           * Determine if a value is a Buffer
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is a Buffer, otherwise false
+           */
+          function isBuffer(val) {
+            return (
+              val !== null &&
+              !isUndefined(val) &&
+              val.constructor !== null &&
+              !isUndefined(val.constructor) &&
+              typeof val.constructor.isBuffer === "function" &&
+              val.constructor.isBuffer(val)
+            );
+          }
+
+          /**
+           * Determine if a value is an ArrayBuffer
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+           */
+          function isArrayBuffer(val) {
+            return toString.call(val) === "[object ArrayBuffer]";
+          }
+
+          /**
+           * Determine if a value is a FormData
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is an FormData, otherwise false
+           */
+          function isFormData(val) {
+            return typeof FormData !== "undefined" && val instanceof FormData;
+          }
+
+          /**
+           * Determine if a value is a view on an ArrayBuffer
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+           */
+          function isArrayBufferView(val) {
+            var result;
+            if (typeof ArrayBuffer !== "undefined" && ArrayBuffer.isView) {
+              result = ArrayBuffer.isView(val);
+            } else {
+              result = val && val.buffer && val.buffer instanceof ArrayBuffer;
+            }
+            return result;
+          }
+
+          /**
+           * Determine if a value is a String
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is a String, otherwise false
+           */
+          function isString(val) {
+            return typeof val === "string";
+          }
+
+          /**
+           * Determine if a value is a Number
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is a Number, otherwise false
+           */
+          function isNumber(val) {
+            return typeof val === "number";
+          }
+
+          /**
+           * Determine if a value is an Object
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is an Object, otherwise false
+           */
+          function isObject(val) {
+            return val !== null && typeof val === "object";
+          }
+
+          /**
+           * Determine if a value is a plain Object
+           *
+           * @param {Object} val The value to test
+           * @return {boolean} True if value is a plain Object, otherwise false
+           */
+          function isPlainObject(val) {
+            if (toString.call(val) !== "[object Object]") {
+              return false;
+            }
+
+            var prototype = Object.getPrototypeOf(val);
+            return prototype === null || prototype === Object.prototype;
+          }
+
+          /**
+           * Determine if a value is a Date
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is a Date, otherwise false
+           */
+          function isDate(val) {
+            return toString.call(val) === "[object Date]";
+          }
+
+          /**
+           * Determine if a value is a File
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is a File, otherwise false
+           */
+          function isFile(val) {
+            return toString.call(val) === "[object File]";
+          }
+
+          /**
+           * Determine if a value is a Blob
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is a Blob, otherwise false
+           */
+          function isBlob(val) {
+            return toString.call(val) === "[object Blob]";
+          }
+
+          /**
+           * Determine if a value is a Function
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is a Function, otherwise false
+           */
+          function isFunction(val) {
+            return toString.call(val) === "[object Function]";
+          }
+
+          /**
+           * Determine if a value is a Stream
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is a Stream, otherwise false
+           */
+          function isStream(val) {
+            return isObject(val) && isFunction(val.pipe);
+          }
+
+          /**
+           * Determine if a value is a URLSearchParams object
+           *
+           * @param {Object} val The value to test
+           * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+           */
+          function isURLSearchParams(val) {
+            return (
+              typeof URLSearchParams !== "undefined" &&
+              val instanceof URLSearchParams
+            );
+          }
+
+          /**
+           * Trim excess whitespace off the beginning and end of a string
+           *
+           * @param {String} str The String to trim
+           * @returns {String} The String freed of excess whitespace
+           */
+          function trim(str) {
+            return str.replace(/^\s*/, "").replace(/\s*$/, "");
+          }
+
+          /**
+           * Determine if we're running in a standard browser environment
+           *
+           * This allows axios to run in a web worker, and react-native.
+           * Both environments support XMLHttpRequest, but not fully standard globals.
+           *
+           * web workers:
+           *  typeof window -> undefined
+           *  typeof document -> undefined
+           *
+           * react-native:
+           *  navigator.product -> 'ReactNative'
+           * nativescript
+           *  navigator.product -> 'NativeScript' or 'NS'
+           */
+          function isStandardBrowserEnv() {
+            if (
+              typeof navigator !== "undefined" &&
+              (navigator.product === "ReactNative" ||
+                navigator.product === "NativeScript" ||
+                navigator.product === "NS")
+            ) {
+              return false;
+            }
+            return (
+              typeof window !== "undefined" && typeof document !== "undefined"
+            );
+          }
+
+          /**
+           * Iterate over an Array or an Object invoking a function for each item.
+           *
+           * If `obj` is an Array callback will be called passing
+           * the value, index, and complete array for each item.
+           *
+           * If 'obj' is an Object callback will be called passing
+           * the value, key, and complete object for each property.
+           *
+           * @param {Object|Array} obj The object to iterate
+           * @param {Function} fn The callback to invoke for each item
+           */
+          function forEach(obj, fn) {
+            // Don't bother if no value provided
+            if (obj === null || typeof obj === "undefined") {
+              return;
+            }
+
+            // Force an array if not already something iterable
+            if (typeof obj !== "object") {
+              /*eslint no-param-reassign:0*/
+              obj = [obj];
+            }
+
+            if (isArray(obj)) {
+              // Iterate over array values
+              for (var i = 0, l = obj.length; i < l; i++) {
+                fn.call(null, obj[i], i, obj);
+              }
+            } else {
+              // Iterate over object keys
+              for (var key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                  fn.call(null, obj[key], key, obj);
+                }
+              }
+            }
+          }
+
+          /**
+           * Accepts varargs expecting each argument to be an object, then
+           * immutably merges the properties of each object and returns result.
+           *
+           * When multiple objects contain the same key the later object in
+           * the arguments list will take precedence.
+           *
+           * Example:
+           *
+           * ```js
+           * var result = merge({foo: 123}, {foo: 456});
+           * console.log(result.foo); // outputs 456
+           * ```
+           *
+           * @param {Object} obj1 Object to merge
+           * @returns {Object} Result of all merge properties
+           */
+          function merge(/* obj1, obj2, obj3, ... */) {
+            var result = {};
+            function assignValue(val, key) {
+              if (isPlainObject(result[key]) && isPlainObject(val)) {
+                result[key] = merge(result[key], val);
+              } else if (isPlainObject(val)) {
+                result[key] = merge({}, val);
+              } else if (isArray(val)) {
+                result[key] = val.slice();
+              } else {
+                result[key] = val;
+              }
+            }
+
+            for (var i = 0, l = arguments.length; i < l; i++) {
+              forEach(arguments[i], assignValue);
+            }
+            return result;
+          }
+
+          /**
+           * Extends object a by mutably adding to it the properties of object b.
+           *
+           * @param {Object} a The object to be extended
+           * @param {Object} b The object to copy properties from
+           * @param {Object} thisArg The object to bind function to
+           * @return {Object} The resulting value of object a
+           */
+          function extend(a, b, thisArg) {
+            forEach(b, function assignValue(val, key) {
+              if (thisArg && typeof val === "function") {
+                a[key] = bind(val, thisArg);
+              } else {
+                a[key] = val;
+              }
+            });
+            return a;
+          }
+
+          /**
+           * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+           *
+           * @param {string} content with BOM
+           * @return {string} content value without BOM
+           */
+          function stripBOM(content) {
+            if (content.charCodeAt(0) === 0xfeff) {
+              content = content.slice(1);
+            }
+            return content;
+          }
+
+          module.exports = {
+            isArray: isArray,
+            isArrayBuffer: isArrayBuffer,
+            isBuffer: isBuffer,
+            isFormData: isFormData,
+            isArrayBufferView: isArrayBufferView,
+            isString: isString,
+            isNumber: isNumber,
+            isObject: isObject,
+            isPlainObject: isPlainObject,
+            isUndefined: isUndefined,
+            isDate: isDate,
+            isFile: isFile,
+            isBlob: isBlob,
+            isFunction: isFunction,
+            isStream: isStream,
+            isURLSearchParams: isURLSearchParams,
+            isStandardBrowserEnv: isStandardBrowserEnv,
+            forEach: forEach,
+            merge: merge,
+            extend: extend,
+            trim: trim,
+            stripBOM: stripBOM
+          };
+
+          /***/
+        },
+
       /***/ "../node_modules/chart.js/dist/Chart.js":
         /*!**********************************************!*\
   !*** ../node_modules/chart.js/dist/Chart.js ***!
@@ -19034,6 +21105,156 @@ define(["moment", "react", "react-dom"], function(
           /***/
         },
 
+      /***/ "../node_modules/css-loader/index.js?!./components/Multiselect/assets/closeicon/css/fontello.css":
+        /*!*******************************************************************************************************!*\
+  !*** ../node_modules/css-loader??ref--7-1!./components/Multiselect/assets/closeicon/css/fontello.css ***!
+  \*******************************************************************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          var escape = __webpack_require__(
+            /*! ../../../../../../node_modules/css-loader/lib/url/escape.js */ "../node_modules/css-loader/lib/url/escape.js"
+          );
+          exports = module.exports = __webpack_require__(
+            /*! ../../../../../../node_modules/css-loader/lib/css-base.js */ "../node_modules/css-loader/lib/css-base.js"
+          )(true);
+          // imports
+
+          // module
+          exports.push([
+            module.i,
+            '@font-face {\r\n  font-family: "fontello";\r\n  src: url(' +
+              escape(
+                __webpack_require__(
+                  /*! ../font/fontello.eot?73464045 */ "./components/Multiselect/assets/closeicon/font/fontello.eot?73464045"
+                )
+              ) +
+              ");\r\n  src: url(" +
+              escape(
+                __webpack_require__(
+                  /*! ../font/fontello.eot?73464045 */ "./components/Multiselect/assets/closeicon/font/fontello.eot?73464045"
+                )
+              ) +
+              '#iefix) format("embedded-opentype"),\r\n    url(' +
+              escape(
+                __webpack_require__(
+                  /*! ../font/fontello.woff2?73464045 */ "./components/Multiselect/assets/closeicon/font/fontello.woff2?73464045"
+                )
+              ) +
+              ') format("woff2"),\r\n    url(' +
+              escape(
+                __webpack_require__(
+                  /*! ../font/fontello.woff?73464045 */ "./components/Multiselect/assets/closeicon/font/fontello.woff?73464045"
+                )
+              ) +
+              ') format("woff"),\r\n    url(' +
+              escape(
+                __webpack_require__(
+                  /*! ../font/fontello.ttf?73464045 */ "./components/Multiselect/assets/closeicon/font/fontello.ttf?73464045"
+                )
+              ) +
+              ') format("truetype"),\r\n    url(' +
+              escape(
+                __webpack_require__(
+                  /*! ../font/fontello.svg?73464045 */ "./components/Multiselect/assets/closeicon/font/fontello.svg?73464045"
+                )
+              ) +
+              '#fontello) format("svg");\r\n  font-weight: normal;\r\n  font-style: normal;\r\n}\r\n/* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it. */\r\n/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be */\r\n/*\r\n@media screen and (-webkit-min-device-pixel-ratio:0) {\r\n  @font-face {\r\n    font-family: \'fontello\';\r\n    src: url(\'../font/fontello.svg?73464045#fontello\') format(\'svg\');\r\n  }\r\n}\r\n*/\r\n\r\n[class^="icon_"]:before,\r\n[class*=" icon_"]:before {\r\n  font-family: "fontello";\r\n  font-style: normal;\r\n  font-weight: normal;\r\n  speak: none;\r\n\r\n  display: inline-block;\r\n  text-decoration: inherit;\r\n  width: 1em;\r\n  margin-right: 0.2em;\r\n  text-align: center;\r\n  /* opacity: .8; */\r\n\r\n  /* For safety - reset parent styles, that can break glyph codes*/\r\n  font-variant: normal;\r\n  text-transform: none;\r\n\r\n  /* fix buttons height, for twitter bootstrap */\r\n  line-height: 1em;\r\n\r\n  /* Animation center compensation - margins should be symmetric */\r\n  /* remove if not needed */\r\n  margin-left: 0.2em;\r\n\r\n  /* you can be more comfortable with increased icons size */\r\n  /* font-size: 120%; */\r\n\r\n  /* Font smoothing. That was taken from TWBS */\r\n  -webkit-font-smoothing: antialiased;\r\n  -moz-osx-font-smoothing: grayscale;\r\n\r\n  /* Uncomment for 3D effect */\r\n  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */\r\n}\r\n\r\n.icon_cancel_circled:before {\r\n  content: "\\E800";\r\n} /* \'\' */\r\n.icon_cancel:before {\r\n  content: "\\E801";\r\n} /* \'\' */\r\n.icon_cancel_circled2:before {\r\n  content: "\\E802";\r\n} /* \'\' */\r\n.icon_down_dir:before {\r\n  content: "\\E803";\r\n} /* \'\' */\r\n.icon_window_close:before {\r\n  content: "\\F2D3";\r\n} /* \'\' */\r\n',
+            "",
+            {
+              version: 3,
+              sources: [
+                "C:/mycode/brighton_plugin/xformation-servicedesk-ui-plugin/src/components/Multiselect/assets/closeicon/css/fontello.css"
+              ],
+              names: [],
+              mappings:
+                "AAAA;EACE,wBAAwB;EACxB,mCAA0C;EAC1C;;;;gDAI8D;EAC9D,oBAAoB;EACpB,mBAAmB;CACpB;AACD,iGAAiG;AACjG,4FAA4F;AAC5F;;;;;;;EAOE;;AAEF;;EAEE,wBAAwB;EACxB,mBAAmB;EACnB,oBAAoB;EACpB,YAAY;;EAEZ,sBAAsB;EACtB,yBAAyB;EACzB,WAAW;EACX,oBAAoB;EACpB,mBAAmB;EACnB,kBAAkB;;EAElB,iEAAiE;EACjE,qBAAqB;EACrB,qBAAqB;;EAErB,+CAA+C;EAC/C,iBAAiB;;EAEjB,iEAAiE;EACjE,0BAA0B;EAC1B,mBAAmB;;EAEnB,2DAA2D;EAC3D,sBAAsB;;EAEtB,8CAA8C;EAC9C,oCAAoC;EACpC,mCAAmC;;EAEnC,6BAA6B;EAC7B,wDAAwD;CACzD;;AAED;EACE,iBAAiB;CAClB,CAAC,SAAS;AACX;EACE,iBAAiB;CAClB,CAAC,SAAS;AACX;EACE,iBAAiB;CAClB,CAAC,SAAS;AACX;EACE,iBAAiB;CAClB,CAAC,SAAS;AACX;EACE,iBAAiB;CAClB,CAAC,SAAS",
+              file: "fontello.css",
+              sourcesContent: [
+                '@font-face {\r\n  font-family: "fontello";\r\n  src: url("../font/fontello.eot?73464045");\r\n  src: url("../font/fontello.eot?73464045#iefix") format("embedded-opentype"),\r\n    url("../font/fontello.woff2?73464045") format("woff2"),\r\n    url("../font/fontello.woff?73464045") format("woff"),\r\n    url("../font/fontello.ttf?73464045") format("truetype"),\r\n    url("../font/fontello.svg?73464045#fontello") format("svg");\r\n  font-weight: normal;\r\n  font-style: normal;\r\n}\r\n/* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it. */\r\n/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be */\r\n/*\r\n@media screen and (-webkit-min-device-pixel-ratio:0) {\r\n  @font-face {\r\n    font-family: \'fontello\';\r\n    src: url(\'../font/fontello.svg?73464045#fontello\') format(\'svg\');\r\n  }\r\n}\r\n*/\r\n\r\n[class^="icon_"]:before,\r\n[class*=" icon_"]:before {\r\n  font-family: "fontello";\r\n  font-style: normal;\r\n  font-weight: normal;\r\n  speak: none;\r\n\r\n  display: inline-block;\r\n  text-decoration: inherit;\r\n  width: 1em;\r\n  margin-right: 0.2em;\r\n  text-align: center;\r\n  /* opacity: .8; */\r\n\r\n  /* For safety - reset parent styles, that can break glyph codes*/\r\n  font-variant: normal;\r\n  text-transform: none;\r\n\r\n  /* fix buttons height, for twitter bootstrap */\r\n  line-height: 1em;\r\n\r\n  /* Animation center compensation - margins should be symmetric */\r\n  /* remove if not needed */\r\n  margin-left: 0.2em;\r\n\r\n  /* you can be more comfortable with increased icons size */\r\n  /* font-size: 120%; */\r\n\r\n  /* Font smoothing. That was taken from TWBS */\r\n  -webkit-font-smoothing: antialiased;\r\n  -moz-osx-font-smoothing: grayscale;\r\n\r\n  /* Uncomment for 3D effect */\r\n  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */\r\n}\r\n\r\n.icon_cancel_circled:before {\r\n  content: "\\e800";\r\n} /* \'\' */\r\n.icon_cancel:before {\r\n  content: "\\e801";\r\n} /* \'\' */\r\n.icon_cancel_circled2:before {\r\n  content: "\\e802";\r\n} /* \'\' */\r\n.icon_down_dir:before {\r\n  content: "\\e803";\r\n} /* \'\' */\r\n.icon_window_close:before {\r\n  content: "\\f2d3";\r\n} /* \'\' */\r\n'
+              ],
+              sourceRoot: ""
+            }
+          ]);
+
+          // exports
+
+          /***/
+        },
+
+      /***/ "../node_modules/css-loader/index.js?!./components/Multiselect/multiselects/multiselect.component.css":
+        /*!************************************************************************************************************!*\
+  !*** ../node_modules/css-loader??ref--7-1!./components/Multiselect/multiselects/multiselect.component.css ***!
+  \************************************************************************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          exports = module.exports = __webpack_require__(
+            /*! ../../../../node_modules/css-loader/lib/css-base.js */ "../node_modules/css-loader/lib/css-base.js"
+          )(true);
+          // imports
+
+          // module
+          exports.push([
+            module.i,
+            '.multiSelectContainer {\r\n  position: relative;\r\n  text-align: left;\r\n  width: 100%;\r\n}\r\n.disable_ms {\r\n  pointer-events: none;\r\n  opacity: 0.5;\r\n}\r\n.searchWrapper {\r\n  border: 1px solid #cccccc;\r\n  border-radius: 4px;\r\n  padding: 5px;\r\n  min-height: 22px;\r\n  position: relative;\r\n}\r\n.multiSelectContainer input {\r\n  border: none;\r\n  margin-top: 3px;\r\n  background: transparent;\r\n}\r\n.multiSelectContainer input:focus {\r\n  outline: none;\r\n}\r\n.chip {\r\n  padding: 4px 10px;\r\n  background: #0096fb;\r\n  margin-right: 5px;\r\n  margin-bottom: 5px;\r\n  border-radius: 10px;\r\n  display: inline-flex;\r\n  align-items: center;\r\n  font-size: 13px;\r\n  color: #fff;\r\n  white-space: nowrap;\r\n}\r\n.singleChip {\r\n  background: none;\r\n  border-radius: none;\r\n  color: inherit;\r\n  white-space: nowrap;\r\n}\r\n.singleChip i {\r\n  display: none;\r\n}\r\n.closeIcon {\r\n  font-size: 12px;\r\n  float: right;\r\n  margin-left: 2px;\r\n  cursor: pointer;\r\n}\r\n.optionListContainer {\r\n  position: absolute;\r\n  width: 100%;\r\n  background: #fff;\r\n  border-radius: 4px;\r\n  margin-top: 1px;\r\n  z-index: 2;\r\n}\r\n.multiSelectContainer ul {\r\n  display: block;\r\n  padding: 0;\r\n  margin: 0;\r\n  border: 1px solid #ccc;\r\n  border-radius: 4px;\r\n  max-height: 250px;\r\n  overflow-y: auto;\r\n}\r\n.multiSelectContainer li {\r\n  padding: 10px 10px;\r\n}\r\n.multiSelectContainer li:hover {\r\n  background: #0096fb;\r\n  color: #fff;\r\n  cursor: pointer;\r\n}\r\n.checkbox {\r\n  margin-right: 10px;\r\n}\r\n.disableSelection {\r\n  pointer-events: none;\r\n  opacity: 0.5;\r\n}\r\n.highlightOption {\r\n  background: #0096fb;\r\n  color: #ffffff;\r\n}\r\n.displayBlock {\r\n  display: block;\r\n}\r\n.displayNone {\r\n  display: none;\r\n}\r\n.notFound {\r\n  padding: 10px;\r\n  display: block;\r\n}\r\n.singleSelect {\r\n  padding-right: 20px;\r\n}\r\nli.groupHeading {\r\n  color: #908e8e;\r\n  pointer-events: none;\r\n  padding: 5px 15px;\r\n}\r\nli.groupChildEle {\r\n  padding-left: 30px;\r\n}\r\n.icon_cancel_circled:before {\r\n  content: "\\E800";\r\n}\r\n.icon_cancel:before {\r\n  content: "\\E801";\r\n}\r\n.icon_cancel_circled2:before {\r\n  content: "\\E802";\r\n}\r\n.icon_window_close:before {\r\n  content: "\\F2D3";\r\n}\r\n.icon_down_dir {\r\n  position: absolute;\r\n  right: 5px;\r\n  top: 50%;\r\n  transform: translateY(-50%);\r\n}\r\n.icon_down_dir:before {\r\n  content: "\\E803";\r\n}\r\n',
+            "",
+            {
+              version: 3,
+              sources: [
+                "C:/mycode/brighton_plugin/xformation-servicedesk-ui-plugin/src/components/Multiselect/multiselects/multiselect.component.css"
+              ],
+              names: [],
+              mappings:
+                "AAAA;EACE,mBAAmB;EACnB,iBAAiB;EACjB,YAAY;CACb;AACD;EACE,qBAAqB;EACrB,aAAa;CACd;AACD;EACE,0BAA0B;EAC1B,mBAAmB;EACnB,aAAa;EACb,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,aAAa;EACb,gBAAgB;EAChB,wBAAwB;CACzB;AACD;EACE,cAAc;CACf;AACD;EACE,kBAAkB;EAClB,oBAAoB;EACpB,kBAAkB;EAClB,mBAAmB;EACnB,oBAAoB;EACpB,qBAAqB;EACrB,oBAAoB;EACpB,gBAAgB;EAChB,YAAY;EACZ,oBAAoB;CACrB;AACD;EACE,iBAAiB;EACjB,oBAAoB;EACpB,eAAe;EACf,oBAAoB;CACrB;AACD;EACE,cAAc;CACf;AACD;EACE,gBAAgB;EAChB,aAAa;EACb,iBAAiB;EACjB,gBAAgB;CACjB;AACD;EACE,mBAAmB;EACnB,YAAY;EACZ,iBAAiB;EACjB,mBAAmB;EACnB,gBAAgB;EAChB,WAAW;CACZ;AACD;EACE,eAAe;EACf,WAAW;EACX,UAAU;EACV,uBAAuB;EACvB,mBAAmB;EACnB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,oBAAoB;EACpB,YAAY;EACZ,gBAAgB;CACjB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,qBAAqB;EACrB,aAAa;CACd;AACD;EACE,oBAAoB;EACpB,eAAe;CAChB;AACD;EACE,eAAe;CAChB;AACD;EACE,cAAc;CACf;AACD;EACE,cAAc;EACd,eAAe;CAChB;AACD;EACE,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,qBAAqB;EACrB,kBAAkB;CACnB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,iBAAiB;CAClB;AACD;EACE,iBAAiB;CAClB;AACD;EACE,iBAAiB;CAClB;AACD;EACE,iBAAiB;CAClB;AACD;EACE,mBAAmB;EACnB,WAAW;EACX,SAAS;EACT,4BAA4B;CAC7B;AACD;EACE,iBAAiB;CAClB",
+              file: "multiselect.component.css",
+              sourcesContent: [
+                '.multiSelectContainer {\r\n  position: relative;\r\n  text-align: left;\r\n  width: 100%;\r\n}\r\n.disable_ms {\r\n  pointer-events: none;\r\n  opacity: 0.5;\r\n}\r\n.searchWrapper {\r\n  border: 1px solid #cccccc;\r\n  border-radius: 4px;\r\n  padding: 5px;\r\n  min-height: 22px;\r\n  position: relative;\r\n}\r\n.multiSelectContainer input {\r\n  border: none;\r\n  margin-top: 3px;\r\n  background: transparent;\r\n}\r\n.multiSelectContainer input:focus {\r\n  outline: none;\r\n}\r\n.chip {\r\n  padding: 4px 10px;\r\n  background: #0096fb;\r\n  margin-right: 5px;\r\n  margin-bottom: 5px;\r\n  border-radius: 10px;\r\n  display: inline-flex;\r\n  align-items: center;\r\n  font-size: 13px;\r\n  color: #fff;\r\n  white-space: nowrap;\r\n}\r\n.singleChip {\r\n  background: none;\r\n  border-radius: none;\r\n  color: inherit;\r\n  white-space: nowrap;\r\n}\r\n.singleChip i {\r\n  display: none;\r\n}\r\n.closeIcon {\r\n  font-size: 12px;\r\n  float: right;\r\n  margin-left: 2px;\r\n  cursor: pointer;\r\n}\r\n.optionListContainer {\r\n  position: absolute;\r\n  width: 100%;\r\n  background: #fff;\r\n  border-radius: 4px;\r\n  margin-top: 1px;\r\n  z-index: 2;\r\n}\r\n.multiSelectContainer ul {\r\n  display: block;\r\n  padding: 0;\r\n  margin: 0;\r\n  border: 1px solid #ccc;\r\n  border-radius: 4px;\r\n  max-height: 250px;\r\n  overflow-y: auto;\r\n}\r\n.multiSelectContainer li {\r\n  padding: 10px 10px;\r\n}\r\n.multiSelectContainer li:hover {\r\n  background: #0096fb;\r\n  color: #fff;\r\n  cursor: pointer;\r\n}\r\n.checkbox {\r\n  margin-right: 10px;\r\n}\r\n.disableSelection {\r\n  pointer-events: none;\r\n  opacity: 0.5;\r\n}\r\n.highlightOption {\r\n  background: #0096fb;\r\n  color: #ffffff;\r\n}\r\n.displayBlock {\r\n  display: block;\r\n}\r\n.displayNone {\r\n  display: none;\r\n}\r\n.notFound {\r\n  padding: 10px;\r\n  display: block;\r\n}\r\n.singleSelect {\r\n  padding-right: 20px;\r\n}\r\nli.groupHeading {\r\n  color: #908e8e;\r\n  pointer-events: none;\r\n  padding: 5px 15px;\r\n}\r\nli.groupChildEle {\r\n  padding-left: 30px;\r\n}\r\n.icon_cancel_circled:before {\r\n  content: "\\e800";\r\n}\r\n.icon_cancel:before {\r\n  content: "\\e801";\r\n}\r\n.icon_cancel_circled2:before {\r\n  content: "\\e802";\r\n}\r\n.icon_window_close:before {\r\n  content: "\\f2d3";\r\n}\r\n.icon_down_dir {\r\n  position: absolute;\r\n  right: 5px;\r\n  top: 50%;\r\n  transform: translateY(-50%);\r\n}\r\n.icon_down_dir:before {\r\n  content: "\\e803";\r\n}\r\n'
+              ],
+              sourceRoot: ""
+            }
+          ]);
+
+          // exports
+
+          /***/
+        },
+
+      /***/ "../node_modules/css-loader/index.js?!./components/table.css":
+        /*!*******************************************************************!*\
+  !*** ../node_modules/css-loader??ref--7-1!./components/table.css ***!
+  \*******************************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          exports = module.exports = __webpack_require__(
+            /*! ../../node_modules/css-loader/lib/css-base.js */ "../node_modules/css-loader/lib/css-base.js"
+          )(true);
+          // imports
+
+          // module
+          exports.push([
+            module.i,
+            '.custom-table .sort-icon {\r\n  display: inline-block;\r\n  padding-left: 5px;\r\n  vertical-align: middle;\r\n  cursor: pointer;\r\n}\r\n.custom-table .checkbox {\r\n  margin-top: -4px;\r\n  margin-right: 0px;\r\n  vertical-align: middle;\r\n}\r\n.custom-table .sort-icon.sort-none:before {\r\n  display: block;\r\n  content: "";\r\n  width: 0;\r\n  height: 0;\r\n  border-style: solid;\r\n  border-width: 0 4px 8px 4px;\r\n  border-color: transparent transparent #dddddd transparent;\r\n  margin-bottom: 2px;\r\n}\r\n\r\n.custom-table .sort-icon.sort-none:after {\r\n  display: block;\r\n  content: "";\r\n  width: 0;\r\n  height: 0;\r\n  border-style: solid;\r\n  border-width: 8px 4px 0 4px;\r\n  border-color: #dddddd transparent transparent transparent;\r\n  margin-top: 2px;\r\n}\r\n\r\n.custom-table .sort-icon.sort-descending:after {\r\n  display: block;\r\n  content: "";\r\n  width: 0;\r\n  height: 0;\r\n  border-style: solid;\r\n  border-width: 8px 4px 0 4px;\r\n  border-color: #dddddd transparent transparent transparent;\r\n  margin-top: 0;\r\n}\r\n\r\n.custom-table .sort-icon.sort-ascending:before {\r\n  display: block;\r\n  content: "";\r\n  width: 0;\r\n  height: 0;\r\n  border-style: solid;\r\n  border-width: 0 4px 8px 4px;\r\n  border-color: transparent transparent #dddddd transparent;\r\n  margin-bottom: 0px;\r\n}\r\n',
+            "",
+            {
+              version: 3,
+              sources: [
+                "C:/mycode/brighton_plugin/xformation-servicedesk-ui-plugin/src/components/table.css"
+              ],
+              names: [],
+              mappings:
+                "AAAA;EACE,sBAAsB;EACtB,kBAAkB;EAClB,uBAAuB;EACvB,gBAAgB;CACjB;AACD;EACE,iBAAiB;EACjB,kBAAkB;EAClB,uBAAuB;CACxB;AACD;EACE,eAAe;EACf,YAAY;EACZ,SAAS;EACT,UAAU;EACV,oBAAoB;EACpB,4BAA4B;EAC5B,0DAA0D;EAC1D,mBAAmB;CACpB;;AAED;EACE,eAAe;EACf,YAAY;EACZ,SAAS;EACT,UAAU;EACV,oBAAoB;EACpB,4BAA4B;EAC5B,0DAA0D;EAC1D,gBAAgB;CACjB;;AAED;EACE,eAAe;EACf,YAAY;EACZ,SAAS;EACT,UAAU;EACV,oBAAoB;EACpB,4BAA4B;EAC5B,0DAA0D;EAC1D,cAAc;CACf;;AAED;EACE,eAAe;EACf,YAAY;EACZ,SAAS;EACT,UAAU;EACV,oBAAoB;EACpB,4BAA4B;EAC5B,0DAA0D;EAC1D,mBAAmB;CACpB",
+              file: "table.css",
+              sourcesContent: [
+                '.custom-table .sort-icon {\r\n  display: inline-block;\r\n  padding-left: 5px;\r\n  vertical-align: middle;\r\n  cursor: pointer;\r\n}\r\n.custom-table .checkbox {\r\n  margin-top: -4px;\r\n  margin-right: 0px;\r\n  vertical-align: middle;\r\n}\r\n.custom-table .sort-icon.sort-none:before {\r\n  display: block;\r\n  content: "";\r\n  width: 0;\r\n  height: 0;\r\n  border-style: solid;\r\n  border-width: 0 4px 8px 4px;\r\n  border-color: transparent transparent #dddddd transparent;\r\n  margin-bottom: 2px;\r\n}\r\n\r\n.custom-table .sort-icon.sort-none:after {\r\n  display: block;\r\n  content: "";\r\n  width: 0;\r\n  height: 0;\r\n  border-style: solid;\r\n  border-width: 8px 4px 0 4px;\r\n  border-color: #dddddd transparent transparent transparent;\r\n  margin-top: 2px;\r\n}\r\n\r\n.custom-table .sort-icon.sort-descending:after {\r\n  display: block;\r\n  content: "";\r\n  width: 0;\r\n  height: 0;\r\n  border-style: solid;\r\n  border-width: 8px 4px 0 4px;\r\n  border-color: #dddddd transparent transparent transparent;\r\n  margin-top: 0;\r\n}\r\n\r\n.custom-table .sort-icon.sort-ascending:before {\r\n  display: block;\r\n  content: "";\r\n  width: 0;\r\n  height: 0;\r\n  border-style: solid;\r\n  border-width: 0 4px 8px 4px;\r\n  border-color: transparent transparent #dddddd transparent;\r\n  margin-bottom: 0px;\r\n}\r\n'
+              ],
+              sourceRoot: ""
+            }
+          ]);
+
+          // exports
+
+          /***/
+        },
+
       /***/ "../node_modules/css-loader/index.js?!./css/servicedesk.dark.css":
         /*!***********************************************************************!*\
   !*** ../node_modules/css-loader??ref--7-1!./css/servicedesk.dark.css ***!
@@ -19048,19 +21269,19 @@ define(["moment", "react", "react-dom"], function(
           // module
           exports.push([
             module.i,
-            "@media (min-width: 1200px) {\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n  .col-xl-5 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 20%;\r\n    -ms-flex: 0 0 20%;\r\n    flex: 0 0 20%;\r\n    max-width: 20%;\r\n  }\r\n  .col-xl-7 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 58.33333%;\r\n    -ms-flex: 0 0 58.33333%;\r\n    flex: 0 0 58.33333%;\r\n    max-width: 58.33333%;\r\n  }\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n}\r\n\r\n/*********************************** Buttons *********************************/\r\n.blue-button {\r\n  background: #3b7cff !important;\r\n  color: #ffffff !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  margin-bottom: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.blue-button:hover,\r\n.blue-button:focus {\r\n  background: #0f5efd !important;\r\n  color: #ffffff !important;\r\n}\r\n\r\n.gray-button {\r\n  background: #dde4e9 !important;\r\n  color: #8392a7 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.gray-button:hover,\r\n.gray-button:focus {\r\n  background: #dbe0e4 !important;\r\n  color: #8392a7 !important;\r\n}\r\n\r\n.white-button {\r\n  background: white !important;\r\n  min-width: 100px;\r\n  color: #3b4859 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  text-align: center;\r\n}\r\n.white-button:hover,\r\n.white-button:focus {\r\n  background: #e6e6e6 !important;\r\n  color: #3b4859 !important;\r\n}\r\n.white-button i {\r\n  color: #57a4ff !important;\r\n}\r\n\r\na:focus,\r\na:hover {\r\n  color: #000000;\r\n}\r\n\r\n.float-right {\r\n  float: right;\r\n}\r\n\r\n.float-left {\r\n  float: left;\r\n}\r\n\r\n.text-left {\r\n  text-align: left;\r\n}\r\n\r\n.text-center {\r\n  text-align: center;\r\n}\r\n\r\n.text-right {\r\n  text-align: right;\r\n}\r\n\r\n.v-a-top {\r\n  vertical-align: top;\r\n}\r\n\r\n.v-a-middle {\r\n  vertical-align: middle;\r\n}\r\n\r\n.d-flex {\r\n  display: flex;\r\n}\r\n\r\n.d-block {\r\n  display: block;\r\n}\r\n\r\n.d-inline-block {\r\n  display: inline-block;\r\n}\r\n\r\n.p-t-0 {\r\n  padding-top: 0 !important;\r\n}\r\n\r\n.p-t-5 {\r\n  padding-top: 5px !important;\r\n}\r\n\r\n.p-t-10 {\r\n  padding-top: 10px !important;\r\n}\r\n\r\n.p-t-15 {\r\n  padding-top: 15px !important;\r\n}\r\n\r\n.p-t-20 {\r\n  padding-top: 20px !important;\r\n}\r\n\r\n.p-r-0 {\r\n  padding-right: 0 !important;\r\n}\r\n\r\n.p-r-5 {\r\n  padding-right: 5px !important;\r\n}\r\n\r\n.p-r-10 {\r\n  padding-right: 10px !important;\r\n}\r\n\r\n.p-r-15 {\r\n  padding-right: 15px !important;\r\n}\r\n\r\n.p-r-20 {\r\n  padding-right: 20px !important;\r\n}\r\n\r\n.p-b-0 {\r\n  padding-bottom: 0px !important;\r\n}\r\n\r\n.p-b-5 {\r\n  padding-bottom: 5px !important;\r\n}\r\n\r\n.p-b-10 {\r\n  padding-bottom: 10px !important;\r\n}\r\n\r\n.p-b-15 {\r\n  padding-bottom: 15px !important;\r\n}\r\n\r\n.p-b-20 {\r\n  padding-bottom: 20px !important;\r\n}\r\n\r\n.p-l-0 {\r\n  padding-left: 0 !important;\r\n}\r\n\r\n.p-l-5 {\r\n  padding-left: 5px !important;\r\n}\r\n\r\n.p-l-10 {\r\n  padding-left: 10px !important;\r\n}\r\n\r\n.p-l-15 {\r\n  padding-left: 15px !important;\r\n}\r\n\r\n.p-l-20 {\r\n  padding-left: 20px !important;\r\n}\r\n\r\n.m-l-0 {\r\n  margin-left: 0 !important;\r\n}\r\n\r\n.m-r-0 {\r\n  margin-right: 0 !important;\r\n}\r\n\r\n.m-t-0 {\r\n  margin-top: 0 !important;\r\n}\r\n\r\n.m-b-0 {\r\n  margin-bottom: 0 !important;\r\n}\r\n\r\n.width-25 {\r\n  width: 25%;\r\n}\r\n\r\n.width-50 {\r\n  width: 50%;\r\n}\r\n\r\n.width-75 {\r\n  width: 75%;\r\n}\r\n\r\n.width-100 {\r\n  width: 100%;\r\n}\r\n\r\n.width-auto {\r\n  width: auto;\r\n}\r\n\r\n.min-width-inherit {\r\n  min-width: inherit !important;\r\n}\r\n\r\n.border-bottom-0 {\r\n  border-bottom: none !important;\r\n}\r\n\r\n.orange {\r\n  color: #ff8f00;\r\n}\r\n\r\n.yellow-green {\r\n  color: #7ed321;\r\n}\r\n\r\n.red {\r\n  color: #f93d3d;\r\n}\r\n\r\n.yellow {\r\n  color: #ffff00;\r\n}\r\n\r\n.blue {\r\n  color: #438afb;\r\n}\r\n\r\n.form-control {\r\n  display: block;\r\n  width: 100%;\r\n  height: calc(1.5em + 0.75rem + 2px);\r\n  padding: 0.375rem 0.75rem;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  background-color: #fff;\r\n  background-clip: padding-box;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;\r\n}\r\n\r\n.input-group-text {\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  -ms-flex-align: center;\r\n  align-items: center;\r\n  padding: 0.375rem 0.75rem;\r\n  margin-bottom: 0;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  text-align: center;\r\n  white-space: nowrap;\r\n  background-color: #e9ecef;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n}\r\n\r\n.servicedesk-page-container {\r\n  background-color: #3b4859;\r\n  margin: 10px 20px;\r\n  border-radius: 10px;\r\n  padding-bottom: 10px;\r\n}\r\n.servicedesk-page-container .common-container {\r\n  padding-top: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  padding-bottom: 15px;\r\n  border-bottom: 1px solid #202226;\r\n}\r\n.servicedesk-page-container .page-heading {\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading h1 {\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  font-size: 24px;\r\n  line-height: 32px;\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading span {\r\n  display: block;\r\n  color: #a9b9c6;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n/*********************************** Filters Container *********************************/\r\n.form-group {\r\n  margin-bottom: 1rem;\r\n}\r\n.form-group label {\r\n  margin-bottom: 0.5rem;\r\n}\r\n\r\n.filter-container .filter-control-group {\r\n  max-width: 250px;\r\n  padding-left: 0px;\r\n}\r\n.filter-container .filter-control-group .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n.filter-container .filter-control-group label {\r\n  color: #ffffff;\r\n  font-size: 14px;\r\n}\r\n\r\n.showing {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n}\r\n\r\n.showby {\r\n  border-left: 1px solid #a9b9c6;\r\n  padding-left: 15px;\r\n  margin-left: 15px;\r\n}\r\n.showby label {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-right: 15px;\r\n}\r\n.showby .form-control {\r\n  display: inline-block;\r\n  width: 75px;\r\n  border-radius: 25px;\r\n}\r\n.showby span {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 1050px) {\r\n  .showing {\r\n    font-size: 11px;\r\n  }\r\n  .showby {\r\n    padding-left: 10px;\r\n    margin-left: 10px;\r\n  }\r\n  .showby label {\r\n    font-size: 11px;\r\n    padding-right: 10px;\r\n  }\r\n  .showby span {\r\n    font-size: 11px;\r\n    padding-left: 10px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1050px) and (min-width: 320px) {\r\n  .showby {\r\n    border-left: none;\r\n    padding-left: 0px;\r\n    margin-left: 0px;\r\n  }\r\n}\r\n\r\n.filter-search-control {\r\n  position: relative;\r\n  margin-bottom: 0;\r\n}\r\n.filter-search-control .input-group-text {\r\n  max-width: 100%;\r\n  text-align: left;\r\n  padding-right: 30px;\r\n  padding-left: 15px;\r\n  width: 100%;\r\n  border: 1px solid #ced4da;\r\n  background-color: #ffffff;\r\n  border-radius: 25px;\r\n}\r\n.filter-search-control .input-group-text:focus {\r\n  outline: none;\r\n}\r\n.filter-search-control button {\r\n  position: absolute;\r\n  right: 0;\r\n  top: 0;\r\n  z-index: 1;\r\n  cursor: pointer;\r\n  border: none;\r\n  background-color: transparent;\r\n  width: 34px;\r\n  height: 32px;\r\n}\r\n.filter-search-control button:hover {\r\n  color: #333333;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .filter-search-control {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.pagination ul {\r\n  list-style: none;\r\n  padding: 0;\r\n  margin: 0;\r\n}\r\n.pagination ul li {\r\n  display: inline-block;\r\n}\r\n.pagination ul li a {\r\n  display: block;\r\n  padding: 5px 10px;\r\n  font-size: 11px;\r\n  color: #868f9b;\r\n  line-height: 16px;\r\n  border: 1px solid #cbcfd4;\r\n  border-right: none;\r\n}\r\n.pagination ul li a:hover {\r\n  background-color: #cbcfd4;\r\n}\r\n.pagination ul li a.active {\r\n  background-color: #cbcfd4;\r\n  color: black;\r\n}\r\n.pagination ul li a.deactive {\r\n  background-color: white;\r\n  color: black;\r\n}\r\n.pagination ul li a.desable {\r\n  background-color: #5e5757;\r\n  color: white;\r\n}\r\n.pagination ul li a.enable {\r\n  background-color: #3b4859;\r\n  color: #ffffff;\r\n}\r\n.pagination ul li.previous a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  -webkit-border-top-left-radius: 5px;\r\n  -webkit-border-bottom-left-radius: 5px;\r\n  -moz-border-radius-topleft: 5px;\r\n  -moz-border-radius-bottomleft: 5px;\r\n  border-top-left-radius: 5px;\r\n  border-bottom-left-radius: 5px;\r\n}\r\n.pagination ul li.next a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  border-right: 1px solid #cbcfd4;\r\n  -webkit-border-top-right-radius: 5px;\r\n  -webkit-border-bottom-right-radius: 5px;\r\n  -moz-border-radius-topright: 5px;\r\n  -moz-border-radius-bottomright: 5px;\r\n  border-top-right-radius: 5px;\r\n  border-bottom-right-radius: 5px;\r\n}\r\n\r\n.open-create-menu {\r\n  position: absolute;\r\n  right: 15px;\r\n  top: 36px;\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 2px 5px #00000029;\r\n  width: 120px;\r\n  z-index: 10;\r\n  padding: 5px 0;\r\n}\r\n.open-create-menu a {\r\n  color: #2a9ce7;\r\n  font-size: 12px;\r\n  font-weight: 400;\r\n  line-height: 20px;\r\n  display: block;\r\n  padding: 4px 0;\r\n}\r\n\r\n.contact-popup-container .heading h4 {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container .heading span {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n.contact-popup-container .heading span a {\r\n  color: #49c740;\r\n}\r\n\r\n.contact-popup-container .upload-photo .upload-icon {\r\n  background-color: #438afb;\r\n  border-radius: 2px;\r\n  padding: 0;\r\n  width: 44px;\r\n  height: 44px;\r\n  color: #ffffff;\r\n  font-size: 24px;\r\n  line-height: 44px;\r\n  text-align: center;\r\n  margin-right: 15px;\r\n  vertical-align: top;\r\n}\r\n\r\n.contact-popup-container .upload-photo strong {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #438afb;\r\n}\r\n\r\n.contact-popup-container .upload-photo p {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n\r\n.contact-popup-container .form-group {\r\n  margin-bottom: 1.5rem;\r\n}\r\n.contact-popup-container .form-group label {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n  display: block;\r\n}\r\n.contact-popup-container .form-group .form-group-inner label {\r\n  display: none;\r\n}\r\n.contact-popup-container .form-group .form-control {\r\n  background-color: transparent;\r\n  border: none;\r\n  border-bottom: 1px solid #89898a;\r\n  color: #89898a;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  padding: 0.375rem 0;\r\n  width: 100%;\r\n  border-radius: 0;\r\n  text-align: left;\r\n}\r\n.contact-popup-container .form-group .form-control.textarea {\r\n  height: 150px;\r\n}\r\n.contact-popup-container .form-group .form-control:focus {\r\n  outline: none;\r\n}\r\n.contact-popup-container .form-group .add-conatct {\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  color: #3b7cff;\r\n  line-height: 18px;\r\n  border: none;\r\n  background: none;\r\n  padding: 0;\r\n}\r\n.contact-popup-container .form-group .invalid-feedback {\r\n  color: red;\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  font-weight: 400;\r\n  display: block;\r\n}\r\n\r\n.contact-popup-container .atleast-fields-box {\r\n  border: 1px solid #d1dae2;\r\n  background-color: #f9f9f9;\r\n  padding: 20px;\r\n  padding-bottom: 0;\r\n  margin-bottom: 20px;\r\n}\r\n.contact-popup-container .atleast-fields-box h3 {\r\n  color: #323c47;\r\n  font-size: 15px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 20px;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons button {\r\n  border: 1px solid #a9b9c6;\r\n  background-color: #ffffff;\r\n  color: #89898a;\r\n  font-size: 15px;\r\n  line-height: 36px;\r\n  font-weight: 500;\r\n  padding: 0 30px;\r\n  margin: 5px;\r\n  text-align: center;\r\n}\r\n.contact-popup-container .contact-popup-buttons button.save {\r\n  border-color: #3b7cff;\r\n  background-color: #3b7cff;\r\n  color: #ffffff;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons .create-author {\r\n  padding-right: 5px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-input {\r\n  display: inline-block;\r\n  margin-top: 2px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-label {\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  display: inline-block;\r\n  padding-left: 7px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group label {\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group .form-control {\r\n  border: 1px solid #d1dae2;\r\n  padding: 0.375rem 0.75rem;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .filter-container .assessments {\r\n    float: left;\r\n  }\r\n}\r\n\r\n#servicedesk-main-container .breadcrumbs-container {\r\n  background-color: #3b4859;\r\n  padding: 14px 20px 15px;\r\n  font-size: 13px;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .page-title {\r\n  color: #ffffff;\r\n  display: inline-block;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .breadcrumbs {\r\n  float: right;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container a.breadcrumbs-link {\r\n  color: #fcfcfc;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .current-page {\r\n  color: #fcfcfc;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .separator {\r\n  color: #fcfcfc;\r\n  display: inline-block;\r\n  padding: 0 10px;\r\n}\r\n\r\n@media (max-width: 768px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n.modal {\r\n  -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  max-width: 992px;\r\n  background: #ffffff;\r\n}\r\n.modal .modal-content {\r\n  padding: 40px;\r\n}\r\n\r\n.modal-backdrop {\r\n  background-color: #141414b3;\r\n  opacity: 0.8;\r\n}\r\n\r\n.ticketing-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 30px;\r\n}\r\n.ticketing-box .image {\r\n  padding-bottom: 10px;\r\n}\r\n.ticketing-box .number {\r\n  color: #3b4859;\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 700;\r\n  padding-bottom: 5px;\r\n}\r\n.ticketing-box .name {\r\n  color: #3b4859;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n\r\n.ticket-trends {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 15px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  min-height: 345px;\r\n}\r\n.ticket-trends .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-trends .heading span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n}\r\n.ticket-trends .days-box .form-check {\r\n  margin-right: 25px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-input {\r\n  display: inline-block;\r\n  vertical-align: top;\r\n  margin-top: 4px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-label {\r\n  font-size: 12px;\r\n  line-height: 21px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  display: inline-block;\r\n  padding-left: 8px;\r\n  vertical-align: top;\r\n}\r\n.ticket-trends .calendar-box .fa {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .calendar-box span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .ticket-graphs canvas {\r\n  height: 220px !important;\r\n  width: 100% !important;\r\n}\r\n.ticket-trends .ticket-graphs .hours-text {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n\r\n.performer-agents {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 20px;\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  padding-bottom: 40px;\r\n  min-height: 345px;\r\n}\r\n.performer-agents .heading {\r\n  color: #323c47;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 15px;\r\n}\r\n.performer-agents .performer-agents-table {\r\n  width: 100%;\r\n}\r\n.performer-agents .performer-agents-table thead tr th {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table thead tr th:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.dashboard-all-ticket-tabel .heading h2 a {\r\n  color: #ffffff;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel {\r\n  width: 1200px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr {\r\n  border-bottom: 7px solid #3b4859;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td {\r\n  background-color: #f0f3f7;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.date {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .ticket-trends-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n  .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n  .days-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .calendar-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n.tickets-number-box {\r\n  padding-right: 75px;\r\n}\r\n.tickets-number-box h3 {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n}\r\n.tickets-number-box span {\r\n  color: #a9b9c6;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n.quarter-form .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n\r\n.all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-support-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-support-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td {\r\n  color: #ffffff;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n  padding-top: 50px;\r\n  font-weight: 600;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n}\r\n\r\n.chart-inner canvas {\r\n  width: 100% !important;\r\n}\r\n\r\n.apply-filters-button {\r\n  margin-top: 8px;\r\n}\r\n\r\n@media only screen and (max-width: 992px) and (min-width: 768px) {\r\n  .tickets-number-box h3 {\r\n    font-size: 22px;\r\n    line-height: 26px;\r\n  }\r\n  .tickets-number-box span {\r\n    font-size: 10px;\r\n    line-height: 18px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n  .quarter-form {\r\n    padding-top: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .tickets-number-box {\r\n    display: block;\r\n    padding-top: 15px;\r\n    text-align: left;\r\n  }\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n  .open-create-menu {\r\n    left: 15px;\r\n    top: 45px;\r\n  }\r\n}\r\n\r\n.all-contacts-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-contacts-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-contacts-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel {\r\n  width: 1200px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .contacts-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-companies-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-companies-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel {\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td .image {\r\n  width: 40px;\r\n  height: 40px;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .companies-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n  .all-companies-container\r\n    .all-companies-tabel\r\n    .companies-main-tabel\r\n    .companies-tabel {\r\n    width: 992px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-open-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-open-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-open-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td {\r\n  color: #ffffff;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n  padding-top: 50px;\r\n  font-weight: 600;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .sortby {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .filters-button {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (min-width: 1200px) {\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n}\r\n\r\n.ticket-buttons .white-button {\r\n  border: 1px solid #a9b9c6 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  font-size: 12px;\r\n  color: #a9b9c6 !important;\r\n  display: inline-block;\r\n  padding-right: 12px !important;\r\n  padding-left: 12px !important;\r\n}\r\n.ticket-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n\r\n.ticket-buttons .group-buttons {\r\n  display: inline-block;\r\n}\r\n.ticket-buttons .group-buttons .white-button {\r\n  margin-right: 0;\r\n  border-right: none !important;\r\n}\r\n.ticket-buttons .group-buttons .white-button:last-child {\r\n  border-right: 1px solid #a9b9c6 !important;\r\n  margin-right: 10px;\r\n}\r\n\r\n.ticket-detail-box {\r\n  box-shadow: 0.94px 6px 16px #cfdff71a;\r\n  border-radius: 3px;\r\n  margin-bottom: 20px;\r\n}\r\n.ticket-detail-box .ticket-detail-head {\r\n  background: #ffffff;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-image {\r\n  display: inline-block;\r\n  width: 32px;\r\n  height: 32px;\r\n  background-color: #d1dae2;\r\n  overflow: hidden;\r\n  vertical-align: top;\r\n  border-radius: 50%;\r\n  margin-right: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text {\r\n  display: inline-block;\r\n  width: 86%;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p {\r\n  display: block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p a {\r\n  color: #3b7cff;\r\n  font-weight: 500;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p strong {\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p span {\r\n  color: #323c47;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-time-text {\r\n  display: inline-block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-right: 15px;\r\n  vertical-align: top;\r\n  padding-top: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button {\r\n  display: inline-block;\r\n  padding: 10px 0 0 0 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 16px;\r\n  background-color: transparent !important;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box {\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box strong {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box p {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box span {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 0px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul {\r\n  display: block;\r\n  list-style: none;\r\n  padding: 0 0 10px 0;\r\n  margin: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul li {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 3px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons {\r\n  padding-top: 0px;\r\n  padding-bottom: 10px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button {\r\n  padding: 7px 7px !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  margin-bottom: 0;\r\n  border-radius: 3px;\r\n  margin-top: 7px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.trash {\r\n  border: 1px solid #e6e6e6;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.saved {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  color: #a9b9c6 !important;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .blue-button {\r\n  padding: 15px 30px !important;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.properties-form {\r\n  display: block;\r\n  padding: 30px 45px;\r\n  background: #f0f3f7;\r\n  box-shadow: 0px 2px 6px #464c56a8;\r\n}\r\n.properties-form h3 {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 17px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 20px;\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group {\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group label {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n.properties-form .form-group select {\r\n  background-color: transparent;\r\n  color: #d1dae2;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 400;\r\n  border: none;\r\n  border-bottom: 1px solid #c7d0d9;\r\n  width: 100%;\r\n  cursor: pointer;\r\n}\r\n.properties-form .form-group select:focus {\r\n  outline: none;\r\n}\r\n.properties-form .form-group .blue-button {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  padding: 15px 60px !important;\r\n  margin: 0;\r\n}\r\n.properties-form .form-group .blue-button:focus {\r\n  outline: none;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .ticket-buttons .white-button {\r\n    padding-right: 7px !important;\r\n    padding-left: 8px !important;\r\n    font-size: 10px;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .head-time-text {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .white-button {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-buttons .detail-right-buttons {\r\n    text-align: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n/*# sourceMappingURL=servicedesk.dark.css.map */\r\n",
+            "@media (min-width: 1200px) {\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n  .col-xl-5 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 20%;\r\n    -ms-flex: 0 0 20%;\r\n    flex: 0 0 20%;\r\n    max-width: 20%;\r\n  }\r\n  .col-xl-7 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 58.33333%;\r\n    -ms-flex: 0 0 58.33333%;\r\n    flex: 0 0 58.33333%;\r\n    max-width: 58.33333%;\r\n  }\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n}\r\n\r\n/*********************************** Buttons *********************************/\r\n.blue-button {\r\n  background: #3b7cff !important;\r\n  color: #ffffff !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  margin-bottom: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.blue-button:hover,\r\n.blue-button:focus {\r\n  background: #0f5efd !important;\r\n  color: #ffffff !important;\r\n}\r\n\r\n.gray-button {\r\n  background: #dde4e9 !important;\r\n  color: #8392a7 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.gray-button:hover,\r\n.gray-button:focus {\r\n  background: #dbe0e4 !important;\r\n  color: #8392a7 !important;\r\n}\r\n\r\n.white-button {\r\n  background: white !important;\r\n  min-width: 100px;\r\n  color: #3b4859 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  text-align: center;\r\n}\r\n.white-button:hover,\r\n.white-button:focus {\r\n  background: #e6e6e6 !important;\r\n  color: #3b4859 !important;\r\n}\r\n.white-button i {\r\n  color: #57a4ff !important;\r\n}\r\n\r\na:focus,\r\na:hover {\r\n  color: #000000;\r\n}\r\n\r\n.float-right {\r\n  float: right;\r\n}\r\n\r\n.float-left {\r\n  float: left;\r\n}\r\n\r\n.text-left {\r\n  text-align: left;\r\n}\r\n\r\n.text-center {\r\n  text-align: center;\r\n}\r\n\r\n.text-right {\r\n  text-align: right;\r\n}\r\n\r\n.v-a-top {\r\n  vertical-align: top;\r\n}\r\n\r\n.v-a-middle {\r\n  vertical-align: middle;\r\n}\r\n\r\n.d-flex {\r\n  display: flex;\r\n}\r\n\r\n.d-block {\r\n  display: block;\r\n}\r\n\r\n.d-inline-block {\r\n  display: inline-block;\r\n}\r\n\r\n.p-t-0 {\r\n  padding-top: 0 !important;\r\n}\r\n\r\n.p-t-5 {\r\n  padding-top: 5px !important;\r\n}\r\n\r\n.p-t-10 {\r\n  padding-top: 10px !important;\r\n}\r\n\r\n.p-t-15 {\r\n  padding-top: 15px !important;\r\n}\r\n\r\n.p-t-20 {\r\n  padding-top: 20px !important;\r\n}\r\n\r\n.p-r-0 {\r\n  padding-right: 0 !important;\r\n}\r\n\r\n.p-r-5 {\r\n  padding-right: 5px !important;\r\n}\r\n\r\n.p-r-10 {\r\n  padding-right: 10px !important;\r\n}\r\n\r\n.p-r-15 {\r\n  padding-right: 15px !important;\r\n}\r\n\r\n.p-r-20 {\r\n  padding-right: 20px !important;\r\n}\r\n\r\n.p-b-0 {\r\n  padding-bottom: 0px !important;\r\n}\r\n\r\n.p-b-5 {\r\n  padding-bottom: 5px !important;\r\n}\r\n\r\n.p-b-10 {\r\n  padding-bottom: 10px !important;\r\n}\r\n\r\n.p-b-15 {\r\n  padding-bottom: 15px !important;\r\n}\r\n\r\n.p-b-20 {\r\n  padding-bottom: 20px !important;\r\n}\r\n\r\n.p-l-0 {\r\n  padding-left: 0 !important;\r\n}\r\n\r\n.p-l-5 {\r\n  padding-left: 5px !important;\r\n}\r\n\r\n.p-l-10 {\r\n  padding-left: 10px !important;\r\n}\r\n\r\n.p-l-15 {\r\n  padding-left: 15px !important;\r\n}\r\n\r\n.p-l-20 {\r\n  padding-left: 20px !important;\r\n}\r\n\r\n.m-l-0 {\r\n  margin-left: 0 !important;\r\n}\r\n\r\n.m-r-0 {\r\n  margin-right: 0 !important;\r\n}\r\n\r\n.m-t-0 {\r\n  margin-top: 0 !important;\r\n}\r\n\r\n.m-b-0 {\r\n  margin-bottom: 0 !important;\r\n}\r\n\r\n.width-25 {\r\n  width: 25%;\r\n}\r\n\r\n.width-50 {\r\n  width: 50%;\r\n}\r\n\r\n.width-75 {\r\n  width: 75%;\r\n}\r\n\r\n.width-100 {\r\n  width: 100%;\r\n}\r\n\r\n.width-auto {\r\n  width: auto;\r\n}\r\n\r\n.min-width-inherit {\r\n  min-width: inherit !important;\r\n}\r\n\r\n.border-bottom-0 {\r\n  border-bottom: none !important;\r\n}\r\n\r\n.orange {\r\n  color: #ff8f00;\r\n}\r\n\r\n.yellow-green {\r\n  color: #7ed321;\r\n}\r\n\r\n.red {\r\n  color: #f93d3d;\r\n}\r\n\r\n.yellow {\r\n  color: #ffff00;\r\n}\r\n\r\n.blue {\r\n  color: #438afb;\r\n}\r\n\r\n.form-control {\r\n  display: block;\r\n  width: 100%;\r\n  height: calc(1.5em + 0.75rem + 2px);\r\n  padding: 0.375rem 0.75rem;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  background-color: #fff;\r\n  background-clip: padding-box;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;\r\n}\r\n\r\n.input-group-text {\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  -ms-flex-align: center;\r\n  align-items: center;\r\n  padding: 0.375rem 0.75rem;\r\n  margin-bottom: 0;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  text-align: center;\r\n  white-space: nowrap;\r\n  background-color: #e9ecef;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n}\r\n\r\n.servicedesk-page-container {\r\n  background-color: #3b4859;\r\n  margin: 10px 20px;\r\n  border-radius: 10px;\r\n  padding-bottom: 10px;\r\n}\r\n.servicedesk-page-container .common-container {\r\n  padding-top: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  padding-bottom: 15px;\r\n  border-bottom: 1px solid #202226;\r\n}\r\n.servicedesk-page-container .page-heading {\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading h1 {\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  font-size: 24px;\r\n  line-height: 32px;\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading span {\r\n  display: block;\r\n  color: #a9b9c6;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n/*********************************** Filters Container *********************************/\r\n.form-group {\r\n  margin-bottom: 1rem;\r\n}\r\n.form-group label {\r\n  margin-bottom: 0.5rem;\r\n}\r\n\r\n.filter-container .filter-control-group {\r\n  max-width: 250px;\r\n  padding-left: 0px;\r\n}\r\n.filter-container .filter-control-group .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n.filter-container .filter-control-group label {\r\n  color: #ffffff;\r\n  font-size: 14px;\r\n}\r\n\r\n.showing {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n}\r\n\r\n.showby {\r\n  border-left: 1px solid #a9b9c6;\r\n  padding-left: 15px;\r\n  margin-left: 15px;\r\n}\r\n.showby label {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-right: 15px;\r\n}\r\n.showby .form-control {\r\n  display: inline-block;\r\n  width: 75px;\r\n  border-radius: 25px;\r\n}\r\n.showby span {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 1050px) {\r\n  .showing {\r\n    font-size: 11px;\r\n  }\r\n  .showby {\r\n    padding-left: 10px;\r\n    margin-left: 10px;\r\n  }\r\n  .showby label {\r\n    font-size: 11px;\r\n    padding-right: 10px;\r\n  }\r\n  .showby span {\r\n    font-size: 11px;\r\n    padding-left: 10px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1050px) and (min-width: 320px) {\r\n  .showby {\r\n    border-left: none;\r\n    padding-left: 0px;\r\n    margin-left: 0px;\r\n  }\r\n}\r\n\r\n.filter-search-control {\r\n  position: relative;\r\n  margin-bottom: 0;\r\n}\r\n.filter-search-control .input-group-text {\r\n  max-width: 100%;\r\n  text-align: left;\r\n  padding-right: 30px;\r\n  padding-left: 15px;\r\n  width: 100%;\r\n  border: 1px solid #ced4da;\r\n  background-color: #ffffff;\r\n  border-radius: 25px;\r\n  padding-top: 0.399rem;\r\n}\r\n.filter-search-control .input-group-text:focus {\r\n  outline: none;\r\n}\r\n.filter-search-control button {\r\n  position: absolute;\r\n  right: 0;\r\n  top: 0;\r\n  z-index: 1;\r\n  cursor: pointer;\r\n  border: none;\r\n  background-color: transparent;\r\n  width: 34px;\r\n  height: 34px;\r\n}\r\n.filter-search-control button:hover {\r\n  color: #333333;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .filter-search-control {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.pagination ul {\r\n  list-style: none;\r\n  padding: 0;\r\n  margin: 0;\r\n}\r\n.pagination ul li {\r\n  display: inline-block;\r\n}\r\n.pagination ul li a {\r\n  display: block;\r\n  padding: 5px 10px;\r\n  font-size: 11px;\r\n  color: #868f9b;\r\n  line-height: 16px;\r\n  border: 1px solid #cbcfd4;\r\n  border-right: none;\r\n}\r\n.pagination ul li a:hover {\r\n  background-color: #cbcfd4;\r\n}\r\n.pagination ul li a.active {\r\n  background-color: #cbcfd4;\r\n  color: black;\r\n}\r\n.pagination ul li a.deactive {\r\n  background-color: white;\r\n  color: black;\r\n}\r\n.pagination ul li a.desable {\r\n  background-color: #5e5757;\r\n  color: white;\r\n}\r\n.pagination ul li a.enable {\r\n  background-color: #3b4859;\r\n  color: #ffffff;\r\n}\r\n.pagination ul li.previous a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  -webkit-border-top-left-radius: 5px;\r\n  -webkit-border-bottom-left-radius: 5px;\r\n  -moz-border-radius-topleft: 5px;\r\n  -moz-border-radius-bottomleft: 5px;\r\n  border-top-left-radius: 5px;\r\n  border-bottom-left-radius: 5px;\r\n}\r\n.pagination ul li.next a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  border-right: 1px solid #cbcfd4;\r\n  -webkit-border-top-right-radius: 5px;\r\n  -webkit-border-bottom-right-radius: 5px;\r\n  -moz-border-radius-topright: 5px;\r\n  -moz-border-radius-bottomright: 5px;\r\n  border-top-right-radius: 5px;\r\n  border-bottom-right-radius: 5px;\r\n}\r\n\r\n.open-create-menu {\r\n  position: absolute;\r\n  right: 15px;\r\n  top: 36px;\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 2px 5px #00000029;\r\n  width: 120px;\r\n  z-index: 10;\r\n  padding: 5px 0;\r\n}\r\n.open-create-menu a {\r\n  color: #2a9ce7;\r\n  font-size: 12px;\r\n  font-weight: 400;\r\n  line-height: 20px;\r\n  display: block;\r\n  padding: 4px 0;\r\n}\r\n\r\n.contact-popup-container .heading h4 {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container .heading span {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n.contact-popup-container .heading span a {\r\n  color: #49c740;\r\n}\r\n\r\n.contact-popup-container .upload-photo .upload-icon {\r\n  background-color: #438afb;\r\n  border-radius: 2px;\r\n  padding: 0;\r\n  width: 44px;\r\n  height: 44px;\r\n  color: #ffffff;\r\n  font-size: 24px;\r\n  line-height: 44px;\r\n  text-align: center;\r\n  margin-right: 15px;\r\n  vertical-align: top;\r\n}\r\n\r\n.contact-popup-container .upload-photo strong {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #438afb;\r\n}\r\n\r\n.contact-popup-container .upload-photo p {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n\r\n.contact-popup-container .form-group {\r\n  margin-bottom: 1.5rem;\r\n}\r\n.contact-popup-container .form-group label {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n  display: block;\r\n}\r\n.contact-popup-container .form-group .form-group-inner label {\r\n  display: none;\r\n}\r\n.contact-popup-container .form-group .form-control {\r\n  background-color: transparent;\r\n  border: none;\r\n  border-bottom: 1px solid #89898a;\r\n  color: #89898a;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  padding: 0.375rem 0;\r\n  width: 100%;\r\n  border-radius: 0;\r\n  text-align: left;\r\n}\r\n.contact-popup-container .form-group .form-control.textarea {\r\n  height: 150px;\r\n}\r\n.contact-popup-container .form-group .form-control:focus {\r\n  outline: none;\r\n}\r\n.contact-popup-container .form-group .add-conatct {\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  color: #3b7cff;\r\n  line-height: 18px;\r\n  border: none;\r\n  background: none;\r\n  padding: 0;\r\n}\r\n.contact-popup-container .form-group .invalid-feedback {\r\n  color: red;\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  font-weight: 400;\r\n  display: block;\r\n}\r\n\r\n.contact-popup-container .atleast-fields-box {\r\n  border: 1px solid #d1dae2;\r\n  background-color: #f9f9f9;\r\n  padding: 20px;\r\n  padding-bottom: 0;\r\n  margin-bottom: 20px;\r\n}\r\n.contact-popup-container .atleast-fields-box h3 {\r\n  color: #323c47;\r\n  font-size: 15px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 20px;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons button {\r\n  border: 1px solid #a9b9c6;\r\n  background-color: #ffffff;\r\n  color: #89898a;\r\n  font-size: 15px;\r\n  line-height: 36px;\r\n  font-weight: 500;\r\n  padding: 0 30px;\r\n  margin: 5px;\r\n  text-align: center;\r\n}\r\n.contact-popup-container .contact-popup-buttons button.save {\r\n  border-color: #3b7cff;\r\n  background-color: #3b7cff;\r\n  color: #ffffff;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons .create-author {\r\n  padding-right: 5px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-input {\r\n  display: inline-block;\r\n  margin-top: 2px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-label {\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  display: inline-block;\r\n  padding-left: 7px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group label {\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group .form-control {\r\n  border: 1px solid #d1dae2;\r\n  padding: 0.375rem 0.75rem;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .filter-container .assessments {\r\n    float: left;\r\n  }\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n}\r\n\r\n#servicedesk-main-container .breadcrumbs-container {\r\n  background-color: #3b4859;\r\n  padding: 14px 20px 15px;\r\n  font-size: 13px;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .page-title {\r\n  color: #ffffff;\r\n  display: inline-block;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .breadcrumbs {\r\n  float: right;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container a.breadcrumbs-link {\r\n  color: #fcfcfc;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .current-page {\r\n  color: #fcfcfc;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .separator {\r\n  color: #fcfcfc;\r\n  display: inline-block;\r\n  padding: 0 10px;\r\n}\r\n\r\n@media (max-width: 768px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n.modal {\r\n  -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  max-width: 992px;\r\n  background: #ffffff;\r\n}\r\n.modal .modal-content {\r\n  padding: 40px;\r\n}\r\n\r\n.modal-backdrop {\r\n  background-color: #141414b3;\r\n  opacity: 0.8;\r\n}\r\n\r\n.ticketing-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 30px;\r\n}\r\n.ticketing-box .image {\r\n  padding-bottom: 10px;\r\n}\r\n.ticketing-box .number {\r\n  color: #3b4859;\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 700;\r\n  padding-bottom: 5px;\r\n}\r\n.ticketing-box .name {\r\n  color: #3b4859;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n\r\n.ticket-trends {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 15px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  min-height: 345px;\r\n}\r\n.ticket-trends .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-trends .heading span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n}\r\n.ticket-trends .days-box .form-check {\r\n  margin-right: 25px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-input {\r\n  display: inline-block;\r\n  vertical-align: top;\r\n  margin-top: 4px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-label {\r\n  font-size: 12px;\r\n  line-height: 21px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  display: inline-block;\r\n  padding-left: 8px;\r\n  vertical-align: top;\r\n}\r\n.ticket-trends .calendar-box .fa {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .calendar-box span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .ticket-graphs canvas {\r\n  height: 220px !important;\r\n  width: 100% !important;\r\n}\r\n.ticket-trends .ticket-graphs .hours-text {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n\r\n.performer-agents {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 20px;\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  padding-bottom: 40px;\r\n  min-height: 345px;\r\n}\r\n.performer-agents .heading {\r\n  color: #323c47;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 15px;\r\n}\r\n.performer-agents .performer-agents-table {\r\n  width: 100%;\r\n}\r\n.performer-agents .performer-agents-table thead tr th {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table thead tr th:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.dashboard-all-ticket-tabel .heading h2 a {\r\n  color: #ffffff;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel {\r\n  width: 1200px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr {\r\n  border-bottom: 7px solid #3b4859;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td {\r\n  background-color: #f0f3f7;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.date {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .ticket-trends-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n  .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n  .days-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .calendar-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n.tickets-number-box {\r\n  padding-right: 75px;\r\n}\r\n.tickets-number-box h3 {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n}\r\n.tickets-number-box span {\r\n  color: #a9b9c6;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n.quarter-form .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n\r\n.all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-support-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-support-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td {\r\n  color: #ffffff;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.chart-inner canvas {\r\n  width: 100% !important;\r\n}\r\n\r\n.apply-filters-button {\r\n  margin-top: 8px;\r\n}\r\n\r\n@media only screen and (max-width: 992px) and (min-width: 768px) {\r\n  .tickets-number-box h3 {\r\n    font-size: 22px;\r\n    line-height: 26px;\r\n  }\r\n  .tickets-number-box span {\r\n    font-size: 10px;\r\n    line-height: 18px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n  .quarter-form {\r\n    padding-top: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .tickets-number-box {\r\n    display: block;\r\n    padding-top: 15px;\r\n    text-align: left;\r\n  }\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n  .open-create-menu {\r\n    left: 15px;\r\n    top: 45px;\r\n  }\r\n}\r\n\r\n.all-contacts-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-contacts-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-contacts-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel {\r\n  width: 1200px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-left: 0px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .contacts-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-companies-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-companies-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel {\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td .image {\r\n  width: 40px;\r\n  height: 40px;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .companies-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n  .all-companies-container\r\n    .all-companies-tabel\r\n    .companies-main-tabel\r\n    .companies-tabel {\r\n    width: 992px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-open-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-open-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-open-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td {\r\n  color: #ffffff;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .sortby {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .filters-button {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (min-width: 1200px) {\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n}\r\n\r\n.ticket-buttons .white-button {\r\n  border: 1px solid #a9b9c6 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  font-size: 12px;\r\n  color: #a9b9c6 !important;\r\n  display: inline-block;\r\n  padding-right: 12px !important;\r\n  padding-left: 12px !important;\r\n}\r\n.ticket-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n\r\n.ticket-buttons .group-buttons {\r\n  display: inline-block;\r\n}\r\n.ticket-buttons .group-buttons .white-button {\r\n  margin-right: 0;\r\n  border-right: none !important;\r\n}\r\n.ticket-buttons .group-buttons .white-button:last-child {\r\n  border-right: 1px solid #a9b9c6 !important;\r\n  margin-right: 10px;\r\n}\r\n\r\n.ticket-detail-box {\r\n  box-shadow: 0.94px 6px 16px #cfdff71a;\r\n  border-radius: 3px;\r\n  margin-bottom: 20px;\r\n}\r\n.ticket-detail-box .ticket-detail-head {\r\n  background: #ffffff;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-image {\r\n  display: inline-block;\r\n  width: 32px;\r\n  height: 32px;\r\n  background-color: #d1dae2;\r\n  overflow: hidden;\r\n  vertical-align: top;\r\n  border-radius: 50%;\r\n  margin-right: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text {\r\n  display: inline-block;\r\n  width: 86%;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p {\r\n  display: block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p a {\r\n  color: #3b7cff;\r\n  font-weight: 500;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p strong {\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p span {\r\n  color: #323c47;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-time-text {\r\n  display: inline-block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-right: 15px;\r\n  vertical-align: top;\r\n  padding-top: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button {\r\n  display: inline-block;\r\n  padding: 10px 0 0 0 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 16px;\r\n  background-color: transparent !important;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box {\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box strong {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box p {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box span {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 0px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul {\r\n  display: block;\r\n  list-style: none;\r\n  padding: 0 0 10px 0;\r\n  margin: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul li {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 3px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons {\r\n  padding-top: 0px;\r\n  padding-bottom: 10px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button {\r\n  padding: 7px 7px !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  margin-bottom: 0;\r\n  border-radius: 3px;\r\n  margin-top: 7px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.trash {\r\n  border: 1px solid #e6e6e6;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.saved {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  color: #a9b9c6 !important;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .blue-button {\r\n  padding: 15px 30px !important;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.properties-form {\r\n  display: block;\r\n  padding: 30px 45px;\r\n  background: #f0f3f7;\r\n  box-shadow: 0px 2px 6px #464c56a8;\r\n}\r\n.properties-form h3 {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 17px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 20px;\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group {\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group label {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n.properties-form .form-group select {\r\n  background-color: transparent;\r\n  color: #d1dae2;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 400;\r\n  border: none;\r\n  border-bottom: 1px solid #c7d0d9;\r\n  width: 100%;\r\n  cursor: pointer;\r\n}\r\n.properties-form .form-group select:focus {\r\n  outline: none;\r\n}\r\n.properties-form .form-group .blue-button {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  padding: 15px 60px !important;\r\n  margin: 0;\r\n}\r\n.properties-form .form-group .blue-button:focus {\r\n  outline: none;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .ticket-buttons .white-button {\r\n    padding-right: 7px !important;\r\n    padding-left: 8px !important;\r\n    font-size: 10px;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .head-time-text {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .white-button {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-buttons .detail-right-buttons {\r\n    text-align: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.reports-page-container {\r\n  padding: 10px;\r\n}\r\n.reports-page-container .reports-left {\r\n  background-color: #f0f3f7;\r\n  border-radius: 3px;\r\n  padding: 20px 30px 30px;\r\n}\r\n.reports-page-container .reports-left .heading {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-left .ask-question {\r\n  border: 1px solid #d1dae2;\r\n  color: #929598;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n  padding: 7px 15px;\r\n  margin-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box {\r\n  border-top: 1px solid #d1dae2;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.productivity ul li span {\r\n  background-color: rgba(67, 138, 251, 0.1);\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.productivity ul li span i {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.happiness ul li span {\r\n  background-color: rgba(246, 115, 115, 0.1);\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.happiness ul li span i {\r\n  color: #f67373;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box .helpdesk-heading {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  font-weight: 600;\r\n  line-height: 18px;\r\n  padding-bottom: 0px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul {\r\n  padding-top: 10px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li {\r\n  margin-right: 30px;\r\n  width: 100px;\r\n  vertical-align: top;\r\n  margin-bottom: 10px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li:last-child {\r\n  margin-right: 0;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li span {\r\n  width: 80px;\r\n  height: 80px;\r\n  line-height: 80px;\r\n  background-color: rgba(72, 199, 65, 0.1);\r\n  border-radius: 3px;\r\n  margin-bottom: 5px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li span i {\r\n  font-size: 32px;\r\n  line-height: 80px;\r\n  color: #48c741;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li strong {\r\n  font-size: 11px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  color: #323c47;\r\n  text-transform: uppercase;\r\n}\r\n.reports-page-container .reports-left .build-reports-text {\r\n  border-top: 1px solid #d1dae2;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .build-reports-text p {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n  margin-bottom: 3px;\r\n}\r\n.reports-page-container .reports-left .build-reports-text strong {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #438afb;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-left .build-reports-text strong a {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-right {\r\n  background-color: #f0f3f7;\r\n  border-radius: 3px;\r\n  padding: 20px 15px 30px;\r\n  min-height: 777px;\r\n}\r\n.reports-page-container .reports-right .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 22px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-right .heading p {\r\n  font-size: 11px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n.reports-page-container .reports-right .customize-link {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #438afb;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-right .customize-link a {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-right .insight-box {\r\n  border: 1px solid #d1dae2;\r\n  padding: 10px 15px;\r\n  margin-bottom: 15px;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-heading {\r\n  color: #d1dae2;\r\n  font-size: 11px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-heading strong {\r\n  color: #3b7cff;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container\r\n  .reports-right\r\n  .insight-box\r\n  .insight-heading-right-text {\r\n  color: #3b7cff;\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  line-height: 18px;\r\n}\r\n.reports-page-container\r\n  .reports-right\r\n  .insight-box\r\n  .insight-heading-right-text.red {\r\n  color: #f67373;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-text {\r\n  color: #a9b9c6;\r\n  font-size: 11px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .reports-page-container .reports-right {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n.desk-depth-container .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n\r\n.desk-depth-container .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.desk-depth-container .filters-buttons .blue-button {\r\n  margin-right: 15px;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.desk-depth-container .filters-buttons .white-button {\r\n  padding: 0px !important;\r\n  font-size: 28px;\r\n  line-height: 34px;\r\n  vertical-align: top;\r\n  margin-right: 15px;\r\n  margin-bottom: 0;\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .filters-buttons .white-button:hover {\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .filters-buttons .white-button i {\r\n  color: #ffffff !important;\r\n}\r\n\r\n.desk-depth-container .desk-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  margin-bottom: 30px;\r\n}\r\n.desk-depth-container .desk-box a {\r\n  padding: 10px;\r\n  padding-bottom: 20px;\r\n  min-height: 160px;\r\n}\r\n.desk-depth-container .desk-box .icon {\r\n  font-size: 16px;\r\n  color: #323c47;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button {\r\n  padding: 0px !important;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n  margin-bottom: 0;\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button:hover {\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.desk-depth-container .desk-box .number {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n  color: #3b4859;\r\n  padding-bottom: 10px;\r\n  padding-top: 10px;\r\n}\r\n.desk-depth-container .desk-box .text {\r\n  font-size: 20px;\r\n  line-height: 28px;\r\n  font-weight: 400;\r\n  color: #3b4859;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .desk-depth-container .filters-buttons {\r\n    text-align: left;\r\n  }\r\n}\r\n\r\n.charts-boxs {\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.charts-boxs .chart-box {\r\n  background: #f0f3f7 0% 0% no-repeat padding-box;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  min-height: 400px;\r\n  margin-bottom: 30px;\r\n  padding: 30px;\r\n}\r\n\r\n/*# sourceMappingURL=servicedesk.dark.css.map */\r\n",
             "",
             {
               version: 3,
               sources: [
-                "E:/plugins/xformation-servicedesk-ui-plugin/src/css/servicedesk.dark.css"
+                "C:/mycode/brighton_plugin/xformation-servicedesk-ui-plugin/src/css/servicedesk.dark.css"
               ],
               names: [],
               mappings:
-                "AAAA;EACE;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,sBAAsB;IACtB,kBAAkB;IAClB,cAAc;IACd,eAAe;GAChB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;CACF;;AAED,+EAA+E;AAC/E;EACE,+BAA+B;EAC/B,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,oBAAoB;EACpB,iCAAiC;EACjC,iBAAiB;EACjB,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;;AAED;EACE,+BAA+B;EAC/B,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,iCAAiC;EACjC,iBAAiB;EACjB,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;;AAED;EACE,6BAA6B;EAC7B,iBAAiB;EACjB,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,iCAAiC;EACjC,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;AACD;EACE,0BAA0B;CAC3B;;AAED;;EAEE,eAAe;CAChB;;AAED;EACE,aAAa;CACd;;AAED;EACE,YAAY;CACb;;AAED;EACE,iBAAiB;CAClB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,kBAAkB;CACnB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,uBAAuB;CACxB;;AAED;EACE,cAAc;CACf;;AAED;EACE,eAAe;CAChB;;AAED;EACE,sBAAsB;CACvB;;AAED;EACE,0BAA0B;CAC3B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,2BAA2B;CAC5B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,0BAA0B;CAC3B;;AAED;EACE,2BAA2B;CAC5B;;AAED;EACE,yBAAyB;CAC1B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,WAAW;CACZ;;AAED;EACE,WAAW;CACZ;;AAED;EACE,WAAW;CACZ;;AAED;EACE,YAAY;CACb;;AAED;EACE,YAAY;CACb;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;EACf,YAAY;EACZ,oCAAoC;EACpC,0BAA0B;EAC1B,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;EACf,uBAAuB;EACvB,6BAA6B;EAC7B,0BAA0B;EAC1B,uBAAuB;EACvB,yEAAyE;CAC1E;;AAED;EACE,qBAAqB;EACrB,cAAc;EACd,uBAAuB;EACvB,oBAAoB;EACpB,0BAA0B;EAC1B,iBAAiB;EACjB,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;EACf,mBAAmB;EACnB,oBAAoB;EACpB,0BAA0B;EAC1B,0BAA0B;EAC1B,uBAAuB;CACxB;;AAED;EACE,0BAA0B;EAC1B,kBAAkB;EAClB,oBAAoB;EACpB,qBAAqB;CACtB;AACD;EACE,kBAAkB;EAClB,mBAAmB;EACnB,oBAAoB;EACpB,qBAAqB;EACrB,iCAAiC;CAClC;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,iBAAiB;EACjB,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED,yFAAyF;AACzF;EACE,oBAAoB;CACrB;AACD;EACE,sBAAsB;CACvB;;AAED;EACE,iBAAiB;EACjB,kBAAkB;CACnB;AACD;EACE,qCAAqC;EACrC,wBAAwB;EACxB,gBAAgB;EAChB,gBAAgB;EAChB,aAAa;CACd;AACD;EACE,eAAe;EACf,gBAAgB;CACjB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,+BAA+B;EAC/B,mBAAmB;EACnB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,sBAAsB;EACtB,YAAY;EACZ,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;;AAED;EACE;IACE,gBAAgB;GACjB;EACD;IACE,mBAAmB;IACnB,kBAAkB;GACnB;EACD;IACE,gBAAgB;IAChB,oBAAoB;GACrB;EACD;IACE,gBAAgB;IAChB,mBAAmB;GACpB;CACF;;AAED;EACE;IACE,kBAAkB;IAClB,kBAAkB;IAClB,iBAAiB;GAClB;CACF;;AAED;EACE,mBAAmB;EACnB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,oBAAoB;EACpB,mBAAmB;EACnB,YAAY;EACZ,0BAA0B;EAC1B,0BAA0B;EAC1B,oBAAoB;CACrB;AACD;EACE,cAAc;CACf;AACD;EACE,mBAAmB;EACnB,SAAS;EACT,OAAO;EACP,WAAW;EACX,gBAAgB;EAChB,aAAa;EACb,8BAA8B;EAC9B,YAAY;EACZ,aAAa;CACd;AACD;EACE,eAAe;CAChB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,iBAAiB;EACjB,WAAW;EACX,UAAU;CACX;AACD;EACE,sBAAsB;CACvB;AACD;EACE,eAAe;EACf,kBAAkB;EAClB,gBAAgB;EAChB,eAAe;EACf,kBAAkB;EAClB,0BAA0B;EAC1B,mBAAmB;CACpB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,0BAA0B;EAC1B,aAAa;CACd;AACD;EACE,wBAAwB;EACxB,aAAa;CACd;AACD;EACE,0BAA0B;EAC1B,aAAa;CACd;AACD;EACE,0BAA0B;EAC1B,eAAe;CAChB;AACD;EACE,mBAAmB;EACnB,oBAAoB;EACpB,oCAAoC;EACpC,uCAAuC;EACvC,gCAAgC;EAChC,mCAAmC;EACnC,4BAA4B;EAC5B,+BAA+B;CAChC;AACD;EACE,mBAAmB;EACnB,oBAAoB;EACpB,gCAAgC;EAChC,qCAAqC;EACrC,wCAAwC;EACxC,iCAAiC;EACjC,oCAAoC;EACpC,6BAA6B;EAC7B,gCAAgC;CACjC;;AAED;EACE,mBAAmB;EACnB,YAAY;EACZ,UAAU;EACV,0BAA0B;EAC1B,kCAAkC;EAClC,aAAa;EACb,YAAY;EACZ,eAAe;CAChB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,eAAe;EACf,eAAe;CAChB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,mBAAmB;CACpB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;;AAED;EACE,0BAA0B;EAC1B,mBAAmB;EACnB,WAAW;EACX,YAAY;EACZ,aAAa;EACb,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,mBAAmB;EACnB,mBAAmB;EACnB,oBAAoB;CACrB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;CAChB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,sBAAsB;CACvB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,cAAc;CACf;AACD;EACE,8BAA8B;EAC9B,aAAa;EACb,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,oBAAoB;EACpB,YAAY;EACZ,iBAAiB;EACjB,iBAAiB;CAClB;AACD;EACE,cAAc;CACf;AACD;EACE,cAAc;CACf;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,eAAe;EACf,kBAAkB;EAClB,aAAa;EACb,iBAAiB;EACjB,WAAW;CACZ;AACD;EACE,WAAW;EACX,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,eAAe;CAChB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;EAC1B,cAAc;EACd,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,oBAAoB;CACrB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,gBAAgB;EAChB,YAAY;EACZ,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,0BAA0B;EAC1B,eAAe;CAChB;;AAED;EACE,mBAAmB;CACpB;AACD;;;;EAIE,sBAAsB;EACtB,gBAAgB;CACjB;AACD;;;;EAIE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,sBAAsB;EACtB,kBAAkB;CACnB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;CAC3B;;AAED;EACE;IACE,YAAY;GACb;CACF;;AAED;EACE,0BAA0B;EAC1B,wBAAwB;EACxB,gBAAgB;CACjB;AACD;EACE,eAAe;EACf,sBAAsB;CACvB;AACD;EACE,aAAa;CACd;AACD;EACE,eAAe;CAChB;AACD;EACE,eAAe;CAChB;AACD;EACE,eAAe;EACf,sBAAsB;EACtB,gBAAgB;CACjB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,+CAA+C;EAC/C,uCAAuC;EACvC,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,cAAc;CACf;;AAED;EACE,4BAA4B;EAC5B,aAAa;CACd;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,qBAAqB;EACrB,oBAAoB;CACrB;AACD;EACE,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;EACpB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,oBAAoB;EACpB,gBAAgB;CACjB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,sBAAsB;EACtB,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,yBAAyB;EACzB,uBAAuB;CACxB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,oBAAoB;EACpB,mBAAmB;EACnB,qBAAqB;EACrB,kBAAkB;CACnB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,qBAAqB;CACtB;AACD;EACE,YAAY;CACb;AACD;EACE,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,0BAA0B;CAC3B;AACD;EACE,iBAAiB;CAClB;AACD;EACE,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,0BAA0B;CAC3B;AACD;EACE,iBAAiB;CAClB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,eAAe;CAChB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,mBAAmB;CACpB;AACD;;;;EAIE,cAAc;CACf;AACD;;;;;;;EAOE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,iCAAiC;CAClC;AACD;;;;;;;EAOE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;;EAQE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;;;;;;;;EAQE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE;IACE,uBAAuB;IACvB,mBAAmB;IACnB,eAAe;IACf,gBAAgB;GACjB;EACD;IACE,uBAAuB;IACvB,mBAAmB;IACnB,eAAe;IACf,gBAAgB;GACjB;EACD;IACE,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,qCAAqC;EACrC,wBAAwB;EACxB,gBAAgB;EAChB,gBAAgB;EAChB,aAAa;CACd;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,gBAAgB;CACjB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;EACE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE,mBAAmB;EACnB,kBAAkB;EAClB,iBAAiB;EACjB,gBAAgB;EAChB,kBAAkB;CACnB;;AAED;EACE,uBAAuB;CACxB;;AAED;EACE,gBAAgB;CACjB;;AAED;EACE;IACE,gBAAgB;IAChB,kBAAkB;GACnB;EACD;IACE,gBAAgB;IAChB,kBAAkB;GACnB;CACF;;AAED;EACE;IACE,oBAAoB;GACrB;CACF;;AAED;EACE;IACE,oBAAoB;GACrB;EACD;IACE,kBAAkB;GACnB;CACF;;AAED;EACE;IACE,eAAe;IACf,kBAAkB;IAClB,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;IACjB,iBAAiB;GAClB;EACD;IACE,WAAW;IACX,UAAU;GACX;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,sBAAsB;EACtB,uBAAuB;EACvB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,gBAAgB;CACjB;AACD;EACE,sBAAsB;EACtB,uBAAuB;CACxB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,gBAAgB;GACjB;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,sBAAsB;EACtB,uBAAuB;EACvB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,YAAY;CACb;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,gBAAgB;CACjB;AACD;;;;;;;EAOE,sBAAsB;EACtB,uBAAuB;CACxB;AACD;EACE,YAAY;EACZ,aAAa;EACb,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,gBAAgB;GACjB;EACD;;;;IAIE,aAAa;GACd;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,gBAAgB;CACjB;AACD;EACE,gBAAgB;CACjB;AACD;;;;;;;EAOE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;;;;;;;EAOE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE,mBAAmB;EACnB,kBAAkB;EAClB,iBAAiB;EACjB,gBAAgB;EAChB,kBAAkB;CACnB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;IACjB,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;CACF;;AAED;EACE,qCAAqC;EACrC,YAAY;EACZ,mBAAmB;EACnB,gBAAgB;EAChB,0BAA0B;EAC1B,sBAAsB;EACtB,+BAA+B;EAC/B,8BAA8B;CAC/B;AACD;EACE,0BAA0B;CAC3B;;AAED;EACE,sBAAsB;CACvB;AACD;EACE,gBAAgB;EAChB,8BAA8B;CAC/B;AACD;EACE,2CAA2C;EAC3C,mBAAmB;CACpB;;AAED;EACE,sCAAsC;EACtC,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,oBAAoB;EACpB,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,sBAAsB;EACtB,YAAY;EACZ,aAAa;EACb,0BAA0B;EAC1B,iBAAiB;EACjB,oBAAoB;EACpB,mBAAmB;EACnB,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,WAAW;CACZ;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;AACD;EACE,sBAAsB;EACtB,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;EACpB,oBAAoB;EACpB,kBAAkB;CACnB;AACD;EACE,sBAAsB;EACtB,+BAA+B;EAC/B,YAAY;EACZ,mBAAmB;EACnB,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,yCAAyC;EACzC,oBAAoB;EACpB,gBAAgB;CACjB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,qBAAqB;EACrB,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,iBAAiB;EACjB,oBAAoB;EACpB,UAAU;CACX;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,iBAAiB;EACjB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,4BAA4B;EAC5B,YAAY;EACZ,mBAAmB;EACnB,iBAAiB;EACjB,mBAAmB;EACnB,gBAAgB;CACjB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,0BAA0B;EAC1B,6BAA6B;CAC9B;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,0BAA0B;EAC1B,6BAA6B;CAC9B;AACD;EACE,8BAA8B;EAC9B,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;CAClB;;AAED;EACE,eAAe;EACf,mBAAmB;EACnB,oBAAoB;EACpB,kCAAkC;CACnC;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,qBAAqB;EACrB,qBAAqB;CACtB;AACD;EACE,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,iBAAiB;CAClB;AACD;EACE,8BAA8B;EAC9B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,aAAa;EACb,iCAAiC;EACjC,YAAY;EACZ,gBAAgB;CACjB;AACD;EACE,cAAc;CACf;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,8BAA8B;EAC9B,UAAU;CACX;AACD;EACE,cAAc;CACf;;AAED;EACE;IACE,8BAA8B;IAC9B,6BAA6B;IAC7B,gBAAgB;GACjB;EACD;IACE,YAAY;GACb;EACD;IACE,YAAY;GACb;EACD;IACE,iBAAiB;IACjB,iBAAiB;GAClB;CACF;;AAED,gDAAgD",
+                "AAAA;EACE;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,sBAAsB;IACtB,kBAAkB;IAClB,cAAc;IACd,eAAe;GAChB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;CACF;;AAED,+EAA+E;AAC/E;EACE,+BAA+B;EAC/B,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,oBAAoB;EACpB,iCAAiC;EACjC,iBAAiB;EACjB,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;;AAED;EACE,+BAA+B;EAC/B,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,iCAAiC;EACjC,iBAAiB;EACjB,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;;AAED;EACE,6BAA6B;EAC7B,iBAAiB;EACjB,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,iCAAiC;EACjC,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;AACD;EACE,0BAA0B;CAC3B;;AAED;;EAEE,eAAe;CAChB;;AAED;EACE,aAAa;CACd;;AAED;EACE,YAAY;CACb;;AAED;EACE,iBAAiB;CAClB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,kBAAkB;CACnB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,uBAAuB;CACxB;;AAED;EACE,cAAc;CACf;;AAED;EACE,eAAe;CAChB;;AAED;EACE,sBAAsB;CACvB;;AAED;EACE,0BAA0B;CAC3B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,2BAA2B;CAC5B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,0BAA0B;CAC3B;;AAED;EACE,2BAA2B;CAC5B;;AAED;EACE,yBAAyB;CAC1B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,WAAW;CACZ;;AAED;EACE,WAAW;CACZ;;AAED;EACE,WAAW;CACZ;;AAED;EACE,YAAY;CACb;;AAED;EACE,YAAY;CACb;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;EACf,YAAY;EACZ,oCAAoC;EACpC,0BAA0B;EAC1B,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;EACf,uBAAuB;EACvB,6BAA6B;EAC7B,0BAA0B;EAC1B,uBAAuB;EACvB,yEAAyE;CAC1E;;AAED;EACE,qBAAqB;EACrB,cAAc;EACd,uBAAuB;EACvB,oBAAoB;EACpB,0BAA0B;EAC1B,iBAAiB;EACjB,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;EACf,mBAAmB;EACnB,oBAAoB;EACpB,0BAA0B;EAC1B,0BAA0B;EAC1B,uBAAuB;CACxB;;AAED;EACE,0BAA0B;EAC1B,kBAAkB;EAClB,oBAAoB;EACpB,qBAAqB;CACtB;AACD;EACE,kBAAkB;EAClB,mBAAmB;EACnB,oBAAoB;EACpB,qBAAqB;EACrB,iCAAiC;CAClC;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,iBAAiB;EACjB,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED,yFAAyF;AACzF;EACE,oBAAoB;CACrB;AACD;EACE,sBAAsB;CACvB;;AAED;EACE,iBAAiB;EACjB,kBAAkB;CACnB;AACD;EACE,qCAAqC;EACrC,wBAAwB;EACxB,gBAAgB;EAChB,gBAAgB;EAChB,aAAa;CACd;AACD;EACE,eAAe;EACf,gBAAgB;CACjB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,+BAA+B;EAC/B,mBAAmB;EACnB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,sBAAsB;EACtB,YAAY;EACZ,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;;AAED;EACE;IACE,gBAAgB;GACjB;EACD;IACE,mBAAmB;IACnB,kBAAkB;GACnB;EACD;IACE,gBAAgB;IAChB,oBAAoB;GACrB;EACD;IACE,gBAAgB;IAChB,mBAAmB;GACpB;CACF;;AAED;EACE;IACE,kBAAkB;IAClB,kBAAkB;IAClB,iBAAiB;GAClB;CACF;;AAED;EACE,mBAAmB;EACnB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,oBAAoB;EACpB,mBAAmB;EACnB,YAAY;EACZ,0BAA0B;EAC1B,0BAA0B;EAC1B,oBAAoB;EACpB,sBAAsB;CACvB;AACD;EACE,cAAc;CACf;AACD;EACE,mBAAmB;EACnB,SAAS;EACT,OAAO;EACP,WAAW;EACX,gBAAgB;EAChB,aAAa;EACb,8BAA8B;EAC9B,YAAY;EACZ,aAAa;CACd;AACD;EACE,eAAe;CAChB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,iBAAiB;EACjB,WAAW;EACX,UAAU;CACX;AACD;EACE,sBAAsB;CACvB;AACD;EACE,eAAe;EACf,kBAAkB;EAClB,gBAAgB;EAChB,eAAe;EACf,kBAAkB;EAClB,0BAA0B;EAC1B,mBAAmB;CACpB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,0BAA0B;EAC1B,aAAa;CACd;AACD;EACE,wBAAwB;EACxB,aAAa;CACd;AACD;EACE,0BAA0B;EAC1B,aAAa;CACd;AACD;EACE,0BAA0B;EAC1B,eAAe;CAChB;AACD;EACE,mBAAmB;EACnB,oBAAoB;EACpB,oCAAoC;EACpC,uCAAuC;EACvC,gCAAgC;EAChC,mCAAmC;EACnC,4BAA4B;EAC5B,+BAA+B;CAChC;AACD;EACE,mBAAmB;EACnB,oBAAoB;EACpB,gCAAgC;EAChC,qCAAqC;EACrC,wCAAwC;EACxC,iCAAiC;EACjC,oCAAoC;EACpC,6BAA6B;EAC7B,gCAAgC;CACjC;;AAED;EACE,mBAAmB;EACnB,YAAY;EACZ,UAAU;EACV,0BAA0B;EAC1B,kCAAkC;EAClC,aAAa;EACb,YAAY;EACZ,eAAe;CAChB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,eAAe;EACf,eAAe;CAChB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,mBAAmB;CACpB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;;AAED;EACE,0BAA0B;EAC1B,mBAAmB;EACnB,WAAW;EACX,YAAY;EACZ,aAAa;EACb,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,mBAAmB;EACnB,mBAAmB;EACnB,oBAAoB;CACrB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;CAChB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,sBAAsB;CACvB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,cAAc;CACf;AACD;EACE,8BAA8B;EAC9B,aAAa;EACb,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,oBAAoB;EACpB,YAAY;EACZ,iBAAiB;EACjB,iBAAiB;CAClB;AACD;EACE,cAAc;CACf;AACD;EACE,cAAc;CACf;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,eAAe;EACf,kBAAkB;EAClB,aAAa;EACb,iBAAiB;EACjB,WAAW;CACZ;AACD;EACE,WAAW;EACX,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,eAAe;CAChB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;EAC1B,cAAc;EACd,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,oBAAoB;CACrB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,gBAAgB;EAChB,YAAY;EACZ,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,0BAA0B;EAC1B,eAAe;CAChB;;AAED;EACE,mBAAmB;CACpB;AACD;;;;EAIE,sBAAsB;EACtB,gBAAgB;CACjB;AACD;;;;EAIE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,sBAAsB;EACtB,kBAAkB;CACnB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;CAC3B;;AAED;EACE;IACE,YAAY;GACb;CACF;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,0BAA0B;EAC1B,wBAAwB;EACxB,gBAAgB;CACjB;AACD;EACE,eAAe;EACf,sBAAsB;CACvB;AACD;EACE,aAAa;CACd;AACD;EACE,eAAe;CAChB;AACD;EACE,eAAe;CAChB;AACD;EACE,eAAe;EACf,sBAAsB;EACtB,gBAAgB;CACjB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,+CAA+C;EAC/C,uCAAuC;EACvC,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,cAAc;CACf;;AAED;EACE,4BAA4B;EAC5B,aAAa;CACd;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,qBAAqB;EACrB,oBAAoB;CACrB;AACD;EACE,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;EACpB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,oBAAoB;EACpB,gBAAgB;CACjB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,sBAAsB;EACtB,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,yBAAyB;EACzB,uBAAuB;CACxB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,oBAAoB;EACpB,mBAAmB;EACnB,qBAAqB;EACrB,kBAAkB;CACnB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,qBAAqB;CACtB;AACD;EACE,YAAY;CACb;AACD;EACE,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,0BAA0B;CAC3B;AACD;EACE,iBAAiB;CAClB;AACD;EACE,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,0BAA0B;CAC3B;AACD;EACE,iBAAiB;CAClB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,eAAe;CAChB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,mBAAmB;CACpB;AACD;;;;EAIE,cAAc;CACf;AACD;;;;;;;EAOE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;;EAOE,mBAAmB;CACpB;AACD;;;;;;;EAOE,kBAAkB;CACnB;AACD;;;;;;EAME,iCAAiC;CAClC;AACD;;;;;;;EAOE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;;EAOE,mBAAmB;CACpB;AACD;;;;;;;EAOE,kBAAkB;CACnB;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;;EAQE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;;;;;;;;EAQE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE;IACE,uBAAuB;IACvB,mBAAmB;IACnB,eAAe;IACf,gBAAgB;GACjB;EACD;IACE,uBAAuB;IACvB,mBAAmB;IACnB,eAAe;IACf,gBAAgB;GACjB;EACD;IACE,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,qCAAqC;EACrC,wBAAwB;EACxB,gBAAgB;EAChB,gBAAgB;EAChB,aAAa;CACd;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;EACE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE,uBAAuB;CACxB;;AAED;EACE,gBAAgB;CACjB;;AAED;EACE;IACE,gBAAgB;IAChB,kBAAkB;GACnB;EACD;IACE,gBAAgB;IAChB,kBAAkB;GACnB;CACF;;AAED;EACE;IACE,oBAAoB;GACrB;CACF;;AAED;EACE;IACE,oBAAoB;GACrB;EACD;IACE,kBAAkB;GACnB;CACF;;AAED;EACE;IACE,eAAe;IACf,kBAAkB;IAClB,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;IACjB,iBAAiB;GAClB;EACD;IACE,WAAW;IACX,UAAU;GACX;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,sBAAsB;EACtB,uBAAuB;EACvB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,mBAAmB;CACpB;AACD;EACE,kBAAkB;CACnB;AACD;EACE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,mBAAmB;CACpB;AACD;EACE,kBAAkB;CACnB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,sBAAsB;EACtB,uBAAuB;CACxB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,iBAAiB;EACjB,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,gBAAgB;GACjB;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,sBAAsB;EACtB,uBAAuB;EACvB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,YAAY;CACb;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;EACE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;;;;;;EAME,gBAAgB;CACjB;AACD;;;;;;;EAOE,sBAAsB;EACtB,uBAAuB;CACxB;AACD;EACE,YAAY;EACZ,aAAa;EACb,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,gBAAgB;GACjB;EACD;;;;IAIE,aAAa;GACd;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;;;;;;EAME,gBAAgB;CACjB;AACD;EACE,gBAAgB;CACjB;AACD;;;;;;;EAOE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;;;;;;;EAOE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;IACjB,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;CACF;;AAED;EACE,qCAAqC;EACrC,YAAY;EACZ,mBAAmB;EACnB,gBAAgB;EAChB,0BAA0B;EAC1B,sBAAsB;EACtB,+BAA+B;EAC/B,8BAA8B;CAC/B;AACD;EACE,0BAA0B;CAC3B;;AAED;EACE,sBAAsB;CACvB;AACD;EACE,gBAAgB;EAChB,8BAA8B;CAC/B;AACD;EACE,2CAA2C;EAC3C,mBAAmB;CACpB;;AAED;EACE,sCAAsC;EACtC,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,oBAAoB;EACpB,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,sBAAsB;EACtB,YAAY;EACZ,aAAa;EACb,0BAA0B;EAC1B,iBAAiB;EACjB,oBAAoB;EACpB,mBAAmB;EACnB,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,WAAW;CACZ;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;AACD;EACE,sBAAsB;EACtB,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;EACpB,oBAAoB;EACpB,kBAAkB;CACnB;AACD;EACE,sBAAsB;EACtB,+BAA+B;EAC/B,YAAY;EACZ,mBAAmB;EACnB,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,yCAAyC;EACzC,oBAAoB;EACpB,gBAAgB;CACjB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,qBAAqB;EACrB,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,iBAAiB;EACjB,oBAAoB;EACpB,UAAU;CACX;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,iBAAiB;EACjB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,4BAA4B;EAC5B,YAAY;EACZ,mBAAmB;EACnB,iBAAiB;EACjB,mBAAmB;EACnB,gBAAgB;CACjB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,0BAA0B;EAC1B,6BAA6B;CAC9B;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,0BAA0B;EAC1B,6BAA6B;CAC9B;AACD;EACE,8BAA8B;EAC9B,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;CAClB;;AAED;EACE,eAAe;EACf,mBAAmB;EACnB,oBAAoB;EACpB,kCAAkC;CACnC;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,qBAAqB;EACrB,qBAAqB;CACtB;AACD;EACE,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,iBAAiB;CAClB;AACD;EACE,8BAA8B;EAC9B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,aAAa;EACb,iCAAiC;EACjC,YAAY;EACZ,gBAAgB;CACjB;AACD;EACE,cAAc;CACf;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,8BAA8B;EAC9B,UAAU;CACX;AACD;EACE,cAAc;CACf;;AAED;EACE;IACE,8BAA8B;IAC9B,6BAA6B;IAC7B,gBAAgB;GACjB;EACD;IACE,YAAY;GACb;EACD;IACE,YAAY;GACb;EACD;IACE,iBAAiB;IACjB,iBAAiB;GAClB;CACF;;AAED;EACE,cAAc;CACf;AACD;EACE,0BAA0B;EAC1B,mBAAmB;EACnB,wBAAwB;CACzB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,8BAA8B;EAC9B,kBAAkB;EAClB,qBAAqB;CACtB;AACD;EACE,0CAA0C;CAC3C;AACD;EACE,eAAe;CAChB;AACD;EACE,2CAA2C;CAC5C;AACD;EACE,eAAe;CAChB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,kBAAkB;CACnB;AACD;EACE,mBAAmB;EACnB,aAAa;EACb,oBAAoB;EACpB,oBAAoB;CACrB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,YAAY;EACZ,aAAa;EACb,kBAAkB;EAClB,yCAAyC;EACzC,mBAAmB;EACnB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;CAChB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,eAAe;EACf,0BAA0B;CAC3B;AACD;EACE,8BAA8B;EAC9B,kBAAkB;EAClB,qBAAqB;CACtB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;AACD;EACE,0BAA0B;EAC1B,mBAAmB;EACnB,wBAAwB;EACxB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;AACD;EACE,0BAA0B;EAC1B,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,iBAAiB;CAClB;AACD;;;;EAIE,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;CACnB;AACD;;;;EAIE,eAAe;CAChB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE;IACE,iBAAiB;GAClB;CACF;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,mBAAmB;EACnB,iBAAiB;CAClB;;AAED;EACE,wBAAwB;EACxB,gBAAgB;EAChB,kBAAkB;EAClB,oBAAoB;EACpB,mBAAmB;EACnB,iBAAiB;EACjB,yCAAyC;CAC1C;AACD;EACE,yCAAyC;CAC1C;AACD;EACE,0BAA0B;CAC3B;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,cAAc;EACd,qBAAqB;EACrB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,eAAe;CAChB;AACD;EACE,wBAAwB;EACxB,gBAAgB;EAChB,kBAAkB;EAClB,oBAAoB;EACpB,gBAAgB;EAChB,iBAAiB;EACjB,yCAAyC;CAC1C;AACD;EACE,yCAAyC;CAC1C;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,eAAe;EACf,qBAAqB;EACrB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,eAAe;CAChB;;AAED;EACE;IACE,iBAAiB;GAClB;CACF;;AAED;EACE,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,gDAAgD;EAChD,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,oBAAoB;EACpB,cAAc;CACf;;AAED,gDAAgD",
               file: "servicedesk.dark.css",
               sourcesContent: [
-                "@media (min-width: 1200px) {\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n  .col-xl-5 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 20%;\r\n    -ms-flex: 0 0 20%;\r\n    flex: 0 0 20%;\r\n    max-width: 20%;\r\n  }\r\n  .col-xl-7 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 58.33333%;\r\n    -ms-flex: 0 0 58.33333%;\r\n    flex: 0 0 58.33333%;\r\n    max-width: 58.33333%;\r\n  }\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n}\r\n\r\n/*********************************** Buttons *********************************/\r\n.blue-button {\r\n  background: #3b7cff !important;\r\n  color: #ffffff !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  margin-bottom: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.blue-button:hover,\r\n.blue-button:focus {\r\n  background: #0f5efd !important;\r\n  color: #ffffff !important;\r\n}\r\n\r\n.gray-button {\r\n  background: #dde4e9 !important;\r\n  color: #8392a7 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.gray-button:hover,\r\n.gray-button:focus {\r\n  background: #dbe0e4 !important;\r\n  color: #8392a7 !important;\r\n}\r\n\r\n.white-button {\r\n  background: white !important;\r\n  min-width: 100px;\r\n  color: #3b4859 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  text-align: center;\r\n}\r\n.white-button:hover,\r\n.white-button:focus {\r\n  background: #e6e6e6 !important;\r\n  color: #3b4859 !important;\r\n}\r\n.white-button i {\r\n  color: #57a4ff !important;\r\n}\r\n\r\na:focus,\r\na:hover {\r\n  color: #000000;\r\n}\r\n\r\n.float-right {\r\n  float: right;\r\n}\r\n\r\n.float-left {\r\n  float: left;\r\n}\r\n\r\n.text-left {\r\n  text-align: left;\r\n}\r\n\r\n.text-center {\r\n  text-align: center;\r\n}\r\n\r\n.text-right {\r\n  text-align: right;\r\n}\r\n\r\n.v-a-top {\r\n  vertical-align: top;\r\n}\r\n\r\n.v-a-middle {\r\n  vertical-align: middle;\r\n}\r\n\r\n.d-flex {\r\n  display: flex;\r\n}\r\n\r\n.d-block {\r\n  display: block;\r\n}\r\n\r\n.d-inline-block {\r\n  display: inline-block;\r\n}\r\n\r\n.p-t-0 {\r\n  padding-top: 0 !important;\r\n}\r\n\r\n.p-t-5 {\r\n  padding-top: 5px !important;\r\n}\r\n\r\n.p-t-10 {\r\n  padding-top: 10px !important;\r\n}\r\n\r\n.p-t-15 {\r\n  padding-top: 15px !important;\r\n}\r\n\r\n.p-t-20 {\r\n  padding-top: 20px !important;\r\n}\r\n\r\n.p-r-0 {\r\n  padding-right: 0 !important;\r\n}\r\n\r\n.p-r-5 {\r\n  padding-right: 5px !important;\r\n}\r\n\r\n.p-r-10 {\r\n  padding-right: 10px !important;\r\n}\r\n\r\n.p-r-15 {\r\n  padding-right: 15px !important;\r\n}\r\n\r\n.p-r-20 {\r\n  padding-right: 20px !important;\r\n}\r\n\r\n.p-b-0 {\r\n  padding-bottom: 0px !important;\r\n}\r\n\r\n.p-b-5 {\r\n  padding-bottom: 5px !important;\r\n}\r\n\r\n.p-b-10 {\r\n  padding-bottom: 10px !important;\r\n}\r\n\r\n.p-b-15 {\r\n  padding-bottom: 15px !important;\r\n}\r\n\r\n.p-b-20 {\r\n  padding-bottom: 20px !important;\r\n}\r\n\r\n.p-l-0 {\r\n  padding-left: 0 !important;\r\n}\r\n\r\n.p-l-5 {\r\n  padding-left: 5px !important;\r\n}\r\n\r\n.p-l-10 {\r\n  padding-left: 10px !important;\r\n}\r\n\r\n.p-l-15 {\r\n  padding-left: 15px !important;\r\n}\r\n\r\n.p-l-20 {\r\n  padding-left: 20px !important;\r\n}\r\n\r\n.m-l-0 {\r\n  margin-left: 0 !important;\r\n}\r\n\r\n.m-r-0 {\r\n  margin-right: 0 !important;\r\n}\r\n\r\n.m-t-0 {\r\n  margin-top: 0 !important;\r\n}\r\n\r\n.m-b-0 {\r\n  margin-bottom: 0 !important;\r\n}\r\n\r\n.width-25 {\r\n  width: 25%;\r\n}\r\n\r\n.width-50 {\r\n  width: 50%;\r\n}\r\n\r\n.width-75 {\r\n  width: 75%;\r\n}\r\n\r\n.width-100 {\r\n  width: 100%;\r\n}\r\n\r\n.width-auto {\r\n  width: auto;\r\n}\r\n\r\n.min-width-inherit {\r\n  min-width: inherit !important;\r\n}\r\n\r\n.border-bottom-0 {\r\n  border-bottom: none !important;\r\n}\r\n\r\n.orange {\r\n  color: #ff8f00;\r\n}\r\n\r\n.yellow-green {\r\n  color: #7ed321;\r\n}\r\n\r\n.red {\r\n  color: #f93d3d;\r\n}\r\n\r\n.yellow {\r\n  color: #ffff00;\r\n}\r\n\r\n.blue {\r\n  color: #438afb;\r\n}\r\n\r\n.form-control {\r\n  display: block;\r\n  width: 100%;\r\n  height: calc(1.5em + 0.75rem + 2px);\r\n  padding: 0.375rem 0.75rem;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  background-color: #fff;\r\n  background-clip: padding-box;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;\r\n}\r\n\r\n.input-group-text {\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  -ms-flex-align: center;\r\n  align-items: center;\r\n  padding: 0.375rem 0.75rem;\r\n  margin-bottom: 0;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  text-align: center;\r\n  white-space: nowrap;\r\n  background-color: #e9ecef;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n}\r\n\r\n.servicedesk-page-container {\r\n  background-color: #3b4859;\r\n  margin: 10px 20px;\r\n  border-radius: 10px;\r\n  padding-bottom: 10px;\r\n}\r\n.servicedesk-page-container .common-container {\r\n  padding-top: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  padding-bottom: 15px;\r\n  border-bottom: 1px solid #202226;\r\n}\r\n.servicedesk-page-container .page-heading {\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading h1 {\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  font-size: 24px;\r\n  line-height: 32px;\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading span {\r\n  display: block;\r\n  color: #a9b9c6;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n/*********************************** Filters Container *********************************/\r\n.form-group {\r\n  margin-bottom: 1rem;\r\n}\r\n.form-group label {\r\n  margin-bottom: 0.5rem;\r\n}\r\n\r\n.filter-container .filter-control-group {\r\n  max-width: 250px;\r\n  padding-left: 0px;\r\n}\r\n.filter-container .filter-control-group .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n.filter-container .filter-control-group label {\r\n  color: #ffffff;\r\n  font-size: 14px;\r\n}\r\n\r\n.showing {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n}\r\n\r\n.showby {\r\n  border-left: 1px solid #a9b9c6;\r\n  padding-left: 15px;\r\n  margin-left: 15px;\r\n}\r\n.showby label {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-right: 15px;\r\n}\r\n.showby .form-control {\r\n  display: inline-block;\r\n  width: 75px;\r\n  border-radius: 25px;\r\n}\r\n.showby span {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 1050px) {\r\n  .showing {\r\n    font-size: 11px;\r\n  }\r\n  .showby {\r\n    padding-left: 10px;\r\n    margin-left: 10px;\r\n  }\r\n  .showby label {\r\n    font-size: 11px;\r\n    padding-right: 10px;\r\n  }\r\n  .showby span {\r\n    font-size: 11px;\r\n    padding-left: 10px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1050px) and (min-width: 320px) {\r\n  .showby {\r\n    border-left: none;\r\n    padding-left: 0px;\r\n    margin-left: 0px;\r\n  }\r\n}\r\n\r\n.filter-search-control {\r\n  position: relative;\r\n  margin-bottom: 0;\r\n}\r\n.filter-search-control .input-group-text {\r\n  max-width: 100%;\r\n  text-align: left;\r\n  padding-right: 30px;\r\n  padding-left: 15px;\r\n  width: 100%;\r\n  border: 1px solid #ced4da;\r\n  background-color: #ffffff;\r\n  border-radius: 25px;\r\n}\r\n.filter-search-control .input-group-text:focus {\r\n  outline: none;\r\n}\r\n.filter-search-control button {\r\n  position: absolute;\r\n  right: 0;\r\n  top: 0;\r\n  z-index: 1;\r\n  cursor: pointer;\r\n  border: none;\r\n  background-color: transparent;\r\n  width: 34px;\r\n  height: 32px;\r\n}\r\n.filter-search-control button:hover {\r\n  color: #333333;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .filter-search-control {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.pagination ul {\r\n  list-style: none;\r\n  padding: 0;\r\n  margin: 0;\r\n}\r\n.pagination ul li {\r\n  display: inline-block;\r\n}\r\n.pagination ul li a {\r\n  display: block;\r\n  padding: 5px 10px;\r\n  font-size: 11px;\r\n  color: #868f9b;\r\n  line-height: 16px;\r\n  border: 1px solid #cbcfd4;\r\n  border-right: none;\r\n}\r\n.pagination ul li a:hover {\r\n  background-color: #cbcfd4;\r\n}\r\n.pagination ul li a.active {\r\n  background-color: #cbcfd4;\r\n  color: black;\r\n}\r\n.pagination ul li a.deactive {\r\n  background-color: white;\r\n  color: black;\r\n}\r\n.pagination ul li a.desable {\r\n  background-color: #5e5757;\r\n  color: white;\r\n}\r\n.pagination ul li a.enable {\r\n  background-color: #3b4859;\r\n  color: #ffffff;\r\n}\r\n.pagination ul li.previous a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  -webkit-border-top-left-radius: 5px;\r\n  -webkit-border-bottom-left-radius: 5px;\r\n  -moz-border-radius-topleft: 5px;\r\n  -moz-border-radius-bottomleft: 5px;\r\n  border-top-left-radius: 5px;\r\n  border-bottom-left-radius: 5px;\r\n}\r\n.pagination ul li.next a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  border-right: 1px solid #cbcfd4;\r\n  -webkit-border-top-right-radius: 5px;\r\n  -webkit-border-bottom-right-radius: 5px;\r\n  -moz-border-radius-topright: 5px;\r\n  -moz-border-radius-bottomright: 5px;\r\n  border-top-right-radius: 5px;\r\n  border-bottom-right-radius: 5px;\r\n}\r\n\r\n.open-create-menu {\r\n  position: absolute;\r\n  right: 15px;\r\n  top: 36px;\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 2px 5px #00000029;\r\n  width: 120px;\r\n  z-index: 10;\r\n  padding: 5px 0;\r\n}\r\n.open-create-menu a {\r\n  color: #2a9ce7;\r\n  font-size: 12px;\r\n  font-weight: 400;\r\n  line-height: 20px;\r\n  display: block;\r\n  padding: 4px 0;\r\n}\r\n\r\n.contact-popup-container .heading h4 {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container .heading span {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n.contact-popup-container .heading span a {\r\n  color: #49c740;\r\n}\r\n\r\n.contact-popup-container .upload-photo .upload-icon {\r\n  background-color: #438afb;\r\n  border-radius: 2px;\r\n  padding: 0;\r\n  width: 44px;\r\n  height: 44px;\r\n  color: #ffffff;\r\n  font-size: 24px;\r\n  line-height: 44px;\r\n  text-align: center;\r\n  margin-right: 15px;\r\n  vertical-align: top;\r\n}\r\n\r\n.contact-popup-container .upload-photo strong {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #438afb;\r\n}\r\n\r\n.contact-popup-container .upload-photo p {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n\r\n.contact-popup-container .form-group {\r\n  margin-bottom: 1.5rem;\r\n}\r\n.contact-popup-container .form-group label {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n  display: block;\r\n}\r\n.contact-popup-container .form-group .form-group-inner label {\r\n  display: none;\r\n}\r\n.contact-popup-container .form-group .form-control {\r\n  background-color: transparent;\r\n  border: none;\r\n  border-bottom: 1px solid #89898a;\r\n  color: #89898a;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  padding: 0.375rem 0;\r\n  width: 100%;\r\n  border-radius: 0;\r\n  text-align: left;\r\n}\r\n.contact-popup-container .form-group .form-control.textarea {\r\n  height: 150px;\r\n}\r\n.contact-popup-container .form-group .form-control:focus {\r\n  outline: none;\r\n}\r\n.contact-popup-container .form-group .add-conatct {\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  color: #3b7cff;\r\n  line-height: 18px;\r\n  border: none;\r\n  background: none;\r\n  padding: 0;\r\n}\r\n.contact-popup-container .form-group .invalid-feedback {\r\n  color: red;\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  font-weight: 400;\r\n  display: block;\r\n}\r\n\r\n.contact-popup-container .atleast-fields-box {\r\n  border: 1px solid #d1dae2;\r\n  background-color: #f9f9f9;\r\n  padding: 20px;\r\n  padding-bottom: 0;\r\n  margin-bottom: 20px;\r\n}\r\n.contact-popup-container .atleast-fields-box h3 {\r\n  color: #323c47;\r\n  font-size: 15px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 20px;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons button {\r\n  border: 1px solid #a9b9c6;\r\n  background-color: #ffffff;\r\n  color: #89898a;\r\n  font-size: 15px;\r\n  line-height: 36px;\r\n  font-weight: 500;\r\n  padding: 0 30px;\r\n  margin: 5px;\r\n  text-align: center;\r\n}\r\n.contact-popup-container .contact-popup-buttons button.save {\r\n  border-color: #3b7cff;\r\n  background-color: #3b7cff;\r\n  color: #ffffff;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons .create-author {\r\n  padding-right: 5px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-input {\r\n  display: inline-block;\r\n  margin-top: 2px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-label {\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  display: inline-block;\r\n  padding-left: 7px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group label {\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group .form-control {\r\n  border: 1px solid #d1dae2;\r\n  padding: 0.375rem 0.75rem;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .filter-container .assessments {\r\n    float: left;\r\n  }\r\n}\r\n\r\n#servicedesk-main-container .breadcrumbs-container {\r\n  background-color: #3b4859;\r\n  padding: 14px 20px 15px;\r\n  font-size: 13px;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .page-title {\r\n  color: #ffffff;\r\n  display: inline-block;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .breadcrumbs {\r\n  float: right;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container a.breadcrumbs-link {\r\n  color: #fcfcfc;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .current-page {\r\n  color: #fcfcfc;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .separator {\r\n  color: #fcfcfc;\r\n  display: inline-block;\r\n  padding: 0 10px;\r\n}\r\n\r\n@media (max-width: 768px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n.modal {\r\n  -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  max-width: 992px;\r\n  background: #ffffff;\r\n}\r\n.modal .modal-content {\r\n  padding: 40px;\r\n}\r\n\r\n.modal-backdrop {\r\n  background-color: #141414b3;\r\n  opacity: 0.8;\r\n}\r\n\r\n.ticketing-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 30px;\r\n}\r\n.ticketing-box .image {\r\n  padding-bottom: 10px;\r\n}\r\n.ticketing-box .number {\r\n  color: #3b4859;\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 700;\r\n  padding-bottom: 5px;\r\n}\r\n.ticketing-box .name {\r\n  color: #3b4859;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n\r\n.ticket-trends {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 15px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  min-height: 345px;\r\n}\r\n.ticket-trends .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-trends .heading span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n}\r\n.ticket-trends .days-box .form-check {\r\n  margin-right: 25px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-input {\r\n  display: inline-block;\r\n  vertical-align: top;\r\n  margin-top: 4px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-label {\r\n  font-size: 12px;\r\n  line-height: 21px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  display: inline-block;\r\n  padding-left: 8px;\r\n  vertical-align: top;\r\n}\r\n.ticket-trends .calendar-box .fa {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .calendar-box span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .ticket-graphs canvas {\r\n  height: 220px !important;\r\n  width: 100% !important;\r\n}\r\n.ticket-trends .ticket-graphs .hours-text {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n\r\n.performer-agents {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 20px;\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  padding-bottom: 40px;\r\n  min-height: 345px;\r\n}\r\n.performer-agents .heading {\r\n  color: #323c47;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 15px;\r\n}\r\n.performer-agents .performer-agents-table {\r\n  width: 100%;\r\n}\r\n.performer-agents .performer-agents-table thead tr th {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table thead tr th:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.dashboard-all-ticket-tabel .heading h2 a {\r\n  color: #ffffff;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel {\r\n  width: 1200px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr {\r\n  border-bottom: 7px solid #3b4859;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td {\r\n  background-color: #f0f3f7;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.date {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .ticket-trends-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n  .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n  .days-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .calendar-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n.tickets-number-box {\r\n  padding-right: 75px;\r\n}\r\n.tickets-number-box h3 {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n}\r\n.tickets-number-box span {\r\n  color: #a9b9c6;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n.quarter-form .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n\r\n.all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-support-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-support-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td {\r\n  color: #ffffff;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n  padding-top: 50px;\r\n  font-weight: 600;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n}\r\n\r\n.chart-inner canvas {\r\n  width: 100% !important;\r\n}\r\n\r\n.apply-filters-button {\r\n  margin-top: 8px;\r\n}\r\n\r\n@media only screen and (max-width: 992px) and (min-width: 768px) {\r\n  .tickets-number-box h3 {\r\n    font-size: 22px;\r\n    line-height: 26px;\r\n  }\r\n  .tickets-number-box span {\r\n    font-size: 10px;\r\n    line-height: 18px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n  .quarter-form {\r\n    padding-top: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .tickets-number-box {\r\n    display: block;\r\n    padding-top: 15px;\r\n    text-align: left;\r\n  }\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n  .open-create-menu {\r\n    left: 15px;\r\n    top: 45px;\r\n  }\r\n}\r\n\r\n.all-contacts-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-contacts-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-contacts-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel {\r\n  width: 1200px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .contacts-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-companies-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-companies-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel {\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td .image {\r\n  width: 40px;\r\n  height: 40px;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .companies-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n  .all-companies-container\r\n    .all-companies-tabel\r\n    .companies-main-tabel\r\n    .companies-tabel {\r\n    width: 992px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-open-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-open-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-open-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td {\r\n  color: #ffffff;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n  padding-top: 50px;\r\n  font-weight: 600;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .sortby {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .filters-button {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (min-width: 1200px) {\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n}\r\n\r\n.ticket-buttons .white-button {\r\n  border: 1px solid #a9b9c6 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  font-size: 12px;\r\n  color: #a9b9c6 !important;\r\n  display: inline-block;\r\n  padding-right: 12px !important;\r\n  padding-left: 12px !important;\r\n}\r\n.ticket-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n\r\n.ticket-buttons .group-buttons {\r\n  display: inline-block;\r\n}\r\n.ticket-buttons .group-buttons .white-button {\r\n  margin-right: 0;\r\n  border-right: none !important;\r\n}\r\n.ticket-buttons .group-buttons .white-button:last-child {\r\n  border-right: 1px solid #a9b9c6 !important;\r\n  margin-right: 10px;\r\n}\r\n\r\n.ticket-detail-box {\r\n  box-shadow: 0.94px 6px 16px #cfdff71a;\r\n  border-radius: 3px;\r\n  margin-bottom: 20px;\r\n}\r\n.ticket-detail-box .ticket-detail-head {\r\n  background: #ffffff;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-image {\r\n  display: inline-block;\r\n  width: 32px;\r\n  height: 32px;\r\n  background-color: #d1dae2;\r\n  overflow: hidden;\r\n  vertical-align: top;\r\n  border-radius: 50%;\r\n  margin-right: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text {\r\n  display: inline-block;\r\n  width: 86%;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p {\r\n  display: block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p a {\r\n  color: #3b7cff;\r\n  font-weight: 500;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p strong {\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p span {\r\n  color: #323c47;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-time-text {\r\n  display: inline-block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-right: 15px;\r\n  vertical-align: top;\r\n  padding-top: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button {\r\n  display: inline-block;\r\n  padding: 10px 0 0 0 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 16px;\r\n  background-color: transparent !important;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box {\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box strong {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box p {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box span {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 0px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul {\r\n  display: block;\r\n  list-style: none;\r\n  padding: 0 0 10px 0;\r\n  margin: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul li {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 3px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons {\r\n  padding-top: 0px;\r\n  padding-bottom: 10px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button {\r\n  padding: 7px 7px !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  margin-bottom: 0;\r\n  border-radius: 3px;\r\n  margin-top: 7px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.trash {\r\n  border: 1px solid #e6e6e6;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.saved {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  color: #a9b9c6 !important;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .blue-button {\r\n  padding: 15px 30px !important;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.properties-form {\r\n  display: block;\r\n  padding: 30px 45px;\r\n  background: #f0f3f7;\r\n  box-shadow: 0px 2px 6px #464c56a8;\r\n}\r\n.properties-form h3 {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 17px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 20px;\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group {\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group label {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n.properties-form .form-group select {\r\n  background-color: transparent;\r\n  color: #d1dae2;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 400;\r\n  border: none;\r\n  border-bottom: 1px solid #c7d0d9;\r\n  width: 100%;\r\n  cursor: pointer;\r\n}\r\n.properties-form .form-group select:focus {\r\n  outline: none;\r\n}\r\n.properties-form .form-group .blue-button {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  padding: 15px 60px !important;\r\n  margin: 0;\r\n}\r\n.properties-form .form-group .blue-button:focus {\r\n  outline: none;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .ticket-buttons .white-button {\r\n    padding-right: 7px !important;\r\n    padding-left: 8px !important;\r\n    font-size: 10px;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .head-time-text {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .white-button {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-buttons .detail-right-buttons {\r\n    text-align: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n/*# sourceMappingURL=servicedesk.dark.css.map */\r\n"
+                "@media (min-width: 1200px) {\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n  .col-xl-5 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 20%;\r\n    -ms-flex: 0 0 20%;\r\n    flex: 0 0 20%;\r\n    max-width: 20%;\r\n  }\r\n  .col-xl-7 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 58.33333%;\r\n    -ms-flex: 0 0 58.33333%;\r\n    flex: 0 0 58.33333%;\r\n    max-width: 58.33333%;\r\n  }\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n}\r\n\r\n/*********************************** Buttons *********************************/\r\n.blue-button {\r\n  background: #3b7cff !important;\r\n  color: #ffffff !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  margin-bottom: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.blue-button:hover,\r\n.blue-button:focus {\r\n  background: #0f5efd !important;\r\n  color: #ffffff !important;\r\n}\r\n\r\n.gray-button {\r\n  background: #dde4e9 !important;\r\n  color: #8392a7 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.gray-button:hover,\r\n.gray-button:focus {\r\n  background: #dbe0e4 !important;\r\n  color: #8392a7 !important;\r\n}\r\n\r\n.white-button {\r\n  background: white !important;\r\n  min-width: 100px;\r\n  color: #3b4859 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  text-align: center;\r\n}\r\n.white-button:hover,\r\n.white-button:focus {\r\n  background: #e6e6e6 !important;\r\n  color: #3b4859 !important;\r\n}\r\n.white-button i {\r\n  color: #57a4ff !important;\r\n}\r\n\r\na:focus,\r\na:hover {\r\n  color: #000000;\r\n}\r\n\r\n.float-right {\r\n  float: right;\r\n}\r\n\r\n.float-left {\r\n  float: left;\r\n}\r\n\r\n.text-left {\r\n  text-align: left;\r\n}\r\n\r\n.text-center {\r\n  text-align: center;\r\n}\r\n\r\n.text-right {\r\n  text-align: right;\r\n}\r\n\r\n.v-a-top {\r\n  vertical-align: top;\r\n}\r\n\r\n.v-a-middle {\r\n  vertical-align: middle;\r\n}\r\n\r\n.d-flex {\r\n  display: flex;\r\n}\r\n\r\n.d-block {\r\n  display: block;\r\n}\r\n\r\n.d-inline-block {\r\n  display: inline-block;\r\n}\r\n\r\n.p-t-0 {\r\n  padding-top: 0 !important;\r\n}\r\n\r\n.p-t-5 {\r\n  padding-top: 5px !important;\r\n}\r\n\r\n.p-t-10 {\r\n  padding-top: 10px !important;\r\n}\r\n\r\n.p-t-15 {\r\n  padding-top: 15px !important;\r\n}\r\n\r\n.p-t-20 {\r\n  padding-top: 20px !important;\r\n}\r\n\r\n.p-r-0 {\r\n  padding-right: 0 !important;\r\n}\r\n\r\n.p-r-5 {\r\n  padding-right: 5px !important;\r\n}\r\n\r\n.p-r-10 {\r\n  padding-right: 10px !important;\r\n}\r\n\r\n.p-r-15 {\r\n  padding-right: 15px !important;\r\n}\r\n\r\n.p-r-20 {\r\n  padding-right: 20px !important;\r\n}\r\n\r\n.p-b-0 {\r\n  padding-bottom: 0px !important;\r\n}\r\n\r\n.p-b-5 {\r\n  padding-bottom: 5px !important;\r\n}\r\n\r\n.p-b-10 {\r\n  padding-bottom: 10px !important;\r\n}\r\n\r\n.p-b-15 {\r\n  padding-bottom: 15px !important;\r\n}\r\n\r\n.p-b-20 {\r\n  padding-bottom: 20px !important;\r\n}\r\n\r\n.p-l-0 {\r\n  padding-left: 0 !important;\r\n}\r\n\r\n.p-l-5 {\r\n  padding-left: 5px !important;\r\n}\r\n\r\n.p-l-10 {\r\n  padding-left: 10px !important;\r\n}\r\n\r\n.p-l-15 {\r\n  padding-left: 15px !important;\r\n}\r\n\r\n.p-l-20 {\r\n  padding-left: 20px !important;\r\n}\r\n\r\n.m-l-0 {\r\n  margin-left: 0 !important;\r\n}\r\n\r\n.m-r-0 {\r\n  margin-right: 0 !important;\r\n}\r\n\r\n.m-t-0 {\r\n  margin-top: 0 !important;\r\n}\r\n\r\n.m-b-0 {\r\n  margin-bottom: 0 !important;\r\n}\r\n\r\n.width-25 {\r\n  width: 25%;\r\n}\r\n\r\n.width-50 {\r\n  width: 50%;\r\n}\r\n\r\n.width-75 {\r\n  width: 75%;\r\n}\r\n\r\n.width-100 {\r\n  width: 100%;\r\n}\r\n\r\n.width-auto {\r\n  width: auto;\r\n}\r\n\r\n.min-width-inherit {\r\n  min-width: inherit !important;\r\n}\r\n\r\n.border-bottom-0 {\r\n  border-bottom: none !important;\r\n}\r\n\r\n.orange {\r\n  color: #ff8f00;\r\n}\r\n\r\n.yellow-green {\r\n  color: #7ed321;\r\n}\r\n\r\n.red {\r\n  color: #f93d3d;\r\n}\r\n\r\n.yellow {\r\n  color: #ffff00;\r\n}\r\n\r\n.blue {\r\n  color: #438afb;\r\n}\r\n\r\n.form-control {\r\n  display: block;\r\n  width: 100%;\r\n  height: calc(1.5em + 0.75rem + 2px);\r\n  padding: 0.375rem 0.75rem;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  background-color: #fff;\r\n  background-clip: padding-box;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;\r\n}\r\n\r\n.input-group-text {\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  -ms-flex-align: center;\r\n  align-items: center;\r\n  padding: 0.375rem 0.75rem;\r\n  margin-bottom: 0;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  text-align: center;\r\n  white-space: nowrap;\r\n  background-color: #e9ecef;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n}\r\n\r\n.servicedesk-page-container {\r\n  background-color: #3b4859;\r\n  margin: 10px 20px;\r\n  border-radius: 10px;\r\n  padding-bottom: 10px;\r\n}\r\n.servicedesk-page-container .common-container {\r\n  padding-top: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  padding-bottom: 15px;\r\n  border-bottom: 1px solid #202226;\r\n}\r\n.servicedesk-page-container .page-heading {\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading h1 {\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  font-size: 24px;\r\n  line-height: 32px;\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading span {\r\n  display: block;\r\n  color: #a9b9c6;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n/*********************************** Filters Container *********************************/\r\n.form-group {\r\n  margin-bottom: 1rem;\r\n}\r\n.form-group label {\r\n  margin-bottom: 0.5rem;\r\n}\r\n\r\n.filter-container .filter-control-group {\r\n  max-width: 250px;\r\n  padding-left: 0px;\r\n}\r\n.filter-container .filter-control-group .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n.filter-container .filter-control-group label {\r\n  color: #ffffff;\r\n  font-size: 14px;\r\n}\r\n\r\n.showing {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n}\r\n\r\n.showby {\r\n  border-left: 1px solid #a9b9c6;\r\n  padding-left: 15px;\r\n  margin-left: 15px;\r\n}\r\n.showby label {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-right: 15px;\r\n}\r\n.showby .form-control {\r\n  display: inline-block;\r\n  width: 75px;\r\n  border-radius: 25px;\r\n}\r\n.showby span {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 1050px) {\r\n  .showing {\r\n    font-size: 11px;\r\n  }\r\n  .showby {\r\n    padding-left: 10px;\r\n    margin-left: 10px;\r\n  }\r\n  .showby label {\r\n    font-size: 11px;\r\n    padding-right: 10px;\r\n  }\r\n  .showby span {\r\n    font-size: 11px;\r\n    padding-left: 10px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1050px) and (min-width: 320px) {\r\n  .showby {\r\n    border-left: none;\r\n    padding-left: 0px;\r\n    margin-left: 0px;\r\n  }\r\n}\r\n\r\n.filter-search-control {\r\n  position: relative;\r\n  margin-bottom: 0;\r\n}\r\n.filter-search-control .input-group-text {\r\n  max-width: 100%;\r\n  text-align: left;\r\n  padding-right: 30px;\r\n  padding-left: 15px;\r\n  width: 100%;\r\n  border: 1px solid #ced4da;\r\n  background-color: #ffffff;\r\n  border-radius: 25px;\r\n  padding-top: 0.399rem;\r\n}\r\n.filter-search-control .input-group-text:focus {\r\n  outline: none;\r\n}\r\n.filter-search-control button {\r\n  position: absolute;\r\n  right: 0;\r\n  top: 0;\r\n  z-index: 1;\r\n  cursor: pointer;\r\n  border: none;\r\n  background-color: transparent;\r\n  width: 34px;\r\n  height: 34px;\r\n}\r\n.filter-search-control button:hover {\r\n  color: #333333;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .filter-search-control {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.pagination ul {\r\n  list-style: none;\r\n  padding: 0;\r\n  margin: 0;\r\n}\r\n.pagination ul li {\r\n  display: inline-block;\r\n}\r\n.pagination ul li a {\r\n  display: block;\r\n  padding: 5px 10px;\r\n  font-size: 11px;\r\n  color: #868f9b;\r\n  line-height: 16px;\r\n  border: 1px solid #cbcfd4;\r\n  border-right: none;\r\n}\r\n.pagination ul li a:hover {\r\n  background-color: #cbcfd4;\r\n}\r\n.pagination ul li a.active {\r\n  background-color: #cbcfd4;\r\n  color: black;\r\n}\r\n.pagination ul li a.deactive {\r\n  background-color: white;\r\n  color: black;\r\n}\r\n.pagination ul li a.desable {\r\n  background-color: #5e5757;\r\n  color: white;\r\n}\r\n.pagination ul li a.enable {\r\n  background-color: #3b4859;\r\n  color: #ffffff;\r\n}\r\n.pagination ul li.previous a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  -webkit-border-top-left-radius: 5px;\r\n  -webkit-border-bottom-left-radius: 5px;\r\n  -moz-border-radius-topleft: 5px;\r\n  -moz-border-radius-bottomleft: 5px;\r\n  border-top-left-radius: 5px;\r\n  border-bottom-left-radius: 5px;\r\n}\r\n.pagination ul li.next a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  border-right: 1px solid #cbcfd4;\r\n  -webkit-border-top-right-radius: 5px;\r\n  -webkit-border-bottom-right-radius: 5px;\r\n  -moz-border-radius-topright: 5px;\r\n  -moz-border-radius-bottomright: 5px;\r\n  border-top-right-radius: 5px;\r\n  border-bottom-right-radius: 5px;\r\n}\r\n\r\n.open-create-menu {\r\n  position: absolute;\r\n  right: 15px;\r\n  top: 36px;\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 2px 5px #00000029;\r\n  width: 120px;\r\n  z-index: 10;\r\n  padding: 5px 0;\r\n}\r\n.open-create-menu a {\r\n  color: #2a9ce7;\r\n  font-size: 12px;\r\n  font-weight: 400;\r\n  line-height: 20px;\r\n  display: block;\r\n  padding: 4px 0;\r\n}\r\n\r\n.contact-popup-container .heading h4 {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container .heading span {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n.contact-popup-container .heading span a {\r\n  color: #49c740;\r\n}\r\n\r\n.contact-popup-container .upload-photo .upload-icon {\r\n  background-color: #438afb;\r\n  border-radius: 2px;\r\n  padding: 0;\r\n  width: 44px;\r\n  height: 44px;\r\n  color: #ffffff;\r\n  font-size: 24px;\r\n  line-height: 44px;\r\n  text-align: center;\r\n  margin-right: 15px;\r\n  vertical-align: top;\r\n}\r\n\r\n.contact-popup-container .upload-photo strong {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #438afb;\r\n}\r\n\r\n.contact-popup-container .upload-photo p {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n\r\n.contact-popup-container .form-group {\r\n  margin-bottom: 1.5rem;\r\n}\r\n.contact-popup-container .form-group label {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n  display: block;\r\n}\r\n.contact-popup-container .form-group .form-group-inner label {\r\n  display: none;\r\n}\r\n.contact-popup-container .form-group .form-control {\r\n  background-color: transparent;\r\n  border: none;\r\n  border-bottom: 1px solid #89898a;\r\n  color: #89898a;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  padding: 0.375rem 0;\r\n  width: 100%;\r\n  border-radius: 0;\r\n  text-align: left;\r\n}\r\n.contact-popup-container .form-group .form-control.textarea {\r\n  height: 150px;\r\n}\r\n.contact-popup-container .form-group .form-control:focus {\r\n  outline: none;\r\n}\r\n.contact-popup-container .form-group .add-conatct {\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  color: #3b7cff;\r\n  line-height: 18px;\r\n  border: none;\r\n  background: none;\r\n  padding: 0;\r\n}\r\n.contact-popup-container .form-group .invalid-feedback {\r\n  color: red;\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  font-weight: 400;\r\n  display: block;\r\n}\r\n\r\n.contact-popup-container .atleast-fields-box {\r\n  border: 1px solid #d1dae2;\r\n  background-color: #f9f9f9;\r\n  padding: 20px;\r\n  padding-bottom: 0;\r\n  margin-bottom: 20px;\r\n}\r\n.contact-popup-container .atleast-fields-box h3 {\r\n  color: #323c47;\r\n  font-size: 15px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 20px;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons button {\r\n  border: 1px solid #a9b9c6;\r\n  background-color: #ffffff;\r\n  color: #89898a;\r\n  font-size: 15px;\r\n  line-height: 36px;\r\n  font-weight: 500;\r\n  padding: 0 30px;\r\n  margin: 5px;\r\n  text-align: center;\r\n}\r\n.contact-popup-container .contact-popup-buttons button.save {\r\n  border-color: #3b7cff;\r\n  background-color: #3b7cff;\r\n  color: #ffffff;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons .create-author {\r\n  padding-right: 5px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-input {\r\n  display: inline-block;\r\n  margin-top: 2px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-label {\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  display: inline-block;\r\n  padding-left: 7px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group label {\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group .form-control {\r\n  border: 1px solid #d1dae2;\r\n  padding: 0.375rem 0.75rem;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .filter-container .assessments {\r\n    float: left;\r\n  }\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n}\r\n\r\n#servicedesk-main-container .breadcrumbs-container {\r\n  background-color: #3b4859;\r\n  padding: 14px 20px 15px;\r\n  font-size: 13px;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .page-title {\r\n  color: #ffffff;\r\n  display: inline-block;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .breadcrumbs {\r\n  float: right;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container a.breadcrumbs-link {\r\n  color: #fcfcfc;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .current-page {\r\n  color: #fcfcfc;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .separator {\r\n  color: #fcfcfc;\r\n  display: inline-block;\r\n  padding: 0 10px;\r\n}\r\n\r\n@media (max-width: 768px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n.modal {\r\n  -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  max-width: 992px;\r\n  background: #ffffff;\r\n}\r\n.modal .modal-content {\r\n  padding: 40px;\r\n}\r\n\r\n.modal-backdrop {\r\n  background-color: #141414b3;\r\n  opacity: 0.8;\r\n}\r\n\r\n.ticketing-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 30px;\r\n}\r\n.ticketing-box .image {\r\n  padding-bottom: 10px;\r\n}\r\n.ticketing-box .number {\r\n  color: #3b4859;\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 700;\r\n  padding-bottom: 5px;\r\n}\r\n.ticketing-box .name {\r\n  color: #3b4859;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n\r\n.ticket-trends {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 15px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  min-height: 345px;\r\n}\r\n.ticket-trends .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-trends .heading span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n}\r\n.ticket-trends .days-box .form-check {\r\n  margin-right: 25px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-input {\r\n  display: inline-block;\r\n  vertical-align: top;\r\n  margin-top: 4px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-label {\r\n  font-size: 12px;\r\n  line-height: 21px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  display: inline-block;\r\n  padding-left: 8px;\r\n  vertical-align: top;\r\n}\r\n.ticket-trends .calendar-box .fa {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .calendar-box span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .ticket-graphs canvas {\r\n  height: 220px !important;\r\n  width: 100% !important;\r\n}\r\n.ticket-trends .ticket-graphs .hours-text {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n\r\n.performer-agents {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 20px;\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  padding-bottom: 40px;\r\n  min-height: 345px;\r\n}\r\n.performer-agents .heading {\r\n  color: #323c47;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 15px;\r\n}\r\n.performer-agents .performer-agents-table {\r\n  width: 100%;\r\n}\r\n.performer-agents .performer-agents-table thead tr th {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table thead tr th:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.dashboard-all-ticket-tabel .heading h2 a {\r\n  color: #ffffff;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel {\r\n  width: 1200px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr {\r\n  border-bottom: 7px solid #3b4859;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td {\r\n  background-color: #f0f3f7;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.date {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .ticket-trends-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n  .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n  .days-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .calendar-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n.tickets-number-box {\r\n  padding-right: 75px;\r\n}\r\n.tickets-number-box h3 {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n}\r\n.tickets-number-box span {\r\n  color: #a9b9c6;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n.quarter-form .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n\r\n.all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-support-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-support-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td {\r\n  color: #ffffff;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.chart-inner canvas {\r\n  width: 100% !important;\r\n}\r\n\r\n.apply-filters-button {\r\n  margin-top: 8px;\r\n}\r\n\r\n@media only screen and (max-width: 992px) and (min-width: 768px) {\r\n  .tickets-number-box h3 {\r\n    font-size: 22px;\r\n    line-height: 26px;\r\n  }\r\n  .tickets-number-box span {\r\n    font-size: 10px;\r\n    line-height: 18px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n  .quarter-form {\r\n    padding-top: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .tickets-number-box {\r\n    display: block;\r\n    padding-top: 15px;\r\n    text-align: left;\r\n  }\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n  .open-create-menu {\r\n    left: 15px;\r\n    top: 45px;\r\n  }\r\n}\r\n\r\n.all-contacts-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-contacts-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-contacts-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel {\r\n  width: 1200px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-left: 0px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .contacts-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-companies-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-companies-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #ffffff;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel {\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td .image {\r\n  width: 40px;\r\n  height: 40px;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .companies-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n  .all-companies-container\r\n    .all-companies-tabel\r\n    .companies-main-tabel\r\n    .companies-tabel {\r\n    width: 992px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-open-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-open-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-open-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td {\r\n  color: #ffffff;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .sortby {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .filters-button {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (min-width: 1200px) {\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n}\r\n\r\n.ticket-buttons .white-button {\r\n  border: 1px solid #a9b9c6 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  font-size: 12px;\r\n  color: #a9b9c6 !important;\r\n  display: inline-block;\r\n  padding-right: 12px !important;\r\n  padding-left: 12px !important;\r\n}\r\n.ticket-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n\r\n.ticket-buttons .group-buttons {\r\n  display: inline-block;\r\n}\r\n.ticket-buttons .group-buttons .white-button {\r\n  margin-right: 0;\r\n  border-right: none !important;\r\n}\r\n.ticket-buttons .group-buttons .white-button:last-child {\r\n  border-right: 1px solid #a9b9c6 !important;\r\n  margin-right: 10px;\r\n}\r\n\r\n.ticket-detail-box {\r\n  box-shadow: 0.94px 6px 16px #cfdff71a;\r\n  border-radius: 3px;\r\n  margin-bottom: 20px;\r\n}\r\n.ticket-detail-box .ticket-detail-head {\r\n  background: #ffffff;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-image {\r\n  display: inline-block;\r\n  width: 32px;\r\n  height: 32px;\r\n  background-color: #d1dae2;\r\n  overflow: hidden;\r\n  vertical-align: top;\r\n  border-radius: 50%;\r\n  margin-right: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text {\r\n  display: inline-block;\r\n  width: 86%;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p {\r\n  display: block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p a {\r\n  color: #3b7cff;\r\n  font-weight: 500;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p strong {\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p span {\r\n  color: #323c47;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-time-text {\r\n  display: inline-block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-right: 15px;\r\n  vertical-align: top;\r\n  padding-top: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button {\r\n  display: inline-block;\r\n  padding: 10px 0 0 0 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 16px;\r\n  background-color: transparent !important;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box {\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box strong {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box p {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box span {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 0px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul {\r\n  display: block;\r\n  list-style: none;\r\n  padding: 0 0 10px 0;\r\n  margin: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul li {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 3px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons {\r\n  padding-top: 0px;\r\n  padding-bottom: 10px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button {\r\n  padding: 7px 7px !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  margin-bottom: 0;\r\n  border-radius: 3px;\r\n  margin-top: 7px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.trash {\r\n  border: 1px solid #e6e6e6;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.saved {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  color: #a9b9c6 !important;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .blue-button {\r\n  padding: 15px 30px !important;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.properties-form {\r\n  display: block;\r\n  padding: 30px 45px;\r\n  background: #f0f3f7;\r\n  box-shadow: 0px 2px 6px #464c56a8;\r\n}\r\n.properties-form h3 {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 17px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 20px;\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group {\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group label {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n.properties-form .form-group select {\r\n  background-color: transparent;\r\n  color: #d1dae2;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 400;\r\n  border: none;\r\n  border-bottom: 1px solid #c7d0d9;\r\n  width: 100%;\r\n  cursor: pointer;\r\n}\r\n.properties-form .form-group select:focus {\r\n  outline: none;\r\n}\r\n.properties-form .form-group .blue-button {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  padding: 15px 60px !important;\r\n  margin: 0;\r\n}\r\n.properties-form .form-group .blue-button:focus {\r\n  outline: none;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .ticket-buttons .white-button {\r\n    padding-right: 7px !important;\r\n    padding-left: 8px !important;\r\n    font-size: 10px;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .head-time-text {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .white-button {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-buttons .detail-right-buttons {\r\n    text-align: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.reports-page-container {\r\n  padding: 10px;\r\n}\r\n.reports-page-container .reports-left {\r\n  background-color: #f0f3f7;\r\n  border-radius: 3px;\r\n  padding: 20px 30px 30px;\r\n}\r\n.reports-page-container .reports-left .heading {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-left .ask-question {\r\n  border: 1px solid #d1dae2;\r\n  color: #929598;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n  padding: 7px 15px;\r\n  margin-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box {\r\n  border-top: 1px solid #d1dae2;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.productivity ul li span {\r\n  background-color: rgba(67, 138, 251, 0.1);\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.productivity ul li span i {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.happiness ul li span {\r\n  background-color: rgba(246, 115, 115, 0.1);\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.happiness ul li span i {\r\n  color: #f67373;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box .helpdesk-heading {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  font-weight: 600;\r\n  line-height: 18px;\r\n  padding-bottom: 0px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul {\r\n  padding-top: 10px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li {\r\n  margin-right: 30px;\r\n  width: 100px;\r\n  vertical-align: top;\r\n  margin-bottom: 10px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li:last-child {\r\n  margin-right: 0;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li span {\r\n  width: 80px;\r\n  height: 80px;\r\n  line-height: 80px;\r\n  background-color: rgba(72, 199, 65, 0.1);\r\n  border-radius: 3px;\r\n  margin-bottom: 5px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li span i {\r\n  font-size: 32px;\r\n  line-height: 80px;\r\n  color: #48c741;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li strong {\r\n  font-size: 11px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  color: #323c47;\r\n  text-transform: uppercase;\r\n}\r\n.reports-page-container .reports-left .build-reports-text {\r\n  border-top: 1px solid #d1dae2;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .build-reports-text p {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n  margin-bottom: 3px;\r\n}\r\n.reports-page-container .reports-left .build-reports-text strong {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #438afb;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-left .build-reports-text strong a {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-right {\r\n  background-color: #f0f3f7;\r\n  border-radius: 3px;\r\n  padding: 20px 15px 30px;\r\n  min-height: 777px;\r\n}\r\n.reports-page-container .reports-right .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 22px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-right .heading p {\r\n  font-size: 11px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n.reports-page-container .reports-right .customize-link {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #438afb;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-right .customize-link a {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-right .insight-box {\r\n  border: 1px solid #d1dae2;\r\n  padding: 10px 15px;\r\n  margin-bottom: 15px;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-heading {\r\n  color: #d1dae2;\r\n  font-size: 11px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-heading strong {\r\n  color: #3b7cff;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container\r\n  .reports-right\r\n  .insight-box\r\n  .insight-heading-right-text {\r\n  color: #3b7cff;\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  line-height: 18px;\r\n}\r\n.reports-page-container\r\n  .reports-right\r\n  .insight-box\r\n  .insight-heading-right-text.red {\r\n  color: #f67373;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-text {\r\n  color: #a9b9c6;\r\n  font-size: 11px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .reports-page-container .reports-right {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n.desk-depth-container .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #ffffff;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n\r\n.desk-depth-container .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.desk-depth-container .filters-buttons .blue-button {\r\n  margin-right: 15px;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.desk-depth-container .filters-buttons .white-button {\r\n  padding: 0px !important;\r\n  font-size: 28px;\r\n  line-height: 34px;\r\n  vertical-align: top;\r\n  margin-right: 15px;\r\n  margin-bottom: 0;\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .filters-buttons .white-button:hover {\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .filters-buttons .white-button i {\r\n  color: #ffffff !important;\r\n}\r\n\r\n.desk-depth-container .desk-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  margin-bottom: 30px;\r\n}\r\n.desk-depth-container .desk-box a {\r\n  padding: 10px;\r\n  padding-bottom: 20px;\r\n  min-height: 160px;\r\n}\r\n.desk-depth-container .desk-box .icon {\r\n  font-size: 16px;\r\n  color: #323c47;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button {\r\n  padding: 0px !important;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n  margin-bottom: 0;\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button:hover {\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.desk-depth-container .desk-box .number {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n  color: #3b4859;\r\n  padding-bottom: 10px;\r\n  padding-top: 10px;\r\n}\r\n.desk-depth-container .desk-box .text {\r\n  font-size: 20px;\r\n  line-height: 28px;\r\n  font-weight: 400;\r\n  color: #3b4859;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .desk-depth-container .filters-buttons {\r\n    text-align: left;\r\n  }\r\n}\r\n\r\n.charts-boxs {\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.charts-boxs .chart-box {\r\n  background: #f0f3f7 0% 0% no-repeat padding-box;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  min-height: 400px;\r\n  margin-bottom: 30px;\r\n  padding: 30px;\r\n}\r\n\r\n/*# sourceMappingURL=servicedesk.dark.css.map */\r\n"
               ],
               sourceRoot: ""
             }
@@ -19085,19 +21306,19 @@ define(["moment", "react", "react-dom"], function(
           // module
           exports.push([
             module.i,
-            "@media (min-width: 1200px) {\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n  .col-xl-5 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 20%;\r\n    -ms-flex: 0 0 20%;\r\n    flex: 0 0 20%;\r\n    max-width: 20%;\r\n  }\r\n  .col-xl-7 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 58.33333%;\r\n    -ms-flex: 0 0 58.33333%;\r\n    flex: 0 0 58.33333%;\r\n    max-width: 58.33333%;\r\n  }\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n}\r\n\r\n/*********************************** Buttons *********************************/\r\n.blue-button {\r\n  background: #3b7cff !important;\r\n  color: #ffffff !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  margin-bottom: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.blue-button:hover,\r\n.blue-button:focus {\r\n  background: #0f5efd !important;\r\n  color: #ffffff !important;\r\n}\r\n\r\n.gray-button {\r\n  background: #dde4e9 !important;\r\n  color: #8392a7 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.gray-button:hover,\r\n.gray-button:focus {\r\n  background: #dbe0e4 !important;\r\n  color: #8392a7 !important;\r\n}\r\n\r\n.white-button {\r\n  background: white !important;\r\n  min-width: 100px;\r\n  color: #3b4859 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  text-align: center;\r\n}\r\n.white-button:hover,\r\n.white-button:focus {\r\n  background: #e6e6e6 !important;\r\n  color: #3b4859 !important;\r\n}\r\n.white-button i {\r\n  color: #57a4ff !important;\r\n}\r\n\r\na:focus,\r\na:hover {\r\n  color: #000000;\r\n}\r\n\r\n.float-right {\r\n  float: right;\r\n}\r\n\r\n.float-left {\r\n  float: left;\r\n}\r\n\r\n.text-left {\r\n  text-align: left;\r\n}\r\n\r\n.text-center {\r\n  text-align: center;\r\n}\r\n\r\n.text-right {\r\n  text-align: right;\r\n}\r\n\r\n.v-a-top {\r\n  vertical-align: top;\r\n}\r\n\r\n.v-a-middle {\r\n  vertical-align: middle;\r\n}\r\n\r\n.d-flex {\r\n  display: flex;\r\n}\r\n\r\n.d-block {\r\n  display: block;\r\n}\r\n\r\n.d-inline-block {\r\n  display: inline-block;\r\n}\r\n\r\n.p-t-0 {\r\n  padding-top: 0 !important;\r\n}\r\n\r\n.p-t-5 {\r\n  padding-top: 5px !important;\r\n}\r\n\r\n.p-t-10 {\r\n  padding-top: 10px !important;\r\n}\r\n\r\n.p-t-15 {\r\n  padding-top: 15px !important;\r\n}\r\n\r\n.p-t-20 {\r\n  padding-top: 20px !important;\r\n}\r\n\r\n.p-r-0 {\r\n  padding-right: 0 !important;\r\n}\r\n\r\n.p-r-5 {\r\n  padding-right: 5px !important;\r\n}\r\n\r\n.p-r-10 {\r\n  padding-right: 10px !important;\r\n}\r\n\r\n.p-r-15 {\r\n  padding-right: 15px !important;\r\n}\r\n\r\n.p-r-20 {\r\n  padding-right: 20px !important;\r\n}\r\n\r\n.p-b-0 {\r\n  padding-bottom: 0px !important;\r\n}\r\n\r\n.p-b-5 {\r\n  padding-bottom: 5px !important;\r\n}\r\n\r\n.p-b-10 {\r\n  padding-bottom: 10px !important;\r\n}\r\n\r\n.p-b-15 {\r\n  padding-bottom: 15px !important;\r\n}\r\n\r\n.p-b-20 {\r\n  padding-bottom: 20px !important;\r\n}\r\n\r\n.p-l-0 {\r\n  padding-left: 0 !important;\r\n}\r\n\r\n.p-l-5 {\r\n  padding-left: 5px !important;\r\n}\r\n\r\n.p-l-10 {\r\n  padding-left: 10px !important;\r\n}\r\n\r\n.p-l-15 {\r\n  padding-left: 15px !important;\r\n}\r\n\r\n.p-l-20 {\r\n  padding-left: 20px !important;\r\n}\r\n\r\n.m-l-0 {\r\n  margin-left: 0 !important;\r\n}\r\n\r\n.m-r-0 {\r\n  margin-right: 0 !important;\r\n}\r\n\r\n.m-t-0 {\r\n  margin-top: 0 !important;\r\n}\r\n\r\n.m-b-0 {\r\n  margin-bottom: 0 !important;\r\n}\r\n\r\n.width-25 {\r\n  width: 25%;\r\n}\r\n\r\n.width-50 {\r\n  width: 50%;\r\n}\r\n\r\n.width-75 {\r\n  width: 75%;\r\n}\r\n\r\n.width-100 {\r\n  width: 100%;\r\n}\r\n\r\n.width-auto {\r\n  width: auto;\r\n}\r\n\r\n.min-width-inherit {\r\n  min-width: inherit !important;\r\n}\r\n\r\n.border-bottom-0 {\r\n  border-bottom: none !important;\r\n}\r\n\r\n.orange {\r\n  color: #ff8f00;\r\n}\r\n\r\n.yellow-green {\r\n  color: #7ed321;\r\n}\r\n\r\n.red {\r\n  color: #f93d3d;\r\n}\r\n\r\n.yellow {\r\n  color: #ffff00;\r\n}\r\n\r\n.blue {\r\n  color: #438afb;\r\n}\r\n\r\n.form-control {\r\n  display: block;\r\n  width: 100%;\r\n  height: calc(1.5em + 0.75rem + 2px);\r\n  padding: 0.375rem 0.75rem;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  background-color: #fff;\r\n  background-clip: padding-box;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;\r\n}\r\n\r\n.input-group-text {\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  -ms-flex-align: center;\r\n  align-items: center;\r\n  padding: 0.375rem 0.75rem;\r\n  margin-bottom: 0;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  text-align: center;\r\n  white-space: nowrap;\r\n  background-color: #e9ecef;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n}\r\n\r\n.servicedesk-page-container {\r\n  background-color: #ffffff;\r\n  margin: 10px 20px;\r\n  border-radius: 10px;\r\n  padding-bottom: 10px;\r\n}\r\n.servicedesk-page-container .common-container {\r\n  padding-top: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  padding-bottom: 15px;\r\n  border-bottom: 1px solid #f5f6f5;\r\n}\r\n.servicedesk-page-container .page-heading {\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading h1 {\r\n  color: #3b4859;\r\n  font-weight: 600;\r\n  font-size: 24px;\r\n  line-height: 32px;\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading span {\r\n  display: block;\r\n  color: #a9b9c6;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n/*********************************** Filters Container *********************************/\r\n.form-group {\r\n  margin-bottom: 1rem;\r\n}\r\n.form-group label {\r\n  margin-bottom: 0.5rem;\r\n}\r\n\r\n.filter-container .filter-control-group {\r\n  max-width: 250px;\r\n  padding-left: 0px;\r\n}\r\n.filter-container .filter-control-group .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n.filter-container .filter-control-group label {\r\n  color: #3b4859;\r\n  font-size: 14px;\r\n}\r\n\r\n.showing {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n}\r\n\r\n.showby {\r\n  border-left: 1px solid #a9b9c6;\r\n  padding-left: 15px;\r\n  margin-left: 15px;\r\n}\r\n.showby label {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-right: 15px;\r\n}\r\n.showby .form-control {\r\n  display: inline-block;\r\n  width: 75px;\r\n  border-radius: 25px;\r\n}\r\n.showby span {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 1050px) {\r\n  .showing {\r\n    font-size: 11px;\r\n  }\r\n  .showby {\r\n    padding-left: 10px;\r\n    margin-left: 10px;\r\n  }\r\n  .showby label {\r\n    font-size: 11px;\r\n    padding-right: 10px;\r\n  }\r\n  .showby span {\r\n    font-size: 11px;\r\n    padding-left: 10px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1050px) and (min-width: 320px) {\r\n  .showby {\r\n    border-left: none;\r\n    padding-left: 0px;\r\n    margin-left: 0px;\r\n  }\r\n}\r\n\r\n.filter-search-control {\r\n  position: relative;\r\n  margin-bottom: 0;\r\n}\r\n.filter-search-control .input-group-text {\r\n  max-width: 100%;\r\n  text-align: left;\r\n  padding-right: 30px;\r\n  padding-left: 15px;\r\n  width: 100%;\r\n  border: 1px solid #ced4da;\r\n  background-color: #ffffff;\r\n  border-radius: 25px;\r\n}\r\n.filter-search-control .input-group-text:focus {\r\n  outline: none;\r\n}\r\n.filter-search-control button {\r\n  position: absolute;\r\n  right: 0;\r\n  top: 0;\r\n  z-index: 1;\r\n  cursor: pointer;\r\n  border: none;\r\n  background-color: transparent;\r\n  width: 34px;\r\n  height: 32px;\r\n}\r\n.filter-search-control button:hover {\r\n  color: #333333;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .filter-search-control {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.pagination ul {\r\n  list-style: none;\r\n  padding: 0;\r\n  margin: 0;\r\n}\r\n.pagination ul li {\r\n  display: inline-block;\r\n}\r\n.pagination ul li a {\r\n  display: block;\r\n  padding: 5px 10px;\r\n  font-size: 11px;\r\n  color: #868f9b;\r\n  line-height: 16px;\r\n  border: 1px solid #cbcfd4;\r\n  border-right: none;\r\n}\r\n.pagination ul li a:hover {\r\n  background-color: #cbcfd4;\r\n}\r\n.pagination ul li a.active {\r\n  background-color: #cbcfd4;\r\n  color: black;\r\n}\r\n.pagination ul li a.deactive {\r\n  background-color: white;\r\n  color: black;\r\n}\r\n.pagination ul li a.desable {\r\n  background-color: #5e5757;\r\n  color: white;\r\n}\r\n.pagination ul li a.enable {\r\n  background-color: #3b4859;\r\n  color: #ffffff;\r\n}\r\n.pagination ul li.previous a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  -webkit-border-top-left-radius: 5px;\r\n  -webkit-border-bottom-left-radius: 5px;\r\n  -moz-border-radius-topleft: 5px;\r\n  -moz-border-radius-bottomleft: 5px;\r\n  border-top-left-radius: 5px;\r\n  border-bottom-left-radius: 5px;\r\n}\r\n.pagination ul li.next a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  border-right: 1px solid #cbcfd4;\r\n  -webkit-border-top-right-radius: 5px;\r\n  -webkit-border-bottom-right-radius: 5px;\r\n  -moz-border-radius-topright: 5px;\r\n  -moz-border-radius-bottomright: 5px;\r\n  border-top-right-radius: 5px;\r\n  border-bottom-right-radius: 5px;\r\n}\r\n\r\n.open-create-menu {\r\n  position: absolute;\r\n  right: 15px;\r\n  top: 36px;\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 2px 5px #00000029;\r\n  width: 120px;\r\n  z-index: 10;\r\n  padding: 5px 0;\r\n}\r\n.open-create-menu a {\r\n  color: #2a9ce7;\r\n  font-size: 12px;\r\n  font-weight: 400;\r\n  line-height: 20px;\r\n  display: block;\r\n  padding: 4px 0;\r\n}\r\n\r\n.contact-popup-container .heading h4 {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container .heading span {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n.contact-popup-container .heading span a {\r\n  color: #49c740;\r\n}\r\n\r\n.contact-popup-container .upload-photo .upload-icon {\r\n  background-color: #438afb;\r\n  border-radius: 2px;\r\n  padding: 0;\r\n  width: 44px;\r\n  height: 44px;\r\n  color: #ffffff;\r\n  font-size: 24px;\r\n  line-height: 44px;\r\n  text-align: center;\r\n  margin-right: 15px;\r\n  vertical-align: top;\r\n}\r\n\r\n.contact-popup-container .upload-photo strong {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #438afb;\r\n}\r\n\r\n.contact-popup-container .upload-photo p {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n\r\n.contact-popup-container .form-group {\r\n  margin-bottom: 1.5rem;\r\n}\r\n.contact-popup-container .form-group label {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n  display: block;\r\n}\r\n.contact-popup-container .form-group .form-group-inner label {\r\n  display: none;\r\n}\r\n.contact-popup-container .form-group .form-control {\r\n  background-color: transparent;\r\n  border: none;\r\n  border-bottom: 1px solid #89898a;\r\n  color: #89898a;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  padding: 0.375rem 0;\r\n  width: 100%;\r\n  border-radius: 0;\r\n  text-align: left;\r\n}\r\n.contact-popup-container .form-group .form-control.textarea {\r\n  height: 150px;\r\n}\r\n.contact-popup-container .form-group .form-control:focus {\r\n  outline: none;\r\n}\r\n.contact-popup-container .form-group .add-conatct {\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  color: #3b7cff;\r\n  line-height: 18px;\r\n  border: none;\r\n  background: none;\r\n  padding: 0;\r\n}\r\n.contact-popup-container .form-group .invalid-feedback {\r\n  color: red;\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  font-weight: 400;\r\n  display: block;\r\n}\r\n\r\n.contact-popup-container .atleast-fields-box {\r\n  border: 1px solid #d1dae2;\r\n  background-color: #f9f9f9;\r\n  padding: 20px;\r\n  padding-bottom: 0;\r\n  margin-bottom: 20px;\r\n}\r\n.contact-popup-container .atleast-fields-box h3 {\r\n  color: #323c47;\r\n  font-size: 15px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 20px;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons button {\r\n  border: 1px solid #a9b9c6;\r\n  background-color: #ffffff;\r\n  color: #89898a;\r\n  font-size: 15px;\r\n  line-height: 36px;\r\n  font-weight: 500;\r\n  padding: 0 30px;\r\n  margin: 5px;\r\n  text-align: center;\r\n}\r\n.contact-popup-container .contact-popup-buttons button.save {\r\n  border-color: #3b7cff;\r\n  background-color: #3b7cff;\r\n  color: #ffffff;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons .create-author {\r\n  padding-right: 5px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-input {\r\n  display: inline-block;\r\n  margin-top: 2px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-label {\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  display: inline-block;\r\n  padding-left: 7px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group label {\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group .form-control {\r\n  border: 1px solid #d1dae2;\r\n  padding: 0.375rem 0.75rem;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .filter-container .assessments {\r\n    float: left;\r\n  }\r\n}\r\n\r\n#servicedesk-main-container .breadcrumbs-container {\r\n  background-color: #eff2f7;\r\n  padding: 14px 20px 15px;\r\n  font-size: 13px;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .page-title {\r\n  color: #3b4859;\r\n  display: inline-block;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .breadcrumbs {\r\n  float: right;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container a.breadcrumbs-link {\r\n  color: #89898a;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .current-page {\r\n  color: #2a9ce7;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .separator {\r\n  color: #89898a;\r\n  display: inline-block;\r\n  padding: 0 10px;\r\n}\r\n\r\n@media (max-width: 768px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n.modal {\r\n  -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  max-width: 992px;\r\n  background: #ffffff;\r\n}\r\n.modal .modal-content {\r\n  padding: 40px;\r\n}\r\n\r\n.modal-backdrop {\r\n  background-color: #141414b3;\r\n  opacity: 0.8;\r\n}\r\n\r\n.ticketing-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 30px;\r\n}\r\n.ticketing-box .image {\r\n  padding-bottom: 10px;\r\n}\r\n.ticketing-box .number {\r\n  color: #3b4859;\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 700;\r\n  padding-bottom: 5px;\r\n}\r\n.ticketing-box .name {\r\n  color: #3b4859;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n\r\n.ticket-trends {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 15px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  min-height: 345px;\r\n}\r\n.ticket-trends .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-trends .heading span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n}\r\n.ticket-trends .days-box .form-check {\r\n  margin-right: 25px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-input {\r\n  display: inline-block;\r\n  vertical-align: top;\r\n  margin-top: 4px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-label {\r\n  font-size: 12px;\r\n  line-height: 21px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  display: inline-block;\r\n  padding-left: 8px;\r\n  vertical-align: top;\r\n}\r\n.ticket-trends .calendar-box .fa {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .calendar-box span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .ticket-graphs canvas {\r\n  height: 220px !important;\r\n  width: 100% !important;\r\n}\r\n.ticket-trends .ticket-graphs .hours-text {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n\r\n.performer-agents {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 20px;\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  padding-bottom: 40px;\r\n  min-height: 345px;\r\n}\r\n.performer-agents .heading {\r\n  color: #323c47;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 15px;\r\n}\r\n.performer-agents .performer-agents-table {\r\n  width: 100%;\r\n}\r\n.performer-agents .performer-agents-table thead tr th {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table thead tr th:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.dashboard-all-ticket-tabel .heading h2 a {\r\n  color: #323c47;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel {\r\n  width: 1200px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr {\r\n  border-bottom: 7px solid #ffffff;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td {\r\n  background-color: #f0f3f7;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.date {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .ticket-trends-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n  .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n  .days-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .calendar-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n.tickets-number-box {\r\n  padding-right: 75px;\r\n}\r\n.tickets-number-box h3 {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n}\r\n.tickets-number-box span {\r\n  color: #a9b9c6;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n.quarter-form .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n\r\n.all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-support-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-support-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td {\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n  padding-top: 50px;\r\n  font-weight: 600;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n}\r\n\r\n.chart-inner canvas {\r\n  width: 100% !important;\r\n}\r\n\r\n.apply-filters-button {\r\n  margin-top: 8px;\r\n}\r\n\r\n@media only screen and (max-width: 992px) and (min-width: 768px) {\r\n  .tickets-number-box h3 {\r\n    font-size: 22px;\r\n    line-height: 26px;\r\n  }\r\n  .tickets-number-box span {\r\n    font-size: 10px;\r\n    line-height: 18px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n  .quarter-form {\r\n    padding-top: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .tickets-number-box {\r\n    display: block;\r\n    padding-top: 15px;\r\n    text-align: left;\r\n  }\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n  .open-create-menu {\r\n    left: 15px;\r\n    top: 45px;\r\n  }\r\n}\r\n\r\n.all-contacts-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-contacts-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-contacts-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel {\r\n  width: 1200px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .contacts-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-companies-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-companies-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel {\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td .image {\r\n  width: 40px;\r\n  height: 40px;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .companies-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n  .all-companies-container\r\n    .all-companies-tabel\r\n    .companies-main-tabel\r\n    .companies-tabel {\r\n    width: 992px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-open-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-open-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-open-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td {\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n  padding-top: 50px;\r\n  font-weight: 600;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .sortby {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .filters-button {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (min-width: 1200px) {\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n}\r\n\r\n.ticket-buttons .white-button {\r\n  border: 1px solid #a9b9c6 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  font-size: 12px;\r\n  color: #a9b9c6 !important;\r\n  display: inline-block;\r\n  padding-right: 12px !important;\r\n  padding-left: 12px !important;\r\n}\r\n.ticket-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n\r\n.ticket-buttons .group-buttons {\r\n  display: inline-block;\r\n}\r\n.ticket-buttons .group-buttons .white-button {\r\n  margin-right: 0;\r\n  border-right: none !important;\r\n}\r\n.ticket-buttons .group-buttons .white-button:last-child {\r\n  border-right: 1px solid #a9b9c6 !important;\r\n  margin-right: 10px;\r\n}\r\n\r\n.ticket-detail-box {\r\n  box-shadow: 0.94px 6px 16px #cfdff71a;\r\n  border-radius: 3px;\r\n  margin-bottom: 20px;\r\n}\r\n.ticket-detail-box .ticket-detail-head {\r\n  background: rgba(209, 218, 226, 0.2);\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-image {\r\n  display: inline-block;\r\n  width: 32px;\r\n  height: 32px;\r\n  background-color: #d1dae2;\r\n  overflow: hidden;\r\n  vertical-align: top;\r\n  border-radius: 50%;\r\n  margin-right: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text {\r\n  display: inline-block;\r\n  width: 86%;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p {\r\n  display: block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p a {\r\n  color: #3b7cff;\r\n  font-weight: 500;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p strong {\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p span {\r\n  color: #323c47;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-time-text {\r\n  display: inline-block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-right: 15px;\r\n  vertical-align: top;\r\n  padding-top: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button {\r\n  display: inline-block;\r\n  padding: 10px 0 0 0 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 16px;\r\n  background-color: transparent !important;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box {\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box strong {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box p {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box span {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 0px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul {\r\n  display: block;\r\n  list-style: none;\r\n  padding: 0 0 10px 0;\r\n  margin: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul li {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 3px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons {\r\n  padding-top: 0px;\r\n  padding-bottom: 10px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button {\r\n  padding: 7px 7px !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  margin-bottom: 0;\r\n  border-radius: 3px;\r\n  margin-top: 7px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.trash {\r\n  border: 1px solid #e6e6e6;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.saved {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  color: #a9b9c6 !important;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .blue-button {\r\n  padding: 15px 30px !important;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.properties-form {\r\n  display: block;\r\n  padding: 30px 45px;\r\n  background: #f0f3f7;\r\n  box-shadow: 0px 2px 6px #464c56a8;\r\n}\r\n.properties-form h3 {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 17px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 20px;\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group {\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group label {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n.properties-form .form-group select {\r\n  background-color: transparent;\r\n  color: #d1dae2;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 400;\r\n  border: none;\r\n  border-bottom: 1px solid #c7d0d9;\r\n  width: 100%;\r\n  cursor: pointer;\r\n}\r\n.properties-form .form-group select:focus {\r\n  outline: none;\r\n}\r\n.properties-form .form-group .blue-button {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  padding: 15px 60px !important;\r\n  margin: 0;\r\n}\r\n.properties-form .form-group .blue-button:focus {\r\n  outline: none;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .ticket-buttons .white-button {\r\n    padding-right: 7px !important;\r\n    padding-left: 8px !important;\r\n    font-size: 10px;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .head-time-text {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .white-button {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-buttons .detail-right-buttons {\r\n    text-align: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n/*# sourceMappingURL=servicedesk.light.css.map */\r\n",
+            "@media (min-width: 1200px) {\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n  .col-xl-5 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 20%;\r\n    -ms-flex: 0 0 20%;\r\n    flex: 0 0 20%;\r\n    max-width: 20%;\r\n  }\r\n  .col-xl-7 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 58.33333%;\r\n    -ms-flex: 0 0 58.33333%;\r\n    flex: 0 0 58.33333%;\r\n    max-width: 58.33333%;\r\n  }\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n}\r\n\r\n/*********************************** Buttons *********************************/\r\n.blue-button {\r\n  background: #3b7cff !important;\r\n  color: #ffffff !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  margin-bottom: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.blue-button:hover,\r\n.blue-button:focus {\r\n  background: #0f5efd !important;\r\n  color: #ffffff !important;\r\n}\r\n\r\n.gray-button {\r\n  background: #dde4e9 !important;\r\n  color: #8392a7 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.gray-button:hover,\r\n.gray-button:focus {\r\n  background: #dbe0e4 !important;\r\n  color: #8392a7 !important;\r\n}\r\n\r\n.white-button {\r\n  background: white !important;\r\n  min-width: 100px;\r\n  color: #3b4859 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  text-align: center;\r\n}\r\n.white-button:hover,\r\n.white-button:focus {\r\n  background: #e6e6e6 !important;\r\n  color: #3b4859 !important;\r\n}\r\n.white-button i {\r\n  color: #57a4ff !important;\r\n}\r\n\r\na:focus,\r\na:hover {\r\n  color: #000000;\r\n}\r\n\r\n.float-right {\r\n  float: right;\r\n}\r\n\r\n.float-left {\r\n  float: left;\r\n}\r\n\r\n.text-left {\r\n  text-align: left;\r\n}\r\n\r\n.text-center {\r\n  text-align: center;\r\n}\r\n\r\n.text-right {\r\n  text-align: right;\r\n}\r\n\r\n.v-a-top {\r\n  vertical-align: top;\r\n}\r\n\r\n.v-a-middle {\r\n  vertical-align: middle;\r\n}\r\n\r\n.d-flex {\r\n  display: flex;\r\n}\r\n\r\n.d-block {\r\n  display: block;\r\n}\r\n\r\n.d-inline-block {\r\n  display: inline-block;\r\n}\r\n\r\n.p-t-0 {\r\n  padding-top: 0 !important;\r\n}\r\n\r\n.p-t-5 {\r\n  padding-top: 5px !important;\r\n}\r\n\r\n.p-t-10 {\r\n  padding-top: 10px !important;\r\n}\r\n\r\n.p-t-15 {\r\n  padding-top: 15px !important;\r\n}\r\n\r\n.p-t-20 {\r\n  padding-top: 20px !important;\r\n}\r\n\r\n.p-r-0 {\r\n  padding-right: 0 !important;\r\n}\r\n\r\n.p-r-5 {\r\n  padding-right: 5px !important;\r\n}\r\n\r\n.p-r-10 {\r\n  padding-right: 10px !important;\r\n}\r\n\r\n.p-r-15 {\r\n  padding-right: 15px !important;\r\n}\r\n\r\n.p-r-20 {\r\n  padding-right: 20px !important;\r\n}\r\n\r\n.p-b-0 {\r\n  padding-bottom: 0px !important;\r\n}\r\n\r\n.p-b-5 {\r\n  padding-bottom: 5px !important;\r\n}\r\n\r\n.p-b-10 {\r\n  padding-bottom: 10px !important;\r\n}\r\n\r\n.p-b-15 {\r\n  padding-bottom: 15px !important;\r\n}\r\n\r\n.p-b-20 {\r\n  padding-bottom: 20px !important;\r\n}\r\n\r\n.p-l-0 {\r\n  padding-left: 0 !important;\r\n}\r\n\r\n.p-l-5 {\r\n  padding-left: 5px !important;\r\n}\r\n\r\n.p-l-10 {\r\n  padding-left: 10px !important;\r\n}\r\n\r\n.p-l-15 {\r\n  padding-left: 15px !important;\r\n}\r\n\r\n.p-l-20 {\r\n  padding-left: 20px !important;\r\n}\r\n\r\n.m-l-0 {\r\n  margin-left: 0 !important;\r\n}\r\n\r\n.m-r-0 {\r\n  margin-right: 0 !important;\r\n}\r\n\r\n.m-t-0 {\r\n  margin-top: 0 !important;\r\n}\r\n\r\n.m-b-0 {\r\n  margin-bottom: 0 !important;\r\n}\r\n\r\n.width-25 {\r\n  width: 25%;\r\n}\r\n\r\n.width-50 {\r\n  width: 50%;\r\n}\r\n\r\n.width-75 {\r\n  width: 75%;\r\n}\r\n\r\n.width-100 {\r\n  width: 100%;\r\n}\r\n\r\n.width-auto {\r\n  width: auto;\r\n}\r\n\r\n.min-width-inherit {\r\n  min-width: inherit !important;\r\n}\r\n\r\n.border-bottom-0 {\r\n  border-bottom: none !important;\r\n}\r\n\r\n.orange {\r\n  color: #ff8f00;\r\n}\r\n\r\n.yellow-green {\r\n  color: #7ed321;\r\n}\r\n\r\n.red {\r\n  color: #f93d3d;\r\n}\r\n\r\n.yellow {\r\n  color: #ffff00;\r\n}\r\n\r\n.blue {\r\n  color: #438afb;\r\n}\r\n\r\n.form-control {\r\n  display: block;\r\n  width: 100%;\r\n  height: calc(1.5em + 0.75rem + 2px);\r\n  padding: 0.375rem 0.75rem;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  background-color: #fff;\r\n  background-clip: padding-box;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;\r\n}\r\n\r\n.input-group-text {\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  -ms-flex-align: center;\r\n  align-items: center;\r\n  padding: 0.375rem 0.75rem;\r\n  margin-bottom: 0;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  text-align: center;\r\n  white-space: nowrap;\r\n  background-color: #e9ecef;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n}\r\n\r\n.servicedesk-page-container {\r\n  background-color: #ffffff;\r\n  margin: 10px 20px;\r\n  border-radius: 10px;\r\n  padding-bottom: 10px;\r\n}\r\n.servicedesk-page-container .common-container {\r\n  padding-top: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  padding-bottom: 15px;\r\n  border-bottom: 1px solid #f5f6f5;\r\n}\r\n.servicedesk-page-container .page-heading {\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading h1 {\r\n  color: #3b4859;\r\n  font-weight: 600;\r\n  font-size: 24px;\r\n  line-height: 32px;\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading span {\r\n  display: block;\r\n  color: #a9b9c6;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n/*********************************** Filters Container *********************************/\r\n.form-group {\r\n  margin-bottom: 1rem;\r\n}\r\n.form-group label {\r\n  margin-bottom: 0.5rem;\r\n}\r\n\r\n.filter-container .filter-control-group {\r\n  max-width: 250px;\r\n  padding-left: 0px;\r\n}\r\n.filter-container .filter-control-group .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n.filter-container .filter-control-group label {\r\n  color: #3b4859;\r\n  font-size: 14px;\r\n}\r\n\r\n.showing {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n}\r\n\r\n.showby {\r\n  border-left: 1px solid #a9b9c6;\r\n  padding-left: 15px;\r\n  margin-left: 15px;\r\n}\r\n.showby label {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-right: 15px;\r\n}\r\n.showby .form-control {\r\n  display: inline-block;\r\n  width: 75px;\r\n  border-radius: 25px;\r\n}\r\n.showby span {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 1050px) {\r\n  .showing {\r\n    font-size: 11px;\r\n  }\r\n  .showby {\r\n    padding-left: 10px;\r\n    margin-left: 10px;\r\n  }\r\n  .showby label {\r\n    font-size: 11px;\r\n    padding-right: 10px;\r\n  }\r\n  .showby span {\r\n    font-size: 11px;\r\n    padding-left: 10px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1050px) and (min-width: 320px) {\r\n  .showby {\r\n    border-left: none;\r\n    padding-left: 0px;\r\n    margin-left: 0px;\r\n  }\r\n}\r\n\r\n.filter-search-control {\r\n  position: relative;\r\n  margin-bottom: 0;\r\n}\r\n.filter-search-control .input-group-text {\r\n  max-width: 100%;\r\n  text-align: left;\r\n  padding-right: 30px;\r\n  padding-left: 15px;\r\n  width: 100%;\r\n  border: 1px solid #ced4da;\r\n  background-color: #ffffff;\r\n  border-radius: 25px;\r\n  padding-top: 0.399rem;\r\n}\r\n.filter-search-control .input-group-text:focus {\r\n  outline: none;\r\n}\r\n.filter-search-control button {\r\n  position: absolute;\r\n  right: 0;\r\n  top: 0;\r\n  z-index: 1;\r\n  cursor: pointer;\r\n  border: none;\r\n  background-color: transparent;\r\n  width: 34px;\r\n  height: 34px;\r\n}\r\n.filter-search-control button:hover {\r\n  color: #333333;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .filter-search-control {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.pagination ul {\r\n  list-style: none;\r\n  padding: 0;\r\n  margin: 0;\r\n}\r\n.pagination ul li {\r\n  display: inline-block;\r\n}\r\n.pagination ul li a {\r\n  display: block;\r\n  padding: 5px 10px;\r\n  font-size: 11px;\r\n  color: #868f9b;\r\n  line-height: 16px;\r\n  border: 1px solid #cbcfd4;\r\n  border-right: none;\r\n}\r\n.pagination ul li a:hover {\r\n  background-color: #cbcfd4;\r\n}\r\n.pagination ul li a.active {\r\n  background-color: #cbcfd4;\r\n  color: black;\r\n}\r\n.pagination ul li a.deactive {\r\n  background-color: white;\r\n  color: black;\r\n}\r\n.pagination ul li a.desable {\r\n  background-color: #5e5757;\r\n  color: white;\r\n}\r\n.pagination ul li a.enable {\r\n  background-color: #3b4859;\r\n  color: #ffffff;\r\n}\r\n.pagination ul li.previous a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  -webkit-border-top-left-radius: 5px;\r\n  -webkit-border-bottom-left-radius: 5px;\r\n  -moz-border-radius-topleft: 5px;\r\n  -moz-border-radius-bottomleft: 5px;\r\n  border-top-left-radius: 5px;\r\n  border-bottom-left-radius: 5px;\r\n}\r\n.pagination ul li.next a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  border-right: 1px solid #cbcfd4;\r\n  -webkit-border-top-right-radius: 5px;\r\n  -webkit-border-bottom-right-radius: 5px;\r\n  -moz-border-radius-topright: 5px;\r\n  -moz-border-radius-bottomright: 5px;\r\n  border-top-right-radius: 5px;\r\n  border-bottom-right-radius: 5px;\r\n}\r\n\r\n.open-create-menu {\r\n  position: absolute;\r\n  right: 15px;\r\n  top: 36px;\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 2px 5px #00000029;\r\n  width: 120px;\r\n  z-index: 10;\r\n  padding: 5px 0;\r\n}\r\n.open-create-menu a {\r\n  color: #2a9ce7;\r\n  font-size: 12px;\r\n  font-weight: 400;\r\n  line-height: 20px;\r\n  display: block;\r\n  padding: 4px 0;\r\n}\r\n\r\n.contact-popup-container .heading h4 {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container .heading span {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n.contact-popup-container .heading span a {\r\n  color: #49c740;\r\n}\r\n\r\n.contact-popup-container .upload-photo .upload-icon {\r\n  background-color: #438afb;\r\n  border-radius: 2px;\r\n  padding: 0;\r\n  width: 44px;\r\n  height: 44px;\r\n  color: #ffffff;\r\n  font-size: 24px;\r\n  line-height: 44px;\r\n  text-align: center;\r\n  margin-right: 15px;\r\n  vertical-align: top;\r\n}\r\n\r\n.contact-popup-container .upload-photo strong {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #438afb;\r\n}\r\n\r\n.contact-popup-container .upload-photo p {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n\r\n.contact-popup-container .form-group {\r\n  margin-bottom: 1.5rem;\r\n}\r\n.contact-popup-container .form-group label {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n  display: block;\r\n}\r\n.contact-popup-container .form-group .form-group-inner label {\r\n  display: none;\r\n}\r\n.contact-popup-container .form-group .form-control {\r\n  background-color: transparent;\r\n  border: none;\r\n  border-bottom: 1px solid #89898a;\r\n  color: #89898a;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  padding: 0.375rem 0;\r\n  width: 100%;\r\n  border-radius: 0;\r\n  text-align: left;\r\n}\r\n.contact-popup-container .form-group .form-control.textarea {\r\n  height: 150px;\r\n}\r\n.contact-popup-container .form-group .form-control:focus {\r\n  outline: none;\r\n}\r\n.contact-popup-container .form-group .add-conatct {\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  color: #3b7cff;\r\n  line-height: 18px;\r\n  border: none;\r\n  background: none;\r\n  padding: 0;\r\n}\r\n.contact-popup-container .form-group .invalid-feedback {\r\n  color: red;\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  font-weight: 400;\r\n  display: block;\r\n}\r\n\r\n.contact-popup-container .atleast-fields-box {\r\n  border: 1px solid #d1dae2;\r\n  background-color: #f9f9f9;\r\n  padding: 20px;\r\n  padding-bottom: 0;\r\n  margin-bottom: 20px;\r\n}\r\n.contact-popup-container .atleast-fields-box h3 {\r\n  color: #323c47;\r\n  font-size: 15px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 20px;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons button {\r\n  border: 1px solid #a9b9c6;\r\n  background-color: #ffffff;\r\n  color: #89898a;\r\n  font-size: 15px;\r\n  line-height: 36px;\r\n  font-weight: 500;\r\n  padding: 0 30px;\r\n  margin: 5px;\r\n  text-align: center;\r\n}\r\n.contact-popup-container .contact-popup-buttons button.save {\r\n  border-color: #3b7cff;\r\n  background-color: #3b7cff;\r\n  color: #ffffff;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons .create-author {\r\n  padding-right: 5px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-input {\r\n  display: inline-block;\r\n  margin-top: 2px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-label {\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  display: inline-block;\r\n  padding-left: 7px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group label {\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group .form-control {\r\n  border: 1px solid #d1dae2;\r\n  padding: 0.375rem 0.75rem;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .filter-container .assessments {\r\n    float: left;\r\n  }\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n}\r\n\r\n#servicedesk-main-container .breadcrumbs-container {\r\n  background-color: #eff2f7;\r\n  padding: 14px 20px 15px;\r\n  font-size: 13px;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .page-title {\r\n  color: #3b4859;\r\n  display: inline-block;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .breadcrumbs {\r\n  float: right;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container a.breadcrumbs-link {\r\n  color: #89898a;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .current-page {\r\n  color: #2a9ce7;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .separator {\r\n  color: #89898a;\r\n  display: inline-block;\r\n  padding: 0 10px;\r\n}\r\n\r\n@media (max-width: 768px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n.modal {\r\n  -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  max-width: 992px;\r\n  background: #ffffff;\r\n}\r\n.modal .modal-content {\r\n  padding: 40px;\r\n}\r\n\r\n.modal-backdrop {\r\n  background-color: #141414b3;\r\n  opacity: 0.8;\r\n}\r\n\r\n.ticketing-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 30px;\r\n}\r\n.ticketing-box .image {\r\n  padding-bottom: 10px;\r\n}\r\n.ticketing-box .number {\r\n  color: #3b4859;\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 700;\r\n  padding-bottom: 5px;\r\n}\r\n.ticketing-box .name {\r\n  color: #3b4859;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n\r\n.ticket-trends {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 15px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  min-height: 345px;\r\n}\r\n.ticket-trends .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-trends .heading span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n}\r\n.ticket-trends .days-box .form-check {\r\n  margin-right: 25px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-input {\r\n  display: inline-block;\r\n  vertical-align: top;\r\n  margin-top: 4px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-label {\r\n  font-size: 12px;\r\n  line-height: 21px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  display: inline-block;\r\n  padding-left: 8px;\r\n  vertical-align: top;\r\n}\r\n.ticket-trends .calendar-box .fa {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .calendar-box span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .ticket-graphs canvas {\r\n  height: 220px !important;\r\n  width: 100% !important;\r\n}\r\n.ticket-trends .ticket-graphs .hours-text {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n\r\n.performer-agents {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 20px;\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  padding-bottom: 40px;\r\n  min-height: 345px;\r\n}\r\n.performer-agents .heading {\r\n  color: #323c47;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 15px;\r\n}\r\n.performer-agents .performer-agents-table {\r\n  width: 100%;\r\n}\r\n.performer-agents .performer-agents-table thead tr th {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table thead tr th:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.dashboard-all-ticket-tabel .heading h2 a {\r\n  color: #323c47;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel {\r\n  width: 1200px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr {\r\n  border-bottom: 7px solid #ffffff;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td {\r\n  background-color: #f0f3f7;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.date {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .ticket-trends-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n  .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n  .days-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .calendar-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n.tickets-number-box {\r\n  padding-right: 75px;\r\n}\r\n.tickets-number-box h3 {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n}\r\n.tickets-number-box span {\r\n  color: #a9b9c6;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n.quarter-form .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n\r\n.all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-support-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-support-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td {\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.chart-inner canvas {\r\n  width: 100% !important;\r\n}\r\n\r\n.apply-filters-button {\r\n  margin-top: 8px;\r\n}\r\n\r\n@media only screen and (max-width: 992px) and (min-width: 768px) {\r\n  .tickets-number-box h3 {\r\n    font-size: 22px;\r\n    line-height: 26px;\r\n  }\r\n  .tickets-number-box span {\r\n    font-size: 10px;\r\n    line-height: 18px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n  .quarter-form {\r\n    padding-top: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .tickets-number-box {\r\n    display: block;\r\n    padding-top: 15px;\r\n    text-align: left;\r\n  }\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n  .open-create-menu {\r\n    left: 15px;\r\n    top: 45px;\r\n  }\r\n}\r\n\r\n.all-contacts-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-contacts-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-contacts-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel {\r\n  width: 1200px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-left: 0px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .contacts-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-companies-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-companies-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel {\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td .image {\r\n  width: 40px;\r\n  height: 40px;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .companies-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n  .all-companies-container\r\n    .all-companies-tabel\r\n    .companies-main-tabel\r\n    .companies-tabel {\r\n    width: 992px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-open-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-open-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-open-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td {\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .sortby {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .filters-button {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (min-width: 1200px) {\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n}\r\n\r\n.ticket-buttons .white-button {\r\n  border: 1px solid #a9b9c6 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  font-size: 12px;\r\n  color: #a9b9c6 !important;\r\n  display: inline-block;\r\n  padding-right: 12px !important;\r\n  padding-left: 12px !important;\r\n}\r\n.ticket-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n\r\n.ticket-buttons .group-buttons {\r\n  display: inline-block;\r\n}\r\n.ticket-buttons .group-buttons .white-button {\r\n  margin-right: 0;\r\n  border-right: none !important;\r\n}\r\n.ticket-buttons .group-buttons .white-button:last-child {\r\n  border-right: 1px solid #a9b9c6 !important;\r\n  margin-right: 10px;\r\n}\r\n\r\n.ticket-detail-box {\r\n  box-shadow: 0.94px 6px 16px #cfdff71a;\r\n  border-radius: 3px;\r\n  margin-bottom: 20px;\r\n}\r\n.ticket-detail-box .ticket-detail-head {\r\n  background: rgba(209, 218, 226, 0.2);\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-image {\r\n  display: inline-block;\r\n  width: 32px;\r\n  height: 32px;\r\n  background-color: #d1dae2;\r\n  overflow: hidden;\r\n  vertical-align: top;\r\n  border-radius: 50%;\r\n  margin-right: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text {\r\n  display: inline-block;\r\n  width: 86%;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p {\r\n  display: block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p a {\r\n  color: #3b7cff;\r\n  font-weight: 500;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p strong {\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p span {\r\n  color: #323c47;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-time-text {\r\n  display: inline-block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-right: 15px;\r\n  vertical-align: top;\r\n  padding-top: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button {\r\n  display: inline-block;\r\n  padding: 10px 0 0 0 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 16px;\r\n  background-color: transparent !important;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box {\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box strong {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box p {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box span {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 0px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul {\r\n  display: block;\r\n  list-style: none;\r\n  padding: 0 0 10px 0;\r\n  margin: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul li {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 3px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons {\r\n  padding-top: 0px;\r\n  padding-bottom: 10px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button {\r\n  padding: 7px 7px !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  margin-bottom: 0;\r\n  border-radius: 3px;\r\n  margin-top: 7px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.trash {\r\n  border: 1px solid #e6e6e6;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.saved {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  color: #a9b9c6 !important;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .blue-button {\r\n  padding: 15px 30px !important;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.properties-form {\r\n  display: block;\r\n  padding: 30px 45px;\r\n  background: #f0f3f7;\r\n  box-shadow: 0px 2px 6px #464c56a8;\r\n}\r\n.properties-form h3 {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 17px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 20px;\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group {\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group label {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n.properties-form .form-group select {\r\n  background-color: transparent;\r\n  color: #d1dae2;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 400;\r\n  border: none;\r\n  border-bottom: 1px solid #c7d0d9;\r\n  width: 100%;\r\n  cursor: pointer;\r\n}\r\n.properties-form .form-group select:focus {\r\n  outline: none;\r\n}\r\n.properties-form .form-group .blue-button {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  padding: 15px 60px !important;\r\n  margin: 0;\r\n}\r\n.properties-form .form-group .blue-button:focus {\r\n  outline: none;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .ticket-buttons .white-button {\r\n    padding-right: 7px !important;\r\n    padding-left: 8px !important;\r\n    font-size: 10px;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .head-time-text {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .white-button {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-buttons .detail-right-buttons {\r\n    text-align: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.reports-page-container {\r\n  padding: 10px;\r\n}\r\n.reports-page-container .reports-left {\r\n  background-color: #f0f3f7;\r\n  border-radius: 3px;\r\n  padding: 20px 30px 30px;\r\n}\r\n.reports-page-container .reports-left .heading {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-left .ask-question {\r\n  border: 1px solid #d1dae2;\r\n  color: #929598;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n  padding: 7px 15px;\r\n  margin-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box {\r\n  border-top: 1px solid #d1dae2;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.productivity ul li span {\r\n  background-color: rgba(67, 138, 251, 0.1);\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.productivity ul li span i {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.happiness ul li span {\r\n  background-color: rgba(246, 115, 115, 0.1);\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.happiness ul li span i {\r\n  color: #f67373;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box .helpdesk-heading {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  font-weight: 600;\r\n  line-height: 18px;\r\n  padding-bottom: 0px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul {\r\n  padding-top: 10px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li {\r\n  margin-right: 30px;\r\n  width: 100px;\r\n  vertical-align: top;\r\n  margin-bottom: 10px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li:last-child {\r\n  margin-right: 0;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li span {\r\n  width: 80px;\r\n  height: 80px;\r\n  line-height: 80px;\r\n  background-color: rgba(72, 199, 65, 0.1);\r\n  border-radius: 3px;\r\n  margin-bottom: 5px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li span i {\r\n  font-size: 32px;\r\n  line-height: 80px;\r\n  color: #48c741;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li strong {\r\n  font-size: 11px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  color: #323c47;\r\n  text-transform: uppercase;\r\n}\r\n.reports-page-container .reports-left .build-reports-text {\r\n  border-top: 1px solid #d1dae2;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .build-reports-text p {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n  margin-bottom: 3px;\r\n}\r\n.reports-page-container .reports-left .build-reports-text strong {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #438afb;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-left .build-reports-text strong a {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-right {\r\n  background-color: #f0f3f7;\r\n  border-radius: 3px;\r\n  padding: 20px 15px 30px;\r\n  min-height: 777px;\r\n}\r\n.reports-page-container .reports-right .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 22px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-right .heading p {\r\n  font-size: 11px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n.reports-page-container .reports-right .customize-link {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #438afb;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-right .customize-link a {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-right .insight-box {\r\n  border: 1px solid #d1dae2;\r\n  padding: 10px 15px;\r\n  margin-bottom: 15px;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-heading {\r\n  color: #d1dae2;\r\n  font-size: 11px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-heading strong {\r\n  color: #3b7cff;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container\r\n  .reports-right\r\n  .insight-box\r\n  .insight-heading-right-text {\r\n  color: #3b7cff;\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  line-height: 18px;\r\n}\r\n.reports-page-container\r\n  .reports-right\r\n  .insight-box\r\n  .insight-heading-right-text.red {\r\n  color: #f67373;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-text {\r\n  color: #a9b9c6;\r\n  font-size: 11px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .reports-page-container .reports-right {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n.desk-depth-container .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n\r\n.desk-depth-container .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.desk-depth-container .filters-buttons .blue-button {\r\n  margin-right: 15px;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.desk-depth-container .filters-buttons .white-button {\r\n  padding: 0px !important;\r\n  font-size: 28px;\r\n  line-height: 34px;\r\n  vertical-align: top;\r\n  margin-right: 15px;\r\n  margin-bottom: 0;\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .filters-buttons .white-button:hover {\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .filters-buttons .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n\r\n.desk-depth-container .desk-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  margin-bottom: 30px;\r\n}\r\n.desk-depth-container .desk-box a {\r\n  padding: 10px;\r\n  padding-bottom: 20px;\r\n  min-height: 160px;\r\n}\r\n.desk-depth-container .desk-box .icon {\r\n  font-size: 16px;\r\n  color: #323c47;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button {\r\n  padding: 0px !important;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n  margin-bottom: 0;\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button:hover {\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.desk-depth-container .desk-box .number {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n  color: #3b4859;\r\n  padding-bottom: 10px;\r\n  padding-top: 10px;\r\n}\r\n.desk-depth-container .desk-box .text {\r\n  font-size: 20px;\r\n  line-height: 28px;\r\n  font-weight: 400;\r\n  color: #3b4859;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .desk-depth-container .filters-buttons {\r\n    text-align: left;\r\n  }\r\n}\r\n\r\n.charts-boxs {\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.charts-boxs .chart-box {\r\n  background: #f0f3f7 0% 0% no-repeat padding-box;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  min-height: 400px;\r\n  margin-bottom: 30px;\r\n  padding: 30px;\r\n}\r\n\r\n/*# sourceMappingURL=servicedesk.light.css.map */\r\n",
             "",
             {
               version: 3,
               sources: [
-                "E:/plugins/xformation-servicedesk-ui-plugin/src/css/servicedesk.light.css"
+                "C:/mycode/brighton_plugin/xformation-servicedesk-ui-plugin/src/css/servicedesk.light.css"
               ],
               names: [],
               mappings:
-                "AAAA;EACE;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,sBAAsB;IACtB,kBAAkB;IAClB,cAAc;IACd,eAAe;GAChB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;CACF;;AAED,+EAA+E;AAC/E;EACE,+BAA+B;EAC/B,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,oBAAoB;EACpB,iCAAiC;EACjC,iBAAiB;EACjB,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;;AAED;EACE,+BAA+B;EAC/B,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,iCAAiC;EACjC,iBAAiB;EACjB,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;;AAED;EACE,6BAA6B;EAC7B,iBAAiB;EACjB,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,iCAAiC;EACjC,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;AACD;EACE,0BAA0B;CAC3B;;AAED;;EAEE,eAAe;CAChB;;AAED;EACE,aAAa;CACd;;AAED;EACE,YAAY;CACb;;AAED;EACE,iBAAiB;CAClB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,kBAAkB;CACnB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,uBAAuB;CACxB;;AAED;EACE,cAAc;CACf;;AAED;EACE,eAAe;CAChB;;AAED;EACE,sBAAsB;CACvB;;AAED;EACE,0BAA0B;CAC3B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,2BAA2B;CAC5B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,0BAA0B;CAC3B;;AAED;EACE,2BAA2B;CAC5B;;AAED;EACE,yBAAyB;CAC1B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,WAAW;CACZ;;AAED;EACE,WAAW;CACZ;;AAED;EACE,WAAW;CACZ;;AAED;EACE,YAAY;CACb;;AAED;EACE,YAAY;CACb;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;EACf,YAAY;EACZ,oCAAoC;EACpC,0BAA0B;EAC1B,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;EACf,uBAAuB;EACvB,6BAA6B;EAC7B,0BAA0B;EAC1B,uBAAuB;EACvB,yEAAyE;CAC1E;;AAED;EACE,qBAAqB;EACrB,cAAc;EACd,uBAAuB;EACvB,oBAAoB;EACpB,0BAA0B;EAC1B,iBAAiB;EACjB,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;EACf,mBAAmB;EACnB,oBAAoB;EACpB,0BAA0B;EAC1B,0BAA0B;EAC1B,uBAAuB;CACxB;;AAED;EACE,0BAA0B;EAC1B,kBAAkB;EAClB,oBAAoB;EACpB,qBAAqB;CACtB;AACD;EACE,kBAAkB;EAClB,mBAAmB;EACnB,oBAAoB;EACpB,qBAAqB;EACrB,iCAAiC;CAClC;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,iBAAiB;EACjB,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED,yFAAyF;AACzF;EACE,oBAAoB;CACrB;AACD;EACE,sBAAsB;CACvB;;AAED;EACE,iBAAiB;EACjB,kBAAkB;CACnB;AACD;EACE,qCAAqC;EACrC,wBAAwB;EACxB,gBAAgB;EAChB,gBAAgB;EAChB,aAAa;CACd;AACD;EACE,eAAe;EACf,gBAAgB;CACjB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,+BAA+B;EAC/B,mBAAmB;EACnB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,sBAAsB;EACtB,YAAY;EACZ,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;;AAED;EACE;IACE,gBAAgB;GACjB;EACD;IACE,mBAAmB;IACnB,kBAAkB;GACnB;EACD;IACE,gBAAgB;IAChB,oBAAoB;GACrB;EACD;IACE,gBAAgB;IAChB,mBAAmB;GACpB;CACF;;AAED;EACE;IACE,kBAAkB;IAClB,kBAAkB;IAClB,iBAAiB;GAClB;CACF;;AAED;EACE,mBAAmB;EACnB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,oBAAoB;EACpB,mBAAmB;EACnB,YAAY;EACZ,0BAA0B;EAC1B,0BAA0B;EAC1B,oBAAoB;CACrB;AACD;EACE,cAAc;CACf;AACD;EACE,mBAAmB;EACnB,SAAS;EACT,OAAO;EACP,WAAW;EACX,gBAAgB;EAChB,aAAa;EACb,8BAA8B;EAC9B,YAAY;EACZ,aAAa;CACd;AACD;EACE,eAAe;CAChB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,iBAAiB;EACjB,WAAW;EACX,UAAU;CACX;AACD;EACE,sBAAsB;CACvB;AACD;EACE,eAAe;EACf,kBAAkB;EAClB,gBAAgB;EAChB,eAAe;EACf,kBAAkB;EAClB,0BAA0B;EAC1B,mBAAmB;CACpB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,0BAA0B;EAC1B,aAAa;CACd;AACD;EACE,wBAAwB;EACxB,aAAa;CACd;AACD;EACE,0BAA0B;EAC1B,aAAa;CACd;AACD;EACE,0BAA0B;EAC1B,eAAe;CAChB;AACD;EACE,mBAAmB;EACnB,oBAAoB;EACpB,oCAAoC;EACpC,uCAAuC;EACvC,gCAAgC;EAChC,mCAAmC;EACnC,4BAA4B;EAC5B,+BAA+B;CAChC;AACD;EACE,mBAAmB;EACnB,oBAAoB;EACpB,gCAAgC;EAChC,qCAAqC;EACrC,wCAAwC;EACxC,iCAAiC;EACjC,oCAAoC;EACpC,6BAA6B;EAC7B,gCAAgC;CACjC;;AAED;EACE,mBAAmB;EACnB,YAAY;EACZ,UAAU;EACV,0BAA0B;EAC1B,kCAAkC;EAClC,aAAa;EACb,YAAY;EACZ,eAAe;CAChB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,eAAe;EACf,eAAe;CAChB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,mBAAmB;CACpB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;;AAED;EACE,0BAA0B;EAC1B,mBAAmB;EACnB,WAAW;EACX,YAAY;EACZ,aAAa;EACb,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,mBAAmB;EACnB,mBAAmB;EACnB,oBAAoB;CACrB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;CAChB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,sBAAsB;CACvB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,cAAc;CACf;AACD;EACE,8BAA8B;EAC9B,aAAa;EACb,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,oBAAoB;EACpB,YAAY;EACZ,iBAAiB;EACjB,iBAAiB;CAClB;AACD;EACE,cAAc;CACf;AACD;EACE,cAAc;CACf;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,eAAe;EACf,kBAAkB;EAClB,aAAa;EACb,iBAAiB;EACjB,WAAW;CACZ;AACD;EACE,WAAW;EACX,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,eAAe;CAChB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;EAC1B,cAAc;EACd,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,oBAAoB;CACrB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,gBAAgB;EAChB,YAAY;EACZ,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,0BAA0B;EAC1B,eAAe;CAChB;;AAED;EACE,mBAAmB;CACpB;AACD;;;;EAIE,sBAAsB;EACtB,gBAAgB;CACjB;AACD;;;;EAIE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,sBAAsB;EACtB,kBAAkB;CACnB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;CAC3B;;AAED;EACE;IACE,YAAY;GACb;CACF;;AAED;EACE,0BAA0B;EAC1B,wBAAwB;EACxB,gBAAgB;CACjB;AACD;EACE,eAAe;EACf,sBAAsB;CACvB;AACD;EACE,aAAa;CACd;AACD;EACE,eAAe;CAChB;AACD;EACE,eAAe;CAChB;AACD;EACE,eAAe;EACf,sBAAsB;EACtB,gBAAgB;CACjB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,+CAA+C;EAC/C,uCAAuC;EACvC,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,cAAc;CACf;;AAED;EACE,4BAA4B;EAC5B,aAAa;CACd;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,qBAAqB;EACrB,oBAAoB;CACrB;AACD;EACE,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;EACpB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,oBAAoB;EACpB,gBAAgB;CACjB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,sBAAsB;EACtB,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,yBAAyB;EACzB,uBAAuB;CACxB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,oBAAoB;EACpB,mBAAmB;EACnB,qBAAqB;EACrB,kBAAkB;CACnB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,qBAAqB;CACtB;AACD;EACE,YAAY;CACb;AACD;EACE,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,0BAA0B;CAC3B;AACD;EACE,iBAAiB;CAClB;AACD;EACE,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,0BAA0B;CAC3B;AACD;EACE,iBAAiB;CAClB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,eAAe;CAChB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,mBAAmB;CACpB;AACD;;;;EAIE,cAAc;CACf;AACD;;;;;;;EAOE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,iCAAiC;CAClC;AACD;;;;;;;EAOE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;;EAQE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;;;;;;;;EAQE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE;IACE,uBAAuB;IACvB,mBAAmB;IACnB,eAAe;IACf,gBAAgB;GACjB;EACD;IACE,uBAAuB;IACvB,mBAAmB;IACnB,eAAe;IACf,gBAAgB;GACjB;EACD;IACE,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,qCAAqC;EACrC,wBAAwB;EACxB,gBAAgB;EAChB,gBAAgB;EAChB,aAAa;CACd;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,gBAAgB;CACjB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;EACE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE,mBAAmB;EACnB,kBAAkB;EAClB,iBAAiB;EACjB,gBAAgB;EAChB,kBAAkB;CACnB;;AAED;EACE,uBAAuB;CACxB;;AAED;EACE,gBAAgB;CACjB;;AAED;EACE;IACE,gBAAgB;IAChB,kBAAkB;GACnB;EACD;IACE,gBAAgB;IAChB,kBAAkB;GACnB;CACF;;AAED;EACE;IACE,oBAAoB;GACrB;CACF;;AAED;EACE;IACE,oBAAoB;GACrB;EACD;IACE,kBAAkB;GACnB;CACF;;AAED;EACE;IACE,eAAe;IACf,kBAAkB;IAClB,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;IACjB,iBAAiB;GAClB;EACD;IACE,WAAW;IACX,UAAU;GACX;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,sBAAsB;EACtB,uBAAuB;EACvB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,gBAAgB;CACjB;AACD;EACE,sBAAsB;EACtB,uBAAuB;CACxB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,gBAAgB;GACjB;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,sBAAsB;EACtB,uBAAuB;EACvB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,YAAY;CACb;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,gBAAgB;CACjB;AACD;;;;;;;EAOE,sBAAsB;EACtB,uBAAuB;CACxB;AACD;EACE,YAAY;EACZ,aAAa;EACb,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,gBAAgB;GACjB;EACD;;;;IAIE,aAAa;GACd;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,gBAAgB;CACjB;AACD;EACE,gBAAgB;CACjB;AACD;;;;;;;EAOE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;;;;;;;EAOE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE,mBAAmB;EACnB,kBAAkB;EAClB,iBAAiB;EACjB,gBAAgB;EAChB,kBAAkB;CACnB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;IACjB,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;CACF;;AAED;EACE,qCAAqC;EACrC,YAAY;EACZ,mBAAmB;EACnB,gBAAgB;EAChB,0BAA0B;EAC1B,sBAAsB;EACtB,+BAA+B;EAC/B,8BAA8B;CAC/B;AACD;EACE,0BAA0B;CAC3B;;AAED;EACE,sBAAsB;CACvB;AACD;EACE,gBAAgB;EAChB,8BAA8B;CAC/B;AACD;EACE,2CAA2C;EAC3C,mBAAmB;CACpB;;AAED;EACE,sCAAsC;EACtC,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,qCAAqC;EACrC,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,sBAAsB;EACtB,YAAY;EACZ,aAAa;EACb,0BAA0B;EAC1B,iBAAiB;EACjB,oBAAoB;EACpB,mBAAmB;EACnB,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,WAAW;CACZ;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;AACD;EACE,sBAAsB;EACtB,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;EACpB,oBAAoB;EACpB,kBAAkB;CACnB;AACD;EACE,sBAAsB;EACtB,+BAA+B;EAC/B,YAAY;EACZ,mBAAmB;EACnB,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,yCAAyC;EACzC,oBAAoB;EACpB,gBAAgB;CACjB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,qBAAqB;EACrB,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,iBAAiB;EACjB,oBAAoB;EACpB,UAAU;CACX;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,iBAAiB;EACjB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,4BAA4B;EAC5B,YAAY;EACZ,mBAAmB;EACnB,iBAAiB;EACjB,mBAAmB;EACnB,gBAAgB;CACjB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,0BAA0B;EAC1B,6BAA6B;CAC9B;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,0BAA0B;EAC1B,6BAA6B;CAC9B;AACD;EACE,8BAA8B;EAC9B,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;CAClB;;AAED;EACE,eAAe;EACf,mBAAmB;EACnB,oBAAoB;EACpB,kCAAkC;CACnC;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,qBAAqB;EACrB,qBAAqB;CACtB;AACD;EACE,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,iBAAiB;CAClB;AACD;EACE,8BAA8B;EAC9B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,aAAa;EACb,iCAAiC;EACjC,YAAY;EACZ,gBAAgB;CACjB;AACD;EACE,cAAc;CACf;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,8BAA8B;EAC9B,UAAU;CACX;AACD;EACE,cAAc;CACf;;AAED;EACE;IACE,8BAA8B;IAC9B,6BAA6B;IAC7B,gBAAgB;GACjB;EACD;IACE,YAAY;GACb;EACD;IACE,YAAY;GACb;EACD;IACE,iBAAiB;IACjB,iBAAiB;GAClB;CACF;;AAED,iDAAiD",
+                "AAAA;EACE;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,sBAAsB;IACtB,kBAAkB;IAClB,cAAc;IACd,eAAe;GAChB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;CACF;;AAED,+EAA+E;AAC/E;EACE,+BAA+B;EAC/B,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,oBAAoB;EACpB,iCAAiC;EACjC,iBAAiB;EACjB,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;;AAED;EACE,+BAA+B;EAC/B,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,iCAAiC;EACjC,iBAAiB;EACjB,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;;AAED;EACE,6BAA6B;EAC7B,iBAAiB;EACjB,0BAA0B;EAC1B,wBAAwB;EACxB,6BAA6B;EAC7B,8BAA8B;EAC9B,mBAAmB;EACnB,iCAAiC;EACjC,mBAAmB;CACpB;AACD;;EAEE,+BAA+B;EAC/B,0BAA0B;CAC3B;AACD;EACE,0BAA0B;CAC3B;;AAED;;EAEE,eAAe;CAChB;;AAED;EACE,aAAa;CACd;;AAED;EACE,YAAY;CACb;;AAED;EACE,iBAAiB;CAClB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,kBAAkB;CACnB;;AAED;EACE,oBAAoB;CACrB;;AAED;EACE,uBAAuB;CACxB;;AAED;EACE,cAAc;CACf;;AAED;EACE,eAAe;CAChB;;AAED;EACE,sBAAsB;CACvB;;AAED;EACE,0BAA0B;CAC3B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,gCAAgC;CACjC;;AAED;EACE,2BAA2B;CAC5B;;AAED;EACE,6BAA6B;CAC9B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,0BAA0B;CAC3B;;AAED;EACE,2BAA2B;CAC5B;;AAED;EACE,yBAAyB;CAC1B;;AAED;EACE,4BAA4B;CAC7B;;AAED;EACE,WAAW;CACZ;;AAED;EACE,WAAW;CACZ;;AAED;EACE,WAAW;CACZ;;AAED;EACE,YAAY;CACb;;AAED;EACE,YAAY;CACb;;AAED;EACE,8BAA8B;CAC/B;;AAED;EACE,+BAA+B;CAChC;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;CAChB;;AAED;EACE,eAAe;EACf,YAAY;EACZ,oCAAoC;EACpC,0BAA0B;EAC1B,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;EACf,uBAAuB;EACvB,6BAA6B;EAC7B,0BAA0B;EAC1B,uBAAuB;EACvB,yEAAyE;CAC1E;;AAED;EACE,qBAAqB;EACrB,cAAc;EACd,uBAAuB;EACvB,oBAAoB;EACpB,0BAA0B;EAC1B,iBAAiB;EACjB,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;EACf,mBAAmB;EACnB,oBAAoB;EACpB,0BAA0B;EAC1B,0BAA0B;EAC1B,uBAAuB;CACxB;;AAED;EACE,0BAA0B;EAC1B,kBAAkB;EAClB,oBAAoB;EACpB,qBAAqB;CACtB;AACD;EACE,kBAAkB;EAClB,mBAAmB;EACnB,oBAAoB;EACpB,qBAAqB;EACrB,iCAAiC;CAClC;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,iBAAiB;EACjB,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED,yFAAyF;AACzF;EACE,oBAAoB;CACrB;AACD;EACE,sBAAsB;CACvB;;AAED;EACE,iBAAiB;EACjB,kBAAkB;CACnB;AACD;EACE,qCAAqC;EACrC,wBAAwB;EACxB,gBAAgB;EAChB,gBAAgB;EAChB,aAAa;CACd;AACD;EACE,eAAe;EACf,gBAAgB;CACjB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,+BAA+B;EAC/B,mBAAmB;EACnB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,sBAAsB;EACtB,YAAY;EACZ,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;;AAED;EACE;IACE,gBAAgB;GACjB;EACD;IACE,mBAAmB;IACnB,kBAAkB;GACnB;EACD;IACE,gBAAgB;IAChB,oBAAoB;GACrB;EACD;IACE,gBAAgB;IAChB,mBAAmB;GACpB;CACF;;AAED;EACE;IACE,kBAAkB;IAClB,kBAAkB;IAClB,iBAAiB;GAClB;CACF;;AAED;EACE,mBAAmB;EACnB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,oBAAoB;EACpB,mBAAmB;EACnB,YAAY;EACZ,0BAA0B;EAC1B,0BAA0B;EAC1B,oBAAoB;EACpB,sBAAsB;CACvB;AACD;EACE,cAAc;CACf;AACD;EACE,mBAAmB;EACnB,SAAS;EACT,OAAO;EACP,WAAW;EACX,gBAAgB;EAChB,aAAa;EACb,8BAA8B;EAC9B,YAAY;EACZ,aAAa;CACd;AACD;EACE,eAAe;CAChB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,iBAAiB;EACjB,WAAW;EACX,UAAU;CACX;AACD;EACE,sBAAsB;CACvB;AACD;EACE,eAAe;EACf,kBAAkB;EAClB,gBAAgB;EAChB,eAAe;EACf,kBAAkB;EAClB,0BAA0B;EAC1B,mBAAmB;CACpB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,0BAA0B;EAC1B,aAAa;CACd;AACD;EACE,wBAAwB;EACxB,aAAa;CACd;AACD;EACE,0BAA0B;EAC1B,aAAa;CACd;AACD;EACE,0BAA0B;EAC1B,eAAe;CAChB;AACD;EACE,mBAAmB;EACnB,oBAAoB;EACpB,oCAAoC;EACpC,uCAAuC;EACvC,gCAAgC;EAChC,mCAAmC;EACnC,4BAA4B;EAC5B,+BAA+B;CAChC;AACD;EACE,mBAAmB;EACnB,oBAAoB;EACpB,gCAAgC;EAChC,qCAAqC;EACrC,wCAAwC;EACxC,iCAAiC;EACjC,oCAAoC;EACpC,6BAA6B;EAC7B,gCAAgC;CACjC;;AAED;EACE,mBAAmB;EACnB,YAAY;EACZ,UAAU;EACV,0BAA0B;EAC1B,kCAAkC;EAClC,aAAa;EACb,YAAY;EACZ,eAAe;CAChB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,eAAe;EACf,eAAe;CAChB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,mBAAmB;CACpB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;;AAED;EACE,0BAA0B;EAC1B,mBAAmB;EACnB,WAAW;EACX,YAAY;EACZ,aAAa;EACb,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,mBAAmB;EACnB,mBAAmB;EACnB,oBAAoB;CACrB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;CAChB;;AAED;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,sBAAsB;CACvB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,cAAc;CACf;AACD;EACE,8BAA8B;EAC9B,aAAa;EACb,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,oBAAoB;EACpB,YAAY;EACZ,iBAAiB;EACjB,iBAAiB;CAClB;AACD;EACE,cAAc;CACf;AACD;EACE,cAAc;CACf;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,eAAe;EACf,kBAAkB;EAClB,aAAa;EACb,iBAAiB;EACjB,WAAW;CACZ;AACD;EACE,WAAW;EACX,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,eAAe;CAChB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;EAC1B,cAAc;EACd,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,oBAAoB;CACrB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,gBAAgB;EAChB,YAAY;EACZ,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,0BAA0B;EAC1B,eAAe;CAChB;;AAED;EACE,mBAAmB;CACpB;AACD;;;;EAIE,sBAAsB;EACtB,gBAAgB;CACjB;AACD;;;;EAIE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,sBAAsB;EACtB,kBAAkB;CACnB;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,0BAA0B;EAC1B,0BAA0B;CAC3B;;AAED;EACE;IACE,YAAY;GACb;CACF;;AAED;EACE,mBAAmB;CACpB;;AAED;EACE,0BAA0B;EAC1B,wBAAwB;EACxB,gBAAgB;CACjB;AACD;EACE,eAAe;EACf,sBAAsB;CACvB;AACD;EACE,aAAa;CACd;AACD;EACE,eAAe;CAChB;AACD;EACE,eAAe;CAChB;AACD;EACE,eAAe;EACf,sBAAsB;EACtB,gBAAgB;CACjB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,+CAA+C;EAC/C,uCAAuC;EACvC,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,cAAc;CACf;;AAED;EACE,4BAA4B;EAC5B,aAAa;CACd;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,qBAAqB;EACrB,oBAAoB;CACrB;AACD;EACE,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;EACpB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,oBAAoB;EACpB,gBAAgB;CACjB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,sBAAsB;EACtB,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,eAAe;CAChB;AACD;EACE,yBAAyB;EACzB,uBAAuB;CACxB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,oBAAoB;EACpB,mBAAmB;EACnB,qBAAqB;EACrB,kBAAkB;CACnB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,qBAAqB;CACtB;AACD;EACE,YAAY;CACb;AACD;EACE,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,0BAA0B;CAC3B;AACD;EACE,iBAAiB;CAClB;AACD;EACE,iCAAiC;EACjC,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,0BAA0B;CAC3B;AACD;EACE,iBAAiB;CAClB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,eAAe;CAChB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,mBAAmB;CACpB;AACD;;;;EAIE,cAAc;CACf;AACD;;;;;;;EAOE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;;EAOE,mBAAmB;CACpB;AACD;;;;;;;EAOE,kBAAkB;CACnB;AACD;;;;;;EAME,iCAAiC;CAClC;AACD;;;;;;;EAOE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;;EAOE,mBAAmB;CACpB;AACD;;;;;;;EAOE,kBAAkB;CACnB;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;EAOE,gBAAgB;CACjB;AACD;;;;;;;;EAQE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;;;;;;;;EAQE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE;IACE,uBAAuB;IACvB,mBAAmB;IACnB,eAAe;IACf,gBAAgB;GACjB;EACD;IACE,uBAAuB;IACvB,mBAAmB;IACnB,eAAe;IACf,gBAAgB;GACjB;EACD;IACE,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,oBAAoB;CACrB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE,qCAAqC;EACrC,wBAAwB;EACxB,gBAAgB;EAChB,gBAAgB;EAChB,aAAa;CACd;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;EACE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE,uBAAuB;CACxB;;AAED;EACE,gBAAgB;CACjB;;AAED;EACE;IACE,gBAAgB;IAChB,kBAAkB;GACnB;EACD;IACE,gBAAgB;IAChB,kBAAkB;GACnB;CACF;;AAED;EACE;IACE,oBAAoB;GACrB;CACF;;AAED;EACE;IACE,oBAAoB;GACrB;EACD;IACE,kBAAkB;GACnB;CACF;;AAED;EACE;IACE,eAAe;IACf,kBAAkB;IAClB,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;IACjB,iBAAiB;GAClB;EACD;IACE,WAAW;IACX,UAAU;GACX;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,sBAAsB;EACtB,uBAAuB;EACvB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,mBAAmB;CACpB;AACD;EACE,kBAAkB;CACnB;AACD;EACE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;EACE,mBAAmB;CACpB;AACD;EACE,kBAAkB;CACnB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,sBAAsB;EACtB,uBAAuB;CACxB;AACD;EACE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,iBAAiB;EACjB,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,gBAAgB;GACjB;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,sBAAsB;EACtB,uBAAuB;EACvB,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,YAAY;CACb;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;EACE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;;;;;;EAME,gBAAgB;CACjB;AACD;;;;;;;EAOE,sBAAsB;EACtB,uBAAuB;CACxB;AACD;EACE,YAAY;EACZ,aAAa;EACb,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;;AAED;EACE;IACE,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,gBAAgB;GACjB;EACD;;;;IAIE,aAAa;GACd;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE,cAAc;EACd,YAAY;CACb;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,mBAAmB;CACpB;AACD;EACE,cAAc;CACf;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;CACf;AACD;;;;;;EAME,mBAAmB;CACpB;AACD;;;;;;EAME,kBAAkB;CACnB;AACD;;;;;;EAME,gBAAgB;CACjB;AACD;EACE,gBAAgB;CACjB;AACD;;;;;;;EAOE,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,iBAAiB;EACjB,0BAA0B;EAC1B,mBAAmB;EACnB,sBAAsB;EACtB,oBAAoB;CACrB;AACD;;;;;;;EAOE,2CAA2C;EAC3C,kBAAkB;EAClB,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,mBAAmB;EACnB,sBAAsB;EACtB,gBAAgB;EAChB,mBAAmB;CACpB;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;GAClB;EACD;IACE,YAAY;IACZ,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,YAAY;IACZ,iBAAiB;IACjB,iBAAiB;GAClB;CACF;;AAED;EACE;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;EACD;IACE,mBAAmB;IACnB,gBAAgB;IAChB,oBAAoB;IACpB,mBAAmB;IACnB,oBAAoB;IACpB,4BAA4B;IAC5B,wBAAwB;IACxB,oBAAoB;IACpB,qBAAqB;GACtB;CACF;;AAED;EACE,qCAAqC;EACrC,YAAY;EACZ,mBAAmB;EACnB,gBAAgB;EAChB,0BAA0B;EAC1B,sBAAsB;EACtB,+BAA+B;EAC/B,8BAA8B;CAC/B;AACD;EACE,0BAA0B;CAC3B;;AAED;EACE,sBAAsB;CACvB;AACD;EACE,gBAAgB;EAChB,8BAA8B;CAC/B;AACD;EACE,2CAA2C;EAC3C,mBAAmB;CACpB;;AAED;EACE,sCAAsC;EACtC,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,qCAAqC;EACrC,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,sBAAsB;EACtB,YAAY;EACZ,aAAa;EACb,0BAA0B;EAC1B,iBAAiB;EACjB,oBAAoB;EACpB,mBAAmB;EACnB,mBAAmB;CACpB;AACD;EACE,sBAAsB;EACtB,WAAW;CACZ;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;AACD;EACE,sBAAsB;EACtB,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;EACpB,oBAAoB;EACpB,kBAAkB;CACnB;AACD;EACE,sBAAsB;EACtB,+BAA+B;EAC/B,YAAY;EACZ,mBAAmB;EACnB,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,yCAAyC;EACzC,oBAAoB;EACpB,gBAAgB;CACjB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,kBAAkB;EAClB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,qBAAqB;EACrB,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,iBAAiB;EACjB,oBAAoB;EACpB,UAAU;CACX;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,oBAAoB;CACrB;AACD;EACE,iBAAiB;EACjB,qBAAqB;EACrB,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,4BAA4B;EAC5B,YAAY;EACZ,mBAAmB;EACnB,iBAAiB;EACjB,mBAAmB;EACnB,gBAAgB;CACjB;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,0BAA0B;EAC1B,6BAA6B;CAC9B;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,0BAA0B;EAC1B,6BAA6B;CAC9B;AACD;EACE,8BAA8B;EAC9B,gBAAgB;EAChB,iBAAiB;EACjB,iBAAiB;CAClB;;AAED;EACE,eAAe;EACf,mBAAmB;EACnB,oBAAoB;EACpB,kCAAkC;CACnC;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,qBAAqB;EACrB,qBAAqB;CACtB;AACD;EACE,qBAAqB;CACtB;AACD;EACE,eAAe;EACf,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,iBAAiB;CAClB;AACD;EACE,8BAA8B;EAC9B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,aAAa;EACb,iCAAiC;EACjC,YAAY;EACZ,gBAAgB;CACjB;AACD;EACE,cAAc;CACf;AACD;EACE,gBAAgB;EAChB,iBAAiB;EACjB,8BAA8B;EAC9B,UAAU;CACX;AACD;EACE,cAAc;CACf;;AAED;EACE;IACE,8BAA8B;IAC9B,6BAA6B;IAC7B,gBAAgB;GACjB;EACD;IACE,YAAY;GACb;EACD;IACE,YAAY;GACb;EACD;IACE,iBAAiB;IACjB,iBAAiB;GAClB;CACF;;AAED;EACE,cAAc;CACf;AACD;EACE,0BAA0B;EAC1B,mBAAmB;EACnB,wBAAwB;CACzB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,0BAA0B;EAC1B,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,8BAA8B;EAC9B,kBAAkB;EAClB,qBAAqB;CACtB;AACD;EACE,0CAA0C;CAC3C;AACD;EACE,eAAe;CAChB;AACD;EACE,2CAA2C;CAC5C;AACD;EACE,eAAe;CAChB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;EAClB,oBAAoB;CACrB;AACD;EACE,kBAAkB;CACnB;AACD;EACE,mBAAmB;EACnB,aAAa;EACb,oBAAoB;EACpB,oBAAoB;CACrB;AACD;EACE,gBAAgB;CACjB;AACD;EACE,YAAY;EACZ,aAAa;EACb,kBAAkB;EAClB,yCAAyC;EACzC,mBAAmB;EACnB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;CAChB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,eAAe;EACf,0BAA0B;CAC3B;AACD;EACE,8BAA8B;EAC9B,kBAAkB;EAClB,qBAAqB;CACtB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;AACD;EACE,0BAA0B;EAC1B,mBAAmB;EACnB,wBAAwB;EACxB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;AACD;EACE,eAAe;CAChB;AACD;EACE,0BAA0B;EAC1B,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,iBAAiB;CAClB;AACD;;;;EAIE,eAAe;EACf,gBAAgB;EAChB,iBAAiB;EACjB,kBAAkB;CACnB;AACD;;;;EAIE,eAAe;CAChB;AACD;EACE,eAAe;EACf,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;CAClB;;AAED;EACE;IACE,iBAAiB;GAClB;CACF;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;EACjB,mBAAmB;CACpB;;AAED;EACE,gBAAgB;EAChB,kBAAkB;EAClB,eAAe;EACf,iBAAiB;CAClB;;AAED;EACE,mBAAmB;EACnB,iBAAiB;CAClB;;AAED;EACE,wBAAwB;EACxB,gBAAgB;EAChB,kBAAkB;EAClB,oBAAoB;EACpB,mBAAmB;EACnB,iBAAiB;EACjB,yCAAyC;CAC1C;AACD;EACE,yCAAyC;CAC1C;AACD;EACE,0BAA0B;CAC3B;;AAED;EACE,0BAA0B;EAC1B,kCAAkC;EAClC,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,cAAc;EACd,qBAAqB;EACrB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,eAAe;CAChB;AACD;EACE,wBAAwB;EACxB,gBAAgB;EAChB,kBAAkB;EAClB,oBAAoB;EACpB,gBAAgB;EAChB,iBAAiB;EACjB,yCAAyC;CAC1C;AACD;EACE,yCAAyC;CAC1C;AACD;EACE,0BAA0B;CAC3B;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,eAAe;EACf,qBAAqB;EACrB,kBAAkB;CACnB;AACD;EACE,gBAAgB;EAChB,kBAAkB;EAClB,iBAAiB;EACjB,eAAe;CAChB;;AAED;EACE;IACE,iBAAiB;GAClB;CACF;;AAED;EACE,mBAAmB;EACnB,oBAAoB;CACrB;AACD;EACE,gDAAgD;EAChD,kCAAkC;EAClC,mBAAmB;EACnB,kBAAkB;EAClB,oBAAoB;EACpB,cAAc;CACf;;AAED,iDAAiD",
               file: "servicedesk.light.css",
               sourcesContent: [
-                "@media (min-width: 1200px) {\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n  .col-xl-5 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 20%;\r\n    -ms-flex: 0 0 20%;\r\n    flex: 0 0 20%;\r\n    max-width: 20%;\r\n  }\r\n  .col-xl-7 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 58.33333%;\r\n    -ms-flex: 0 0 58.33333%;\r\n    flex: 0 0 58.33333%;\r\n    max-width: 58.33333%;\r\n  }\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n}\r\n\r\n/*********************************** Buttons *********************************/\r\n.blue-button {\r\n  background: #3b7cff !important;\r\n  color: #ffffff !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  margin-bottom: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.blue-button:hover,\r\n.blue-button:focus {\r\n  background: #0f5efd !important;\r\n  color: #ffffff !important;\r\n}\r\n\r\n.gray-button {\r\n  background: #dde4e9 !important;\r\n  color: #8392a7 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.gray-button:hover,\r\n.gray-button:focus {\r\n  background: #dbe0e4 !important;\r\n  color: #8392a7 !important;\r\n}\r\n\r\n.white-button {\r\n  background: white !important;\r\n  min-width: 100px;\r\n  color: #3b4859 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  text-align: center;\r\n}\r\n.white-button:hover,\r\n.white-button:focus {\r\n  background: #e6e6e6 !important;\r\n  color: #3b4859 !important;\r\n}\r\n.white-button i {\r\n  color: #57a4ff !important;\r\n}\r\n\r\na:focus,\r\na:hover {\r\n  color: #000000;\r\n}\r\n\r\n.float-right {\r\n  float: right;\r\n}\r\n\r\n.float-left {\r\n  float: left;\r\n}\r\n\r\n.text-left {\r\n  text-align: left;\r\n}\r\n\r\n.text-center {\r\n  text-align: center;\r\n}\r\n\r\n.text-right {\r\n  text-align: right;\r\n}\r\n\r\n.v-a-top {\r\n  vertical-align: top;\r\n}\r\n\r\n.v-a-middle {\r\n  vertical-align: middle;\r\n}\r\n\r\n.d-flex {\r\n  display: flex;\r\n}\r\n\r\n.d-block {\r\n  display: block;\r\n}\r\n\r\n.d-inline-block {\r\n  display: inline-block;\r\n}\r\n\r\n.p-t-0 {\r\n  padding-top: 0 !important;\r\n}\r\n\r\n.p-t-5 {\r\n  padding-top: 5px !important;\r\n}\r\n\r\n.p-t-10 {\r\n  padding-top: 10px !important;\r\n}\r\n\r\n.p-t-15 {\r\n  padding-top: 15px !important;\r\n}\r\n\r\n.p-t-20 {\r\n  padding-top: 20px !important;\r\n}\r\n\r\n.p-r-0 {\r\n  padding-right: 0 !important;\r\n}\r\n\r\n.p-r-5 {\r\n  padding-right: 5px !important;\r\n}\r\n\r\n.p-r-10 {\r\n  padding-right: 10px !important;\r\n}\r\n\r\n.p-r-15 {\r\n  padding-right: 15px !important;\r\n}\r\n\r\n.p-r-20 {\r\n  padding-right: 20px !important;\r\n}\r\n\r\n.p-b-0 {\r\n  padding-bottom: 0px !important;\r\n}\r\n\r\n.p-b-5 {\r\n  padding-bottom: 5px !important;\r\n}\r\n\r\n.p-b-10 {\r\n  padding-bottom: 10px !important;\r\n}\r\n\r\n.p-b-15 {\r\n  padding-bottom: 15px !important;\r\n}\r\n\r\n.p-b-20 {\r\n  padding-bottom: 20px !important;\r\n}\r\n\r\n.p-l-0 {\r\n  padding-left: 0 !important;\r\n}\r\n\r\n.p-l-5 {\r\n  padding-left: 5px !important;\r\n}\r\n\r\n.p-l-10 {\r\n  padding-left: 10px !important;\r\n}\r\n\r\n.p-l-15 {\r\n  padding-left: 15px !important;\r\n}\r\n\r\n.p-l-20 {\r\n  padding-left: 20px !important;\r\n}\r\n\r\n.m-l-0 {\r\n  margin-left: 0 !important;\r\n}\r\n\r\n.m-r-0 {\r\n  margin-right: 0 !important;\r\n}\r\n\r\n.m-t-0 {\r\n  margin-top: 0 !important;\r\n}\r\n\r\n.m-b-0 {\r\n  margin-bottom: 0 !important;\r\n}\r\n\r\n.width-25 {\r\n  width: 25%;\r\n}\r\n\r\n.width-50 {\r\n  width: 50%;\r\n}\r\n\r\n.width-75 {\r\n  width: 75%;\r\n}\r\n\r\n.width-100 {\r\n  width: 100%;\r\n}\r\n\r\n.width-auto {\r\n  width: auto;\r\n}\r\n\r\n.min-width-inherit {\r\n  min-width: inherit !important;\r\n}\r\n\r\n.border-bottom-0 {\r\n  border-bottom: none !important;\r\n}\r\n\r\n.orange {\r\n  color: #ff8f00;\r\n}\r\n\r\n.yellow-green {\r\n  color: #7ed321;\r\n}\r\n\r\n.red {\r\n  color: #f93d3d;\r\n}\r\n\r\n.yellow {\r\n  color: #ffff00;\r\n}\r\n\r\n.blue {\r\n  color: #438afb;\r\n}\r\n\r\n.form-control {\r\n  display: block;\r\n  width: 100%;\r\n  height: calc(1.5em + 0.75rem + 2px);\r\n  padding: 0.375rem 0.75rem;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  background-color: #fff;\r\n  background-clip: padding-box;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;\r\n}\r\n\r\n.input-group-text {\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  -ms-flex-align: center;\r\n  align-items: center;\r\n  padding: 0.375rem 0.75rem;\r\n  margin-bottom: 0;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  text-align: center;\r\n  white-space: nowrap;\r\n  background-color: #e9ecef;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n}\r\n\r\n.servicedesk-page-container {\r\n  background-color: #ffffff;\r\n  margin: 10px 20px;\r\n  border-radius: 10px;\r\n  padding-bottom: 10px;\r\n}\r\n.servicedesk-page-container .common-container {\r\n  padding-top: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  padding-bottom: 15px;\r\n  border-bottom: 1px solid #f5f6f5;\r\n}\r\n.servicedesk-page-container .page-heading {\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading h1 {\r\n  color: #3b4859;\r\n  font-weight: 600;\r\n  font-size: 24px;\r\n  line-height: 32px;\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading span {\r\n  display: block;\r\n  color: #a9b9c6;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n/*********************************** Filters Container *********************************/\r\n.form-group {\r\n  margin-bottom: 1rem;\r\n}\r\n.form-group label {\r\n  margin-bottom: 0.5rem;\r\n}\r\n\r\n.filter-container .filter-control-group {\r\n  max-width: 250px;\r\n  padding-left: 0px;\r\n}\r\n.filter-container .filter-control-group .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n.filter-container .filter-control-group label {\r\n  color: #3b4859;\r\n  font-size: 14px;\r\n}\r\n\r\n.showing {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n}\r\n\r\n.showby {\r\n  border-left: 1px solid #a9b9c6;\r\n  padding-left: 15px;\r\n  margin-left: 15px;\r\n}\r\n.showby label {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-right: 15px;\r\n}\r\n.showby .form-control {\r\n  display: inline-block;\r\n  width: 75px;\r\n  border-radius: 25px;\r\n}\r\n.showby span {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 1050px) {\r\n  .showing {\r\n    font-size: 11px;\r\n  }\r\n  .showby {\r\n    padding-left: 10px;\r\n    margin-left: 10px;\r\n  }\r\n  .showby label {\r\n    font-size: 11px;\r\n    padding-right: 10px;\r\n  }\r\n  .showby span {\r\n    font-size: 11px;\r\n    padding-left: 10px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1050px) and (min-width: 320px) {\r\n  .showby {\r\n    border-left: none;\r\n    padding-left: 0px;\r\n    margin-left: 0px;\r\n  }\r\n}\r\n\r\n.filter-search-control {\r\n  position: relative;\r\n  margin-bottom: 0;\r\n}\r\n.filter-search-control .input-group-text {\r\n  max-width: 100%;\r\n  text-align: left;\r\n  padding-right: 30px;\r\n  padding-left: 15px;\r\n  width: 100%;\r\n  border: 1px solid #ced4da;\r\n  background-color: #ffffff;\r\n  border-radius: 25px;\r\n}\r\n.filter-search-control .input-group-text:focus {\r\n  outline: none;\r\n}\r\n.filter-search-control button {\r\n  position: absolute;\r\n  right: 0;\r\n  top: 0;\r\n  z-index: 1;\r\n  cursor: pointer;\r\n  border: none;\r\n  background-color: transparent;\r\n  width: 34px;\r\n  height: 32px;\r\n}\r\n.filter-search-control button:hover {\r\n  color: #333333;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .filter-search-control {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.pagination ul {\r\n  list-style: none;\r\n  padding: 0;\r\n  margin: 0;\r\n}\r\n.pagination ul li {\r\n  display: inline-block;\r\n}\r\n.pagination ul li a {\r\n  display: block;\r\n  padding: 5px 10px;\r\n  font-size: 11px;\r\n  color: #868f9b;\r\n  line-height: 16px;\r\n  border: 1px solid #cbcfd4;\r\n  border-right: none;\r\n}\r\n.pagination ul li a:hover {\r\n  background-color: #cbcfd4;\r\n}\r\n.pagination ul li a.active {\r\n  background-color: #cbcfd4;\r\n  color: black;\r\n}\r\n.pagination ul li a.deactive {\r\n  background-color: white;\r\n  color: black;\r\n}\r\n.pagination ul li a.desable {\r\n  background-color: #5e5757;\r\n  color: white;\r\n}\r\n.pagination ul li a.enable {\r\n  background-color: #3b4859;\r\n  color: #ffffff;\r\n}\r\n.pagination ul li.previous a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  -webkit-border-top-left-radius: 5px;\r\n  -webkit-border-bottom-left-radius: 5px;\r\n  -moz-border-radius-topleft: 5px;\r\n  -moz-border-radius-bottomleft: 5px;\r\n  border-top-left-radius: 5px;\r\n  border-bottom-left-radius: 5px;\r\n}\r\n.pagination ul li.next a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  border-right: 1px solid #cbcfd4;\r\n  -webkit-border-top-right-radius: 5px;\r\n  -webkit-border-bottom-right-radius: 5px;\r\n  -moz-border-radius-topright: 5px;\r\n  -moz-border-radius-bottomright: 5px;\r\n  border-top-right-radius: 5px;\r\n  border-bottom-right-radius: 5px;\r\n}\r\n\r\n.open-create-menu {\r\n  position: absolute;\r\n  right: 15px;\r\n  top: 36px;\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 2px 5px #00000029;\r\n  width: 120px;\r\n  z-index: 10;\r\n  padding: 5px 0;\r\n}\r\n.open-create-menu a {\r\n  color: #2a9ce7;\r\n  font-size: 12px;\r\n  font-weight: 400;\r\n  line-height: 20px;\r\n  display: block;\r\n  padding: 4px 0;\r\n}\r\n\r\n.contact-popup-container .heading h4 {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container .heading span {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n.contact-popup-container .heading span a {\r\n  color: #49c740;\r\n}\r\n\r\n.contact-popup-container .upload-photo .upload-icon {\r\n  background-color: #438afb;\r\n  border-radius: 2px;\r\n  padding: 0;\r\n  width: 44px;\r\n  height: 44px;\r\n  color: #ffffff;\r\n  font-size: 24px;\r\n  line-height: 44px;\r\n  text-align: center;\r\n  margin-right: 15px;\r\n  vertical-align: top;\r\n}\r\n\r\n.contact-popup-container .upload-photo strong {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #438afb;\r\n}\r\n\r\n.contact-popup-container .upload-photo p {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n\r\n.contact-popup-container .form-group {\r\n  margin-bottom: 1.5rem;\r\n}\r\n.contact-popup-container .form-group label {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n  display: block;\r\n}\r\n.contact-popup-container .form-group .form-group-inner label {\r\n  display: none;\r\n}\r\n.contact-popup-container .form-group .form-control {\r\n  background-color: transparent;\r\n  border: none;\r\n  border-bottom: 1px solid #89898a;\r\n  color: #89898a;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  padding: 0.375rem 0;\r\n  width: 100%;\r\n  border-radius: 0;\r\n  text-align: left;\r\n}\r\n.contact-popup-container .form-group .form-control.textarea {\r\n  height: 150px;\r\n}\r\n.contact-popup-container .form-group .form-control:focus {\r\n  outline: none;\r\n}\r\n.contact-popup-container .form-group .add-conatct {\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  color: #3b7cff;\r\n  line-height: 18px;\r\n  border: none;\r\n  background: none;\r\n  padding: 0;\r\n}\r\n.contact-popup-container .form-group .invalid-feedback {\r\n  color: red;\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  font-weight: 400;\r\n  display: block;\r\n}\r\n\r\n.contact-popup-container .atleast-fields-box {\r\n  border: 1px solid #d1dae2;\r\n  background-color: #f9f9f9;\r\n  padding: 20px;\r\n  padding-bottom: 0;\r\n  margin-bottom: 20px;\r\n}\r\n.contact-popup-container .atleast-fields-box h3 {\r\n  color: #323c47;\r\n  font-size: 15px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 20px;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons button {\r\n  border: 1px solid #a9b9c6;\r\n  background-color: #ffffff;\r\n  color: #89898a;\r\n  font-size: 15px;\r\n  line-height: 36px;\r\n  font-weight: 500;\r\n  padding: 0 30px;\r\n  margin: 5px;\r\n  text-align: center;\r\n}\r\n.contact-popup-container .contact-popup-buttons button.save {\r\n  border-color: #3b7cff;\r\n  background-color: #3b7cff;\r\n  color: #ffffff;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons .create-author {\r\n  padding-right: 5px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-input {\r\n  display: inline-block;\r\n  margin-top: 2px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-label {\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  display: inline-block;\r\n  padding-left: 7px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group label {\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group .form-control {\r\n  border: 1px solid #d1dae2;\r\n  padding: 0.375rem 0.75rem;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .filter-container .assessments {\r\n    float: left;\r\n  }\r\n}\r\n\r\n#servicedesk-main-container .breadcrumbs-container {\r\n  background-color: #eff2f7;\r\n  padding: 14px 20px 15px;\r\n  font-size: 13px;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .page-title {\r\n  color: #3b4859;\r\n  display: inline-block;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .breadcrumbs {\r\n  float: right;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container a.breadcrumbs-link {\r\n  color: #89898a;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .current-page {\r\n  color: #2a9ce7;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .separator {\r\n  color: #89898a;\r\n  display: inline-block;\r\n  padding: 0 10px;\r\n}\r\n\r\n@media (max-width: 768px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n.modal {\r\n  -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  max-width: 992px;\r\n  background: #ffffff;\r\n}\r\n.modal .modal-content {\r\n  padding: 40px;\r\n}\r\n\r\n.modal-backdrop {\r\n  background-color: #141414b3;\r\n  opacity: 0.8;\r\n}\r\n\r\n.ticketing-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 30px;\r\n}\r\n.ticketing-box .image {\r\n  padding-bottom: 10px;\r\n}\r\n.ticketing-box .number {\r\n  color: #3b4859;\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 700;\r\n  padding-bottom: 5px;\r\n}\r\n.ticketing-box .name {\r\n  color: #3b4859;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n\r\n.ticket-trends {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 15px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  min-height: 345px;\r\n}\r\n.ticket-trends .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-trends .heading span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n}\r\n.ticket-trends .days-box .form-check {\r\n  margin-right: 25px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-input {\r\n  display: inline-block;\r\n  vertical-align: top;\r\n  margin-top: 4px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-label {\r\n  font-size: 12px;\r\n  line-height: 21px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  display: inline-block;\r\n  padding-left: 8px;\r\n  vertical-align: top;\r\n}\r\n.ticket-trends .calendar-box .fa {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .calendar-box span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .ticket-graphs canvas {\r\n  height: 220px !important;\r\n  width: 100% !important;\r\n}\r\n.ticket-trends .ticket-graphs .hours-text {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n\r\n.performer-agents {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 20px;\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  padding-bottom: 40px;\r\n  min-height: 345px;\r\n}\r\n.performer-agents .heading {\r\n  color: #323c47;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 15px;\r\n}\r\n.performer-agents .performer-agents-table {\r\n  width: 100%;\r\n}\r\n.performer-agents .performer-agents-table thead tr th {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table thead tr th:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.dashboard-all-ticket-tabel .heading h2 a {\r\n  color: #323c47;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel {\r\n  width: 1200px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr {\r\n  border-bottom: 7px solid #ffffff;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td {\r\n  background-color: #f0f3f7;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.date {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .ticket-trends-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n  .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n  .days-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .calendar-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n.tickets-number-box {\r\n  padding-right: 75px;\r\n}\r\n.tickets-number-box h3 {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n}\r\n.tickets-number-box span {\r\n  color: #a9b9c6;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n.quarter-form .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n\r\n.all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-support-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-support-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td {\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n  padding-top: 50px;\r\n  font-weight: 600;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n}\r\n\r\n.chart-inner canvas {\r\n  width: 100% !important;\r\n}\r\n\r\n.apply-filters-button {\r\n  margin-top: 8px;\r\n}\r\n\r\n@media only screen and (max-width: 992px) and (min-width: 768px) {\r\n  .tickets-number-box h3 {\r\n    font-size: 22px;\r\n    line-height: 26px;\r\n  }\r\n  .tickets-number-box span {\r\n    font-size: 10px;\r\n    line-height: 18px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n  .quarter-form {\r\n    padding-top: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .tickets-number-box {\r\n    display: block;\r\n    padding-top: 15px;\r\n    text-align: left;\r\n  }\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n  .open-create-menu {\r\n    left: 15px;\r\n    top: 45px;\r\n  }\r\n}\r\n\r\n.all-contacts-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-contacts-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-contacts-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel {\r\n  width: 1200px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .contacts-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-companies-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-companies-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel {\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td .image {\r\n  width: 40px;\r\n  height: 40px;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .companies-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n  .all-companies-container\r\n    .all-companies-tabel\r\n    .companies-main-tabel\r\n    .companies-tabel {\r\n    width: 992px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-open-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-open-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-open-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td {\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n  padding-top: 50px;\r\n  font-weight: 600;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .sortby {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .filters-button {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (min-width: 1200px) {\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n}\r\n\r\n.ticket-buttons .white-button {\r\n  border: 1px solid #a9b9c6 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  font-size: 12px;\r\n  color: #a9b9c6 !important;\r\n  display: inline-block;\r\n  padding-right: 12px !important;\r\n  padding-left: 12px !important;\r\n}\r\n.ticket-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n\r\n.ticket-buttons .group-buttons {\r\n  display: inline-block;\r\n}\r\n.ticket-buttons .group-buttons .white-button {\r\n  margin-right: 0;\r\n  border-right: none !important;\r\n}\r\n.ticket-buttons .group-buttons .white-button:last-child {\r\n  border-right: 1px solid #a9b9c6 !important;\r\n  margin-right: 10px;\r\n}\r\n\r\n.ticket-detail-box {\r\n  box-shadow: 0.94px 6px 16px #cfdff71a;\r\n  border-radius: 3px;\r\n  margin-bottom: 20px;\r\n}\r\n.ticket-detail-box .ticket-detail-head {\r\n  background: rgba(209, 218, 226, 0.2);\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-image {\r\n  display: inline-block;\r\n  width: 32px;\r\n  height: 32px;\r\n  background-color: #d1dae2;\r\n  overflow: hidden;\r\n  vertical-align: top;\r\n  border-radius: 50%;\r\n  margin-right: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text {\r\n  display: inline-block;\r\n  width: 86%;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p {\r\n  display: block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p a {\r\n  color: #3b7cff;\r\n  font-weight: 500;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p strong {\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p span {\r\n  color: #323c47;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-time-text {\r\n  display: inline-block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-right: 15px;\r\n  vertical-align: top;\r\n  padding-top: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button {\r\n  display: inline-block;\r\n  padding: 10px 0 0 0 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 16px;\r\n  background-color: transparent !important;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box {\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box strong {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box p {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box span {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 0px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul {\r\n  display: block;\r\n  list-style: none;\r\n  padding: 0 0 10px 0;\r\n  margin: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul li {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 3px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons {\r\n  padding-top: 0px;\r\n  padding-bottom: 10px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button {\r\n  padding: 7px 7px !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  margin-bottom: 0;\r\n  border-radius: 3px;\r\n  margin-top: 7px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.trash {\r\n  border: 1px solid #e6e6e6;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.saved {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  color: #a9b9c6 !important;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .blue-button {\r\n  padding: 15px 30px !important;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.properties-form {\r\n  display: block;\r\n  padding: 30px 45px;\r\n  background: #f0f3f7;\r\n  box-shadow: 0px 2px 6px #464c56a8;\r\n}\r\n.properties-form h3 {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 17px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 20px;\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group {\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group label {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n.properties-form .form-group select {\r\n  background-color: transparent;\r\n  color: #d1dae2;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 400;\r\n  border: none;\r\n  border-bottom: 1px solid #c7d0d9;\r\n  width: 100%;\r\n  cursor: pointer;\r\n}\r\n.properties-form .form-group select:focus {\r\n  outline: none;\r\n}\r\n.properties-form .form-group .blue-button {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  padding: 15px 60px !important;\r\n  margin: 0;\r\n}\r\n.properties-form .form-group .blue-button:focus {\r\n  outline: none;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .ticket-buttons .white-button {\r\n    padding-right: 7px !important;\r\n    padding-left: 8px !important;\r\n    font-size: 10px;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .head-time-text {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .white-button {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-buttons .detail-right-buttons {\r\n    text-align: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n/*# sourceMappingURL=servicedesk.light.css.map */\r\n"
+                "@media (min-width: 1200px) {\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n  .col-xl-5 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 20%;\r\n    -ms-flex: 0 0 20%;\r\n    flex: 0 0 20%;\r\n    max-width: 20%;\r\n  }\r\n  .col-xl-7 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 58.33333%;\r\n    -ms-flex: 0 0 58.33333%;\r\n    flex: 0 0 58.33333%;\r\n    max-width: 58.33333%;\r\n  }\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n}\r\n\r\n/*********************************** Buttons *********************************/\r\n.blue-button {\r\n  background: #3b7cff !important;\r\n  color: #ffffff !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  margin-bottom: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.blue-button:hover,\r\n.blue-button:focus {\r\n  background: #0f5efd !important;\r\n  color: #ffffff !important;\r\n}\r\n\r\n.gray-button {\r\n  background: #dde4e9 !important;\r\n  color: #8392a7 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  min-width: 100px;\r\n  text-align: center;\r\n}\r\n.gray-button:hover,\r\n.gray-button:focus {\r\n  background: #dbe0e4 !important;\r\n  color: #8392a7 !important;\r\n}\r\n\r\n.white-button {\r\n  background: white !important;\r\n  min-width: 100px;\r\n  color: #3b4859 !important;\r\n  border: none !important;\r\n  padding: 7px 18px !important;\r\n  border-radius: 2px !important;\r\n  margin-right: 10px;\r\n  display: inline-block !important;\r\n  text-align: center;\r\n}\r\n.white-button:hover,\r\n.white-button:focus {\r\n  background: #e6e6e6 !important;\r\n  color: #3b4859 !important;\r\n}\r\n.white-button i {\r\n  color: #57a4ff !important;\r\n}\r\n\r\na:focus,\r\na:hover {\r\n  color: #000000;\r\n}\r\n\r\n.float-right {\r\n  float: right;\r\n}\r\n\r\n.float-left {\r\n  float: left;\r\n}\r\n\r\n.text-left {\r\n  text-align: left;\r\n}\r\n\r\n.text-center {\r\n  text-align: center;\r\n}\r\n\r\n.text-right {\r\n  text-align: right;\r\n}\r\n\r\n.v-a-top {\r\n  vertical-align: top;\r\n}\r\n\r\n.v-a-middle {\r\n  vertical-align: middle;\r\n}\r\n\r\n.d-flex {\r\n  display: flex;\r\n}\r\n\r\n.d-block {\r\n  display: block;\r\n}\r\n\r\n.d-inline-block {\r\n  display: inline-block;\r\n}\r\n\r\n.p-t-0 {\r\n  padding-top: 0 !important;\r\n}\r\n\r\n.p-t-5 {\r\n  padding-top: 5px !important;\r\n}\r\n\r\n.p-t-10 {\r\n  padding-top: 10px !important;\r\n}\r\n\r\n.p-t-15 {\r\n  padding-top: 15px !important;\r\n}\r\n\r\n.p-t-20 {\r\n  padding-top: 20px !important;\r\n}\r\n\r\n.p-r-0 {\r\n  padding-right: 0 !important;\r\n}\r\n\r\n.p-r-5 {\r\n  padding-right: 5px !important;\r\n}\r\n\r\n.p-r-10 {\r\n  padding-right: 10px !important;\r\n}\r\n\r\n.p-r-15 {\r\n  padding-right: 15px !important;\r\n}\r\n\r\n.p-r-20 {\r\n  padding-right: 20px !important;\r\n}\r\n\r\n.p-b-0 {\r\n  padding-bottom: 0px !important;\r\n}\r\n\r\n.p-b-5 {\r\n  padding-bottom: 5px !important;\r\n}\r\n\r\n.p-b-10 {\r\n  padding-bottom: 10px !important;\r\n}\r\n\r\n.p-b-15 {\r\n  padding-bottom: 15px !important;\r\n}\r\n\r\n.p-b-20 {\r\n  padding-bottom: 20px !important;\r\n}\r\n\r\n.p-l-0 {\r\n  padding-left: 0 !important;\r\n}\r\n\r\n.p-l-5 {\r\n  padding-left: 5px !important;\r\n}\r\n\r\n.p-l-10 {\r\n  padding-left: 10px !important;\r\n}\r\n\r\n.p-l-15 {\r\n  padding-left: 15px !important;\r\n}\r\n\r\n.p-l-20 {\r\n  padding-left: 20px !important;\r\n}\r\n\r\n.m-l-0 {\r\n  margin-left: 0 !important;\r\n}\r\n\r\n.m-r-0 {\r\n  margin-right: 0 !important;\r\n}\r\n\r\n.m-t-0 {\r\n  margin-top: 0 !important;\r\n}\r\n\r\n.m-b-0 {\r\n  margin-bottom: 0 !important;\r\n}\r\n\r\n.width-25 {\r\n  width: 25%;\r\n}\r\n\r\n.width-50 {\r\n  width: 50%;\r\n}\r\n\r\n.width-75 {\r\n  width: 75%;\r\n}\r\n\r\n.width-100 {\r\n  width: 100%;\r\n}\r\n\r\n.width-auto {\r\n  width: auto;\r\n}\r\n\r\n.min-width-inherit {\r\n  min-width: inherit !important;\r\n}\r\n\r\n.border-bottom-0 {\r\n  border-bottom: none !important;\r\n}\r\n\r\n.orange {\r\n  color: #ff8f00;\r\n}\r\n\r\n.yellow-green {\r\n  color: #7ed321;\r\n}\r\n\r\n.red {\r\n  color: #f93d3d;\r\n}\r\n\r\n.yellow {\r\n  color: #ffff00;\r\n}\r\n\r\n.blue {\r\n  color: #438afb;\r\n}\r\n\r\n.form-control {\r\n  display: block;\r\n  width: 100%;\r\n  height: calc(1.5em + 0.75rem + 2px);\r\n  padding: 0.375rem 0.75rem;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  background-color: #fff;\r\n  background-clip: padding-box;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;\r\n}\r\n\r\n.input-group-text {\r\n  display: -ms-flexbox;\r\n  display: flex;\r\n  -ms-flex-align: center;\r\n  align-items: center;\r\n  padding: 0.375rem 0.75rem;\r\n  margin-bottom: 0;\r\n  font-size: 1rem;\r\n  font-weight: 400;\r\n  line-height: 1.5;\r\n  color: #495057;\r\n  text-align: center;\r\n  white-space: nowrap;\r\n  background-color: #e9ecef;\r\n  border: 1px solid #ced4da;\r\n  border-radius: 0.25rem;\r\n}\r\n\r\n.servicedesk-page-container {\r\n  background-color: #ffffff;\r\n  margin: 10px 20px;\r\n  border-radius: 10px;\r\n  padding-bottom: 10px;\r\n}\r\n.servicedesk-page-container .common-container {\r\n  padding-top: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  padding-bottom: 15px;\r\n  border-bottom: 1px solid #f5f6f5;\r\n}\r\n.servicedesk-page-container .page-heading {\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading h1 {\r\n  color: #3b4859;\r\n  font-weight: 600;\r\n  font-size: 24px;\r\n  line-height: 32px;\r\n  display: block;\r\n  margin-bottom: 0;\r\n}\r\n.servicedesk-page-container .page-heading span {\r\n  display: block;\r\n  color: #a9b9c6;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n/*********************************** Filters Container *********************************/\r\n.form-group {\r\n  margin-bottom: 1rem;\r\n}\r\n.form-group label {\r\n  margin-bottom: 0.5rem;\r\n}\r\n\r\n.filter-container .filter-control-group {\r\n  max-width: 250px;\r\n  padding-left: 0px;\r\n}\r\n.filter-container .filter-control-group .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n.filter-container .filter-control-group label {\r\n  color: #3b4859;\r\n  font-size: 14px;\r\n}\r\n\r\n.showing {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n}\r\n\r\n.showby {\r\n  border-left: 1px solid #a9b9c6;\r\n  padding-left: 15px;\r\n  margin-left: 15px;\r\n}\r\n.showby label {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-right: 15px;\r\n}\r\n.showby .form-control {\r\n  display: inline-block;\r\n  width: 75px;\r\n  border-radius: 25px;\r\n}\r\n.showby span {\r\n  font-size: 13px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 1050px) {\r\n  .showing {\r\n    font-size: 11px;\r\n  }\r\n  .showby {\r\n    padding-left: 10px;\r\n    margin-left: 10px;\r\n  }\r\n  .showby label {\r\n    font-size: 11px;\r\n    padding-right: 10px;\r\n  }\r\n  .showby span {\r\n    font-size: 11px;\r\n    padding-left: 10px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1050px) and (min-width: 320px) {\r\n  .showby {\r\n    border-left: none;\r\n    padding-left: 0px;\r\n    margin-left: 0px;\r\n  }\r\n}\r\n\r\n.filter-search-control {\r\n  position: relative;\r\n  margin-bottom: 0;\r\n}\r\n.filter-search-control .input-group-text {\r\n  max-width: 100%;\r\n  text-align: left;\r\n  padding-right: 30px;\r\n  padding-left: 15px;\r\n  width: 100%;\r\n  border: 1px solid #ced4da;\r\n  background-color: #ffffff;\r\n  border-radius: 25px;\r\n  padding-top: 0.399rem;\r\n}\r\n.filter-search-control .input-group-text:focus {\r\n  outline: none;\r\n}\r\n.filter-search-control button {\r\n  position: absolute;\r\n  right: 0;\r\n  top: 0;\r\n  z-index: 1;\r\n  cursor: pointer;\r\n  border: none;\r\n  background-color: transparent;\r\n  width: 34px;\r\n  height: 34px;\r\n}\r\n.filter-search-control button:hover {\r\n  color: #333333;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .filter-search-control {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.pagination ul {\r\n  list-style: none;\r\n  padding: 0;\r\n  margin: 0;\r\n}\r\n.pagination ul li {\r\n  display: inline-block;\r\n}\r\n.pagination ul li a {\r\n  display: block;\r\n  padding: 5px 10px;\r\n  font-size: 11px;\r\n  color: #868f9b;\r\n  line-height: 16px;\r\n  border: 1px solid #cbcfd4;\r\n  border-right: none;\r\n}\r\n.pagination ul li a:hover {\r\n  background-color: #cbcfd4;\r\n}\r\n.pagination ul li a.active {\r\n  background-color: #cbcfd4;\r\n  color: black;\r\n}\r\n.pagination ul li a.deactive {\r\n  background-color: white;\r\n  color: black;\r\n}\r\n.pagination ul li a.desable {\r\n  background-color: #5e5757;\r\n  color: white;\r\n}\r\n.pagination ul li a.enable {\r\n  background-color: #3b4859;\r\n  color: #ffffff;\r\n}\r\n.pagination ul li.previous a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  -webkit-border-top-left-radius: 5px;\r\n  -webkit-border-bottom-left-radius: 5px;\r\n  -moz-border-radius-topleft: 5px;\r\n  -moz-border-radius-bottomleft: 5px;\r\n  border-top-left-radius: 5px;\r\n  border-bottom-left-radius: 5px;\r\n}\r\n.pagination ul li.next a {\r\n  padding-left: 20px;\r\n  padding-right: 20px;\r\n  border-right: 1px solid #cbcfd4;\r\n  -webkit-border-top-right-radius: 5px;\r\n  -webkit-border-bottom-right-radius: 5px;\r\n  -moz-border-radius-topright: 5px;\r\n  -moz-border-radius-bottomright: 5px;\r\n  border-top-right-radius: 5px;\r\n  border-bottom-right-radius: 5px;\r\n}\r\n\r\n.open-create-menu {\r\n  position: absolute;\r\n  right: 15px;\r\n  top: 36px;\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 2px 5px #00000029;\r\n  width: 120px;\r\n  z-index: 10;\r\n  padding: 5px 0;\r\n}\r\n.open-create-menu a {\r\n  color: #2a9ce7;\r\n  font-size: 12px;\r\n  font-weight: 400;\r\n  line-height: 20px;\r\n  display: block;\r\n  padding: 4px 0;\r\n}\r\n\r\n.contact-popup-container .heading h4 {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container .heading span {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n.contact-popup-container .heading span a {\r\n  color: #49c740;\r\n}\r\n\r\n.contact-popup-container .upload-photo .upload-icon {\r\n  background-color: #438afb;\r\n  border-radius: 2px;\r\n  padding: 0;\r\n  width: 44px;\r\n  height: 44px;\r\n  color: #ffffff;\r\n  font-size: 24px;\r\n  line-height: 44px;\r\n  text-align: center;\r\n  margin-right: 15px;\r\n  vertical-align: top;\r\n}\r\n\r\n.contact-popup-container .upload-photo strong {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #438afb;\r\n}\r\n\r\n.contact-popup-container .upload-photo p {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 400;\r\n}\r\n\r\n.contact-popup-container .form-group {\r\n  margin-bottom: 1.5rem;\r\n}\r\n.contact-popup-container .form-group label {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n  display: block;\r\n}\r\n.contact-popup-container .form-group .form-group-inner label {\r\n  display: none;\r\n}\r\n.contact-popup-container .form-group .form-control {\r\n  background-color: transparent;\r\n  border: none;\r\n  border-bottom: 1px solid #89898a;\r\n  color: #89898a;\r\n  font-size: 13px;\r\n  line-height: 18px;\r\n  padding: 0.375rem 0;\r\n  width: 100%;\r\n  border-radius: 0;\r\n  text-align: left;\r\n}\r\n.contact-popup-container .form-group .form-control.textarea {\r\n  height: 150px;\r\n}\r\n.contact-popup-container .form-group .form-control:focus {\r\n  outline: none;\r\n}\r\n.contact-popup-container .form-group .add-conatct {\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  color: #3b7cff;\r\n  line-height: 18px;\r\n  border: none;\r\n  background: none;\r\n  padding: 0;\r\n}\r\n.contact-popup-container .form-group .invalid-feedback {\r\n  color: red;\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  font-weight: 400;\r\n  display: block;\r\n}\r\n\r\n.contact-popup-container .atleast-fields-box {\r\n  border: 1px solid #d1dae2;\r\n  background-color: #f9f9f9;\r\n  padding: 20px;\r\n  padding-bottom: 0;\r\n  margin-bottom: 20px;\r\n}\r\n.contact-popup-container .atleast-fields-box h3 {\r\n  color: #323c47;\r\n  font-size: 15px;\r\n  line-height: 18px;\r\n  font-weight: 600;\r\n  margin-bottom: 20px;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons button {\r\n  border: 1px solid #a9b9c6;\r\n  background-color: #ffffff;\r\n  color: #89898a;\r\n  font-size: 15px;\r\n  line-height: 36px;\r\n  font-weight: 500;\r\n  padding: 0 30px;\r\n  margin: 5px;\r\n  text-align: center;\r\n}\r\n.contact-popup-container .contact-popup-buttons button.save {\r\n  border-color: #3b7cff;\r\n  background-color: #3b7cff;\r\n  color: #ffffff;\r\n}\r\n\r\n.contact-popup-container .contact-popup-buttons .create-author {\r\n  padding-right: 5px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-input {\r\n  display: inline-block;\r\n  margin-top: 2px;\r\n}\r\n.contact-popup-container\r\n  .contact-popup-buttons\r\n  .create-author\r\n  .form-check-label {\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  display: inline-block;\r\n  padding-left: 7px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group label {\r\n  margin-bottom: 5px;\r\n}\r\n\r\n.contact-popup-container.new-ticket-container .form-group .form-control {\r\n  border: 1px solid #d1dae2;\r\n  padding: 0.375rem 0.75rem;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .filter-container .assessments {\r\n    float: left;\r\n  }\r\n}\r\n\r\n.there-no-data {\r\n  text-align: center;\r\n}\r\n\r\n#servicedesk-main-container .breadcrumbs-container {\r\n  background-color: #eff2f7;\r\n  padding: 14px 20px 15px;\r\n  font-size: 13px;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .page-title {\r\n  color: #3b4859;\r\n  display: inline-block;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .breadcrumbs {\r\n  float: right;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container a.breadcrumbs-link {\r\n  color: #89898a;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .current-page {\r\n  color: #2a9ce7;\r\n}\r\n#servicedesk-main-container .breadcrumbs-container .separator {\r\n  color: #89898a;\r\n  display: inline-block;\r\n  padding: 0 10px;\r\n}\r\n\r\n@media (max-width: 768px) {\r\n  .breadcrumbs-container .breadcrumbs {\r\n    float: none;\r\n    padding-top: 5px;\r\n  }\r\n}\r\n\r\n.modal {\r\n  -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  box-shadow: 0 0px 0px rgba(0, 0, 0, 0);\r\n  max-width: 992px;\r\n  background: #ffffff;\r\n}\r\n.modal .modal-content {\r\n  padding: 40px;\r\n}\r\n\r\n.modal-backdrop {\r\n  background-color: #141414b3;\r\n  opacity: 0.8;\r\n}\r\n\r\n.ticketing-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 30px;\r\n}\r\n.ticketing-box .image {\r\n  padding-bottom: 10px;\r\n}\r\n.ticketing-box .number {\r\n  color: #3b4859;\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 700;\r\n  padding-bottom: 5px;\r\n}\r\n.ticketing-box .name {\r\n  color: #3b4859;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n\r\n.ticket-trends {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 15px;\r\n  padding-bottom: 15px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n  min-height: 345px;\r\n}\r\n.ticket-trends .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-trends .heading span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n}\r\n.ticket-trends .days-box .form-check {\r\n  margin-right: 25px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-input {\r\n  display: inline-block;\r\n  vertical-align: top;\r\n  margin-top: 4px;\r\n}\r\n.ticket-trends .days-box .form-check .form-check-label {\r\n  font-size: 12px;\r\n  line-height: 21px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  display: inline-block;\r\n  padding-left: 8px;\r\n  vertical-align: top;\r\n}\r\n.ticket-trends .calendar-box .fa {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .calendar-box span {\r\n  font-size: 12px;\r\n  line-height: 15px;\r\n  color: #3b4859;\r\n  font-weight: 400;\r\n  padding: 0 4px;\r\n}\r\n.ticket-trends .ticket-graphs canvas {\r\n  height: 220px !important;\r\n  width: 100% !important;\r\n}\r\n.ticket-trends .ticket-graphs .hours-text {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n\r\n.performer-agents {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  padding-top: 20px;\r\n  padding-right: 15px;\r\n  padding-left: 15px;\r\n  padding-bottom: 40px;\r\n  min-height: 345px;\r\n}\r\n.performer-agents .heading {\r\n  color: #323c47;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 15px;\r\n}\r\n.performer-agents .performer-agents-table {\r\n  width: 100%;\r\n}\r\n.performer-agents .performer-agents-table thead tr th {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table thead tr th:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td {\r\n  border-bottom: 1px solid #a9b9c6;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 10px 10px 10px 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td:last-child {\r\n  padding-right: 0;\r\n}\r\n.performer-agents .performer-agents-table tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.dashboard-all-ticket-tabel .heading h2 a {\r\n  color: #323c47;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.dashboard-all-ticket-tabel .all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel {\r\n  width: 1200px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr {\r\n  border-bottom: 7px solid #ffffff;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td {\r\n  background-color: #f0f3f7;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.date {\r\n  font-size: 11px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.dashboard-all-ticket-tabel\r\n  .all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .ticket-trends-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main {\r\n    -webkit-flex: 0 0 100%;\r\n    -ms-flex: 0 0 100%;\r\n    flex: 0 0 100%;\r\n    max-width: 100%;\r\n  }\r\n  .performer-agents-main .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .performer-agents {\r\n    margin-top: 30px;\r\n  }\r\n  .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n  .days-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .calendar-box {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n.tickets-number-box {\r\n  padding-right: 75px;\r\n}\r\n.tickets-number-box h3 {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n}\r\n.tickets-number-box span {\r\n  color: #a9b9c6;\r\n  font-size: 14px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n.quarter-form .form-control {\r\n  background-color: #f0f3f7 !important;\r\n  border: none !important;\r\n  font-size: 12px;\r\n  cursor: pointer;\r\n  height: 35px;\r\n}\r\n\r\n.all-support-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-support-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-support-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td {\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-support-ticket-tabel\r\n  .tickets-tabel\r\n  .ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n.chart-inner canvas {\r\n  width: 100% !important;\r\n}\r\n\r\n.apply-filters-button {\r\n  margin-top: 8px;\r\n}\r\n\r\n@media only screen and (max-width: 992px) and (min-width: 768px) {\r\n  .tickets-number-box h3 {\r\n    font-size: 22px;\r\n    line-height: 26px;\r\n  }\r\n  .tickets-number-box span {\r\n    font-size: 10px;\r\n    line-height: 18px;\r\n  }\r\n}\r\n\r\n@media only screen and (max-width: 1200px) and (min-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .tickets-number-box {\r\n    padding-right: 15px;\r\n  }\r\n  .quarter-form {\r\n    padding-top: 15px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .tickets-number-box {\r\n    display: block;\r\n    padding-top: 15px;\r\n    text-align: left;\r\n  }\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n  .open-create-menu {\r\n    left: 15px;\r\n    top: 45px;\r\n  }\r\n}\r\n\r\n.all-contacts-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-contacts-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-contacts-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel {\r\n  width: 1200px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel thead tr th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-left: 0px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .contacts-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-contacts-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-companies-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .select-all .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n  margin-top: -3px;\r\n}\r\n.all-companies-tabel .select-all label {\r\n  font-size: 14px;\r\n  line-height: 40px;\r\n  color: #323c47;\r\n  font-weight: 500;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.all-companies-tabel .companies-main-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel {\r\n  width: 100%;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td {\r\n  background-color: #ffffff;\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td.there-no-data {\r\n  font-size: 18px;\r\n}\r\n.all-companies-tabel\r\n  .companies-main-tabel\r\n  .companies-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .checkbox {\r\n  display: inline-block;\r\n  vertical-align: middle;\r\n}\r\n.all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td .image {\r\n  width: 40px;\r\n  height: 40px;\r\n  margin-left: 15px;\r\n  margin-right: 15px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .companies-control-group {\r\n    margin-top: 15px;\r\n  }\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 0px;\r\n  }\r\n  .all-companies-container\r\n    .all-companies-tabel\r\n    .companies-main-tabel\r\n    .companies-tabel {\r\n    width: 992px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .all-companies-container .create-button {\r\n    float: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.all-open-ticket-tabel {\r\n  display: grid;\r\n  width: 100%;\r\n}\r\n.all-open-ticket-tabel .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n.all-open-ticket-tabel .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel {\r\n  overflow-x: scroll;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel {\r\n  width: 1500px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel thead tr th {\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  thead\r\n  tr\r\n  th:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td {\r\n  color: #323c47;\r\n  font-size: 12px;\r\n  line-height: 32px;\r\n  font-weight: 600;\r\n  padding: 15px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(1) {\r\n  padding-right: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td:nth-child(2) {\r\n  padding-left: 5px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td.subjects {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td.date {\r\n  font-size: 11px;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .image {\r\n  width: 32px;\r\n  height: 32px;\r\n  border-radius: 50%;\r\n  overflow: hidden;\r\n  background-color: #a9b9c6;\r\n  margin-right: 10px;\r\n  display: inline-block;\r\n  vertical-align: top;\r\n}\r\n.all-open-ticket-tabel\r\n  .open-tickets-tabel\r\n  .open-ticket-tabel\r\n  tbody\r\n  tr\r\n  td\r\n  .priority {\r\n  background-color: rgba(169, 185, 198, 0.3);\r\n  padding: 4px 10px;\r\n  color: #a9b9c6;\r\n  font-size: 12px;\r\n  font-weight: 500;\r\n  line-height: 20px;\r\n  border-radius: 3px;\r\n  display: inline-block;\r\n  min-width: 70px;\r\n  text-align: center;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .sortby {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n  .filters-button {\r\n    float: left;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .create-btn {\r\n    float: left;\r\n    margin-bottom: 0;\r\n    margin-top: 10px;\r\n  }\r\n}\r\n\r\n@media (min-width: 1200px) {\r\n  .col-xl-8 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 66.66667%;\r\n    -ms-flex: 0 0 66.66667%;\r\n    flex: 0 0 66.66667%;\r\n    max-width: 66.66667%;\r\n  }\r\n  .col-xl-4 {\r\n    position: relative;\r\n    min-height: 1px;\r\n    padding-right: 15px;\r\n    padding-left: 15px;\r\n    -webkit-box-flex: 0;\r\n    -webkit-flex: 0 0 33.33333%;\r\n    -ms-flex: 0 0 33.33333%;\r\n    flex: 0 0 33.33333%;\r\n    max-width: 33.33333%;\r\n  }\r\n}\r\n\r\n.ticket-buttons .white-button {\r\n  border: 1px solid #a9b9c6 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  font-size: 12px;\r\n  color: #a9b9c6 !important;\r\n  display: inline-block;\r\n  padding-right: 12px !important;\r\n  padding-left: 12px !important;\r\n}\r\n.ticket-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n\r\n.ticket-buttons .group-buttons {\r\n  display: inline-block;\r\n}\r\n.ticket-buttons .group-buttons .white-button {\r\n  margin-right: 0;\r\n  border-right: none !important;\r\n}\r\n.ticket-buttons .group-buttons .white-button:last-child {\r\n  border-right: 1px solid #a9b9c6 !important;\r\n  margin-right: 10px;\r\n}\r\n\r\n.ticket-detail-box {\r\n  box-shadow: 0.94px 6px 16px #cfdff71a;\r\n  border-radius: 3px;\r\n  margin-bottom: 20px;\r\n}\r\n.ticket-detail-box .ticket-detail-head {\r\n  background: rgba(209, 218, 226, 0.2);\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 15px;\r\n  padding-right: 15px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-image {\r\n  display: inline-block;\r\n  width: 32px;\r\n  height: 32px;\r\n  background-color: #d1dae2;\r\n  overflow: hidden;\r\n  vertical-align: top;\r\n  border-radius: 50%;\r\n  margin-right: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text {\r\n  display: inline-block;\r\n  width: 86%;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p {\r\n  display: block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  margin-bottom: 2px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p a {\r\n  color: #3b7cff;\r\n  font-weight: 500;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p strong {\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-text p span {\r\n  color: #323c47;\r\n}\r\n.ticket-detail-box .ticket-detail-head .head-time-text {\r\n  display: inline-block;\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-right: 15px;\r\n  vertical-align: top;\r\n  padding-top: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button {\r\n  display: inline-block;\r\n  padding: 10px 0 0 0 !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  line-height: 16px;\r\n  background-color: transparent !important;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-head .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box {\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box strong {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box p {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 10px;\r\n  margin-bottom: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box span {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 0px;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul {\r\n  display: block;\r\n  list-style: none;\r\n  padding: 0 0 10px 0;\r\n  margin: 0;\r\n}\r\n.ticket-detail-box .ticket-detail-text-box ul li {\r\n  display: block;\r\n  font-size: 13px;\r\n  line-height: 24px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n  padding-bottom: 3px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons {\r\n  padding-top: 0px;\r\n  padding-bottom: 10px;\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button {\r\n  padding: 7px 7px !important;\r\n  width: auto;\r\n  min-width: inherit;\r\n  margin-bottom: 0;\r\n  border-radius: 3px;\r\n  margin-top: 7px;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button i {\r\n  color: #a9b9c6 !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.trash {\r\n  border: 1px solid #e6e6e6;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .white-button.saved {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  color: #a9b9c6 !important;\r\n  padding: 7px 15px !important;\r\n}\r\n.ticket-detail-box .ticket-detail-buttons .blue-button {\r\n  padding: 15px 30px !important;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.properties-form {\r\n  display: block;\r\n  padding: 30px 45px;\r\n  background: #f0f3f7;\r\n  box-shadow: 0px 2px 6px #464c56a8;\r\n}\r\n.properties-form h3 {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 17px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  padding-bottom: 20px;\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group {\r\n  padding-bottom: 10px;\r\n}\r\n.properties-form .form-group label {\r\n  display: block;\r\n  color: #323c47;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 600;\r\n  margin-bottom: 0;\r\n}\r\n.properties-form .form-group select {\r\n  background-color: transparent;\r\n  color: #d1dae2;\r\n  font-size: 13px;\r\n  line-height: 20px;\r\n  font-weight: 400;\r\n  border: none;\r\n  border-bottom: 1px solid #c7d0d9;\r\n  width: 100%;\r\n  cursor: pointer;\r\n}\r\n.properties-form .form-group select:focus {\r\n  outline: none;\r\n}\r\n.properties-form .form-group .blue-button {\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n  padding: 15px 60px !important;\r\n  margin: 0;\r\n}\r\n.properties-form .form-group .blue-button:focus {\r\n  outline: none;\r\n}\r\n\r\n@media (max-width: 992px) {\r\n  .ticket-buttons .white-button {\r\n    padding-right: 7px !important;\r\n    padding-left: 8px !important;\r\n    font-size: 10px;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .head-time-text {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-head .white-button {\r\n    float: left;\r\n  }\r\n  .ticket-detail-box .ticket-detail-buttons .detail-right-buttons {\r\n    text-align: left;\r\n    margin-top: 15px;\r\n  }\r\n}\r\n\r\n.reports-page-container {\r\n  padding: 10px;\r\n}\r\n.reports-page-container .reports-left {\r\n  background-color: #f0f3f7;\r\n  border-radius: 3px;\r\n  padding: 20px 30px 30px;\r\n}\r\n.reports-page-container .reports-left .heading {\r\n  color: #323c47;\r\n  font-size: 20px;\r\n  line-height: 24px;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-left .ask-question {\r\n  border: 1px solid #d1dae2;\r\n  color: #929598;\r\n  font-size: 12px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n  padding: 7px 15px;\r\n  margin-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box {\r\n  border-top: 1px solid #d1dae2;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.productivity ul li span {\r\n  background-color: rgba(67, 138, 251, 0.1);\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.productivity ul li span i {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.happiness ul li span {\r\n  background-color: rgba(246, 115, 115, 0.1);\r\n}\r\n.reports-page-container .reports-left .helpdesk-box.happiness ul li span i {\r\n  color: #f67373;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box .helpdesk-heading {\r\n  color: #323c47;\r\n  font-size: 14px;\r\n  font-weight: 600;\r\n  line-height: 18px;\r\n  padding-bottom: 0px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul {\r\n  padding-top: 10px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li {\r\n  margin-right: 30px;\r\n  width: 100px;\r\n  vertical-align: top;\r\n  margin-bottom: 10px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li:last-child {\r\n  margin-right: 0;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li span {\r\n  width: 80px;\r\n  height: 80px;\r\n  line-height: 80px;\r\n  background-color: rgba(72, 199, 65, 0.1);\r\n  border-radius: 3px;\r\n  margin-bottom: 5px;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li span i {\r\n  font-size: 32px;\r\n  line-height: 80px;\r\n  color: #48c741;\r\n}\r\n.reports-page-container .reports-left .helpdesk-box ul li strong {\r\n  font-size: 11px;\r\n  line-height: 16px;\r\n  font-weight: 600;\r\n  color: #323c47;\r\n  text-transform: uppercase;\r\n}\r\n.reports-page-container .reports-left .build-reports-text {\r\n  border-top: 1px solid #d1dae2;\r\n  padding-top: 20px;\r\n  padding-bottom: 20px;\r\n}\r\n.reports-page-container .reports-left .build-reports-text p {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n  margin-bottom: 3px;\r\n}\r\n.reports-page-container .reports-left .build-reports-text strong {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #438afb;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-left .build-reports-text strong a {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-right {\r\n  background-color: #f0f3f7;\r\n  border-radius: 3px;\r\n  padding: 20px 15px 30px;\r\n  min-height: 777px;\r\n}\r\n.reports-page-container .reports-right .heading h3 {\r\n  font-size: 16px;\r\n  line-height: 22px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-right .heading p {\r\n  font-size: 11px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 500;\r\n}\r\n.reports-page-container .reports-right .customize-link {\r\n  font-size: 12px;\r\n  line-height: 16px;\r\n  color: #438afb;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container .reports-right .customize-link a {\r\n  color: #438afb;\r\n}\r\n.reports-page-container .reports-right .insight-box {\r\n  border: 1px solid #d1dae2;\r\n  padding: 10px 15px;\r\n  margin-bottom: 15px;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-heading {\r\n  color: #d1dae2;\r\n  font-size: 11px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-heading strong {\r\n  color: #3b7cff;\r\n  font-size: 13px;\r\n  font-weight: 600;\r\n}\r\n.reports-page-container\r\n  .reports-right\r\n  .insight-box\r\n  .insight-heading-right-text {\r\n  color: #3b7cff;\r\n  font-size: 12px;\r\n  font-weight: 600;\r\n  line-height: 18px;\r\n}\r\n.reports-page-container\r\n  .reports-right\r\n  .insight-box\r\n  .insight-heading-right-text.red {\r\n  color: #f67373;\r\n}\r\n.reports-page-container .reports-right .insight-box .insight-text {\r\n  color: #a9b9c6;\r\n  font-size: 11px;\r\n  line-height: 18px;\r\n  font-weight: 500;\r\n}\r\n\r\n@media (max-width: 1200px) {\r\n  .reports-page-container .reports-right {\r\n    margin-top: 30px;\r\n  }\r\n}\r\n\r\n.desk-depth-container .heading h2 {\r\n  font-size: 18px;\r\n  line-height: 24px;\r\n  color: #323c47;\r\n  font-weight: 600;\r\n  margin-bottom: 2px;\r\n}\r\n\r\n.desk-depth-container .heading span {\r\n  font-size: 13px;\r\n  line-height: 16px;\r\n  color: #a9b9c6;\r\n  font-weight: 400;\r\n}\r\n\r\n.desk-depth-container .filters-buttons .blue-button {\r\n  margin-right: 15px;\r\n  margin-bottom: 0;\r\n}\r\n\r\n.desk-depth-container .filters-buttons .white-button {\r\n  padding: 0px !important;\r\n  font-size: 28px;\r\n  line-height: 34px;\r\n  vertical-align: top;\r\n  margin-right: 15px;\r\n  margin-bottom: 0;\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .filters-buttons .white-button:hover {\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .filters-buttons .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n\r\n.desk-depth-container .desk-box {\r\n  background-color: #f0f3f7;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  margin-bottom: 30px;\r\n}\r\n.desk-depth-container .desk-box a {\r\n  padding: 10px;\r\n  padding-bottom: 20px;\r\n  min-height: 160px;\r\n}\r\n.desk-depth-container .desk-box .icon {\r\n  font-size: 16px;\r\n  color: #323c47;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button {\r\n  padding: 0px !important;\r\n  font-size: 16px;\r\n  line-height: 20px;\r\n  vertical-align: top;\r\n  margin-right: 0;\r\n  margin-bottom: 0;\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button:hover {\r\n  background-color: transparent !important;\r\n}\r\n.desk-depth-container .desk-box .icon .white-button i {\r\n  color: #323c47 !important;\r\n}\r\n.desk-depth-container .desk-box .number {\r\n  font-size: 24px;\r\n  line-height: 28px;\r\n  font-weight: 600;\r\n  color: #3b4859;\r\n  padding-bottom: 10px;\r\n  padding-top: 10px;\r\n}\r\n.desk-depth-container .desk-box .text {\r\n  font-size: 20px;\r\n  line-height: 28px;\r\n  font-weight: 400;\r\n  color: #3b4859;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .desk-depth-container .filters-buttons {\r\n    text-align: left;\r\n  }\r\n}\r\n\r\n.charts-boxs {\r\n  padding-left: 30px;\r\n  padding-right: 30px;\r\n}\r\n.charts-boxs .chart-box {\r\n  background: #f0f3f7 0% 0% no-repeat padding-box;\r\n  box-shadow: 0px 1px 5px #00000029;\r\n  border-radius: 5px;\r\n  min-height: 400px;\r\n  margin-bottom: 30px;\r\n  padding: 30px;\r\n}\r\n\r\n/*# sourceMappingURL=servicedesk.light.css.map */\r\n"
               ],
               sourceRoot: ""
             }
@@ -19200,6 +21421,32 @@ define(["moment", "react", "react-dom"], function(
 
             return "/*# " + data + " */";
           }
+
+          /***/
+        },
+
+      /***/ "../node_modules/css-loader/lib/url/escape.js":
+        /*!****************************************************!*\
+  !*** ../node_modules/css-loader/lib/url/escape.js ***!
+  \****************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports) {
+          module.exports = function escape(url) {
+            if (typeof url !== "string") {
+              return url;
+            }
+            // If url is already wrapped in quotes, remove them
+            if (/^['"].*['"]$/.test(url)) {
+              url = url.slice(1, -1);
+            }
+            // Should url be wrapped?
+            // See https://drafts.csswg.org/css-values-3/#urls
+            if (/["'() \t\n]/.test(url)) {
+              return '"' + url.replace(/"/g, '\\"').replace(/\n/g, "\\n") + '"';
+            }
+
+            return url;
+          };
 
           /***/
         },
@@ -56507,9 +58754,9 @@ object-assign
                       React.createElement(
                         "option",
                         {
-                          value: optionData[index]
+                          value: JSON.stringify(optionData[index])
                         },
-                        optionData[index]
+                        optionData[index].companyName
                       )
                     );
                   });
@@ -56580,15 +58827,901 @@ object-assign
           /***/
         },
 
+      /***/ "./components/Multiselect/assets/closeicon/css/fontello.css":
+        /*!******************************************************************!*\
+  !*** ./components/Multiselect/assets/closeicon/css/fontello.css ***!
+  \******************************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          var content = __webpack_require__(
+            /*! !../../../../../../node_modules/css-loader??ref--7-1!./fontello.css */ "../node_modules/css-loader/index.js?!./components/Multiselect/assets/closeicon/css/fontello.css"
+          );
+
+          if (typeof content === "string") content = [[module.i, content, ""]];
+
+          var transform;
+          var insertInto;
+
+          var options = { hmr: true };
+
+          options.transform = transform;
+          options.insertInto = undefined;
+
+          var update = __webpack_require__(
+            /*! ../../../../../../node_modules/style-loader/lib/addStyles.js */ "../node_modules/style-loader/lib/addStyles.js"
+          )(content, options);
+
+          if (content.locals) module.exports = content.locals;
+
+          if (false) {
+          }
+
+          /***/
+        },
+
+      /***/ "./components/Multiselect/assets/closeicon/font/fontello.eot?73464045":
+        /*!****************************************************************************!*\
+  !*** ./components/Multiselect/assets/closeicon/font/fontello.eot?73464045 ***!
+  \****************************************************************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            __webpack_require__.p + "a15913f1ff5ed1b6620077dac9fa6f81.eot";
+
+          /***/
+        },
+
+      /***/ "./components/Multiselect/assets/closeicon/font/fontello.svg?73464045":
+        /*!****************************************************************************!*\
+  !*** ./components/Multiselect/assets/closeicon/font/fontello.svg?73464045 ***!
+  \****************************************************************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pg0KPCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj4NCjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCjxtZXRhZGF0YT5Db3B5cmlnaHQgKEMpIDIwMTkgYnkgb3JpZ2luYWwgYXV0aG9ycyBAIGZvbnRlbGxvLmNvbTwvbWV0YWRhdGE+DQo8ZGVmcz4NCjxmb250IGlkPSJmb250ZWxsbyIgaG9yaXotYWR2LXg9IjEwMDAiID4NCjxmb250LWZhY2UgZm9udC1mYW1pbHk9ImZvbnRlbGxvIiBmb250LXdlaWdodD0iNDAwIiBmb250LXN0cmV0Y2g9Im5vcm1hbCIgdW5pdHMtcGVyLWVtPSIxMDAwIiBhc2NlbnQ9Ijg1MCIgZGVzY2VudD0iLTE1MCIgLz4NCjxtaXNzaW5nLWdseXBoIGhvcml6LWFkdi14PSIxMDAwIiAvPg0KPGdseXBoIGdseXBoLW5hbWU9ImNhbmNlbC1jaXJjbGVkIiB1bmljb2RlPSImI3hlODAwOyIgZD0iTTY0MSAyMjRxMCAxNC0xMCAyNWwtMTAxIDEwMSAxMDEgMTAxcTEwIDExIDEwIDI1IDAgMTUtMTAgMjZsLTUxIDUwcS0xMCAxMS0yNSAxMS0xNSAwLTI1LTExbC0xMDEtMTAxLTEwMSAxMDFxLTExIDExLTI1IDExLTE2IDAtMjYtMTFsLTUwLTUwcS0xMS0xMS0xMS0yNiAwLTE0IDExLTI1bDEwMS0xMDEtMTAxLTEwMXEtMTEtMTEtMTEtMjUgMC0xNSAxMS0yNmw1MC01MHExMC0xMSAyNi0xMSAxNCAwIDI1IDExbDEwMSAxMDEgMTAxLTEwMXExMC0xMSAyNS0xMSAxNSAwIDI1IDExbDUxIDUwcTEwIDExIDEwIDI2eiBtMjE2IDEyNnEwLTExNy01Ny0yMTV0LTE1Ni0xNTYtMjE1LTU4LTIxNiA1OC0xNTUgMTU2LTU4IDIxNSA1OCAyMTUgMTU1IDE1NiAyMTYgNTggMjE1LTU4IDE1Ni0xNTYgNTctMjE1eiIgaG9yaXotYWR2LXg9Ijg1Ny4xIiAvPg0KDQo8Z2x5cGggZ2x5cGgtbmFtZT0iY2FuY2VsIiB1bmljb2RlPSImI3hlODAxOyIgZD0iTTcyNCAxMTJxMC0yMi0xNS0zOGwtNzYtNzZxLTE2LTE1LTM4LTE1dC0zOCAxNWwtMTY0IDE2NS0xNjQtMTY1cS0xNi0xNS0zOC0xNXQtMzggMTVsLTc2IDc2cS0xNiAxNi0xNiAzOHQxNiAzOGwxNjQgMTY0LTE2NCAxNjRxLTE2IDE2LTE2IDM4dDE2IDM4bDc2IDc2cTE2IDE2IDM4IDE2dDM4LTE2bDE2NC0xNjQgMTY0IDE2NHExNiAxNiAzOCAxNnQzOC0xNmw3Ni03NnExNS0xNSAxNS0zOHQtMTUtMzhsLTE2NC0xNjQgMTY0LTE2NHExNS0xNSAxNS0zOHoiIGhvcml6LWFkdi14PSI3ODUuNyIgLz4NCg0KPGdseXBoIGdseXBoLW5hbWU9ImNhbmNlbC1jaXJjbGVkMiIgdW5pY29kZT0iJiN4ZTgwMjsiIGQ9Ik02MTIgMjQ4bC04MS04MnEtNi01LTEzLTV0LTEzIDVsLTc2IDc3LTc3LTc3cS01LTUtMTMtNXQtMTIgNWwtODIgODJxLTYgNi02IDEzdDYgMTNsNzYgNzYtNzYgNzdxLTYgNS02IDEydDYgMTNsODIgODJxNSA1IDEyIDV0MTMtNWw3Ny03NyA3NiA3N3E2IDUgMTMgNXQxMy01bDgxLTgycTYtNSA2LTEzdC02LTEybC03Ni03NyA3Ni03NnE2LTYgNi0xM3QtNi0xM3ogbTEyMCAxMDJxMCA4My00MSAxNTJ0LTExMCAxMTEtMTUyIDQxLTE1My00MS0xMTAtMTExLTQxLTE1MiA0MS0xNTIgMTEwLTExMSAxNTMtNDEgMTUyIDQxIDExMCAxMTEgNDEgMTUyeiBtMTI1IDBxMC0xMTctNTctMjE1dC0xNTYtMTU2LTIxNS01OC0yMTYgNTgtMTU1IDE1Ni01OCAyMTUgNTggMjE1IDE1NSAxNTYgMjE2IDU4IDIxNS01OCAxNTYtMTU2IDU3LTIxNXoiIGhvcml6LWFkdi14PSI4NTcuMSIgLz4NCg0KPGdseXBoIGdseXBoLW5hbWU9ImRvd24tZGlyIiB1bmljb2RlPSImI3hlODAzOyIgZD0iTTU3MSA0NTdxMC0xNC0xMC0yNWwtMjUwLTI1MHEtMTEtMTEtMjUtMTF0LTI1IDExbC0yNTAgMjUwcS0xMSAxMS0xMSAyNXQxMSAyNSAyNSAxMWg1MDBxMTQgMCAyNS0xMXQxMC0yNXoiIGhvcml6LWFkdi14PSI1NzEuNCIgLz4NCg0KPGdseXBoIGdseXBoLW5hbWU9IndpbmRvdy1jbG9zZSIgdW5pY29kZT0iJiN4ZjJkMzsiIGQ9Ik02NTYgMTEzbDgxIDgxcTYgNiA2IDEzdC02IDEzbC0xMzAgMTMwIDEzMCAxMzBxNiA2IDYgMTN0LTYgMTNsLTgxIDgxcS02IDYtMTMgNnQtMTMtNmwtMTMwLTEzMC0xMzAgMTMwcS02IDYtMTMgNnQtMTMtNmwtODEtODFxLTYtNi02LTEzdDYtMTNsMTMwLTEzMC0xMzAtMTMwcS02LTYtNi0xM3Q2LTEzbDgxLTgxcTYtNiAxMy02dDEzIDZsMTMwIDEzMCAxMzAtMTMwcTYtNiAxMy02dDEzIDZ6IG0zNDQgNTc2di02NzhxMC0zNy0yNi02M3QtNjMtMjdoLTgyMnEtMzYgMC02MyAyN3QtMjYgNjN2Njc4cTAgMzcgMjYgNjN0NjMgMjdoODIycTM3IDAgNjMtMjd0MjYtNjN6IiBob3Jpei1hZHYteD0iMTAwMCIgLz4NCjwvZm9udD4NCjwvZGVmcz4NCjwvc3ZnPg==";
+
+          /***/
+        },
+
+      /***/ "./components/Multiselect/assets/closeicon/font/fontello.ttf?73464045":
+        /*!****************************************************************************!*\
+  !*** ./components/Multiselect/assets/closeicon/font/fontello.ttf?73464045 ***!
+  \****************************************************************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            __webpack_require__.p + "b9968a7f0221da2baa3ac5c3dd46a59a.ttf";
+
+          /***/
+        },
+
+      /***/ "./components/Multiselect/assets/closeicon/font/fontello.woff2?73464045":
+        /*!******************************************************************************!*\
+  !*** ./components/Multiselect/assets/closeicon/font/fontello.woff2?73464045 ***!
+  \******************************************************************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            __webpack_require__.p + "85bed4b35545aad42740cf760a408d3a.woff2";
+
+          /***/
+        },
+
+      /***/ "./components/Multiselect/assets/closeicon/font/fontello.woff?73464045":
+        /*!*****************************************************************************!*\
+  !*** ./components/Multiselect/assets/closeicon/font/fontello.woff?73464045 ***!
+  \*****************************************************************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            __webpack_require__.p + "3cd041eeefbc33ff9ae03ff0c2b6c841.woff";
+
+          /***/
+        },
+
+      /***/ "./components/Multiselect/multiselects/multiselect.component.css":
+        /*!***********************************************************************!*\
+  !*** ./components/Multiselect/multiselects/multiselect.component.css ***!
+  \***********************************************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          var content = __webpack_require__(
+            /*! !../../../../node_modules/css-loader??ref--7-1!./multiselect.component.css */ "../node_modules/css-loader/index.js?!./components/Multiselect/multiselects/multiselect.component.css"
+          );
+
+          if (typeof content === "string") content = [[module.i, content, ""]];
+
+          var transform;
+          var insertInto;
+
+          var options = { hmr: true };
+
+          options.transform = transform;
+          options.insertInto = undefined;
+
+          var update = __webpack_require__(
+            /*! ../../../../node_modules/style-loader/lib/addStyles.js */ "../node_modules/style-loader/lib/addStyles.js"
+          )(content, options);
+
+          if (content.locals) module.exports = content.locals;
+
+          if (false) {
+          }
+
+          /***/
+        },
+
       /***/ "./components/Multiselect/multiselects/multiselect.component.jsx":
         /*!***********************************************************************!*\
   !*** ./components/Multiselect/multiselects/multiselect.component.jsx ***!
   \***********************************************************************/
-        /*! no static exports found */
-        /***/ function(module, exports) {
-          throw new Error(
-            "Module build failed (from ../node_modules/babel-loader/lib/index.js):\nSyntaxError: E:\\plugins\\xformation-servicedesk-ui-plugin\\src\\components\\Multiselect\\multiselects\\multiselect.component.jsx: Support for the experimental syntax 'jsx' isn't currently enabled (294:7):\n\n\u001b[0m \u001b[90m 292 | \u001b[39m    \u001b[36mconst\u001b[39m { options } \u001b[33m=\u001b[39m \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mstate\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 293 | \u001b[39m    \u001b[36mreturn\u001b[39m (\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 294 | \u001b[39m      \u001b[33m<\u001b[39m\u001b[33mul\u001b[39m className\u001b[33m=\u001b[39m{\u001b[32m`optionContainer`\u001b[39m} style\u001b[33m=\u001b[39m{style[\u001b[32m'optionContainer'\u001b[39m]}\u001b[33m>\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m     | \u001b[39m      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 295 | \u001b[39m        {options\u001b[33m.\u001b[39mlength \u001b[33m===\u001b[39m \u001b[35m0\u001b[39m \u001b[33m&&\u001b[39m \u001b[33m<\u001b[39m\u001b[33mspan\u001b[39m style\u001b[33m=\u001b[39m{style[\u001b[32m'notFound'\u001b[39m]} className\u001b[33m=\u001b[39m{\u001b[32m`notFound ${ms.notFound}`\u001b[39m}\u001b[33m>\u001b[39m{emptyRecordMsg}\u001b[33m<\u001b[39m\u001b[33m/\u001b[39m\u001b[33mspan\u001b[39m\u001b[33m>\u001b[39m}\u001b[0m\n\u001b[0m \u001b[90m 296 | \u001b[39m        {\u001b[33m!\u001b[39mgroupBy \u001b[33m?\u001b[39m \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mrenderNormalOption() \u001b[33m:\u001b[39m \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mrenderGroupByOptions()}\u001b[0m\n\u001b[0m \u001b[90m 297 | \u001b[39m      \u001b[33m<\u001b[39m\u001b[33m/\u001b[39m\u001b[33mul\u001b[39m\u001b[33m>\u001b[39m\u001b[0m\n\nAdd @babel/preset-react (https://git.io/JfeDR) to the 'presets' section of your Babel config to enable transformation.\nIf you want to leave it as-is, add @babel/plugin-syntax-jsx (https://git.io/vb4yA) to the 'plugins' section to enable parsing.\n    at Parser._raise (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:764:17)\n    at Parser.raiseWithData (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:757:17)\n    at Parser.expectOnePlugin (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:8942:18)\n    at Parser.parseExprAtom (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:10221:22)\n    at Parser.parseExprSubscripts (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9789:23)\n    at Parser.parseUpdate (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9769:21)\n    at Parser.parseMaybeUnary (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9758:17)\n    at Parser.parseExprOps (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9628:23)\n    at Parser.parseMaybeConditional (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9602:23)\n    at Parser.parseMaybeAssign (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9565:21)\n    at Parser.parseParenAndDistinguishExpression (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:10418:28)\n    at Parser.parseExprAtom (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:10122:21)\n    at Parser.parseExprSubscripts (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9789:23)\n    at Parser.parseUpdate (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9769:21)\n    at Parser.parseMaybeUnary (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9758:17)\n    at Parser.parseExprOps (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9628:23)\n    at Parser.parseMaybeConditional (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9602:23)\n    at Parser.parseMaybeAssign (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9565:21)\n    at Parser.parseExpression (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:9517:23)\n    at Parser.parseReturnStatement (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:11700:28)\n    at Parser.parseStatementContent (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:11379:21)\n    at Parser.parseStatement (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:11331:17)\n    at Parser.parseBlockOrModuleBlockBody (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:11913:25)\n    at Parser.parseBlockBody (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:11899:10)\n    at Parser.parseBlock (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:11883:10)\n    at Parser.parseFunctionBody (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:10901:24)\n    at Parser.parseFunctionBodyAndFinish (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:10884:10)\n    at Parser.parseMethod (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:10827:10)\n    at Parser.pushClassMethod (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:12334:30)\n    at Parser.parseClassMemberWithIsStatic (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:12251:12)\n    at Parser.parseClassMember (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:12193:10)\n    at E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:12141:14\n    at Parser.withTopicForbiddingContext (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:11206:14)\n    at Parser.parseClassBody (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:12118:10)\n    at Parser.parseClass (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:12093:22)\n    at Parser.parseStatementContent (E:\\plugins\\xformation-servicedesk-ui-plugin\\node_modules\\@babel\\parser\\lib\\index.js:11373:21)"
+        /*! exports provided: Multiselect */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony export (binding) */ __webpack_require__.d(
+            __webpack_exports__,
+            "Multiselect",
+            function() {
+              return Multiselect;
+            }
           );
+          /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(
+            /*! react */ "react"
+          );
+          /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/ __webpack_require__.n(
+            react__WEBPACK_IMPORTED_MODULE_0__
+          );
+          /* harmony import */ var _multiselect_component_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(
+            /*! ./multiselect.component.css */ "./components/Multiselect/multiselects/multiselect.component.css"
+          );
+          /* harmony import */ var _multiselect_component_css__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/ __webpack_require__.n(
+            _multiselect_component_css__WEBPACK_IMPORTED_MODULE_1__
+          );
+          /* harmony import */ var _assets_closeicon_css_fontello_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(
+            /*! ../assets/closeicon/css/fontello.css */ "./components/Multiselect/assets/closeicon/css/fontello.css"
+          );
+          /* harmony import */ var _assets_closeicon_css_fontello_css__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/ __webpack_require__.n(
+            _assets_closeicon_css_fontello_css__WEBPACK_IMPORTED_MODULE_2__
+          );
+
+          const closeIconTypes = {
+            circle: "icon_cancel_circled",
+            circle2: "icon_cancel_circled2",
+            close: "icon_window_close",
+            cancel: "icon_cancel"
+          };
+          class Multiselect extends react__WEBPACK_IMPORTED_MODULE_0__[
+            "Component"
+          ] {
+            constructor(props) {
+              super(props);
+              this.state = {
+                inputValue: "",
+                options: props.options,
+                filteredOptions: props.options,
+                unfilteredOptions: props.options,
+                selectedValues: Object.assign([], props.selectedValues),
+                preSelectedValues: Object.assign([], props.selectedValues),
+                toggleOptionsList: false,
+                highlightOption: props.avoidHighlightFirstOption ? -1 : 0,
+                showCheckbox: props.showCheckbox,
+                groupedObject: [],
+                closeIconType:
+                  closeIconTypes[props.closeIcon] || closeIconTypes["circle"]
+              };
+              this.searchWrapper = /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                "createRef"
+              ]();
+              this.searchBox = /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                "createRef"
+              ]();
+              this.onChange = this.onChange.bind(this);
+              this.onKeyPress = this.onKeyPress.bind(this);
+              this.renderMultiselectContainer = this.renderMultiselectContainer.bind(
+                this
+              );
+              this.renderSelectedList = this.renderSelectedList.bind(this);
+              this.onRemoveSelectedItem = this.onRemoveSelectedItem.bind(this);
+              this.toggelOptionList = this.toggelOptionList.bind(this);
+              this.onArrowKeyNavigation = this.onArrowKeyNavigation.bind(this);
+              this.onSelectItem = this.onSelectItem.bind(this);
+              this.filterOptionsByInput = this.filterOptionsByInput.bind(this);
+              this.removeSelectedValuesFromOptions = this.removeSelectedValuesFromOptions.bind(
+                this
+              );
+              this.isSelectedValue = this.isSelectedValue.bind(this);
+              this.fadeOutSelection = this.fadeOutSelection.bind(this);
+              this.isDisablePreSelectedValues = this.isDisablePreSelectedValues.bind(
+                this
+              );
+              this.renderGroupByOptions = this.renderGroupByOptions.bind(this);
+              this.renderNormalOption = this.renderNormalOption.bind(this);
+              this.listenerCallback = this.listenerCallback.bind(this);
+              this.resetSelectedValues = this.resetSelectedValues.bind(this);
+              this.getSelectedItems = this.getSelectedItems.bind(this);
+              this.getSelectedItemsCount = this.getSelectedItemsCount.bind(
+                this
+              );
+            }
+
+            initialSetValue() {
+              const { showCheckbox, groupBy, singleSelect } = this.props;
+              const { options } = this.state;
+
+              if (!showCheckbox && !singleSelect) {
+                this.removeSelectedValuesFromOptions(false);
+              }
+
+              if (groupBy && showCheckbox) {
+                this.groupByOptions(options);
+              }
+            }
+
+            resetSelectedValues() {
+              const { unfilteredOptions } = this.state;
+              this.setState(
+                {
+                  selectedValues: [],
+                  preSelectedValues: [],
+                  options: unfilteredOptions,
+                  filteredOptions: unfilteredOptions
+                },
+                this.initialSetValue
+              );
+            }
+
+            getSelectedItems() {
+              return this.state.selectedValues;
+            }
+
+            getSelectedItemsCount() {
+              return this.state.selectedValues.length;
+            }
+
+            componentDidMount() {
+              this.initialSetValue();
+              this.searchWrapper.current.addEventListener(
+                "click",
+                this.listenerCallback
+              );
+            }
+
+            componentDidUpdate(prevProps) {
+              const { options, selectedValues } = this.props;
+              const {
+                options: prevOptions,
+                selectedValues: prevSelectedvalues
+              } = prevProps;
+
+              if (JSON.stringify(prevOptions) !== JSON.stringify(options)) {
+                this.setState(
+                  {
+                    options,
+                    filteredOptions: options,
+                    unfilteredOptions: options
+                  },
+                  this.initialSetValue
+                );
+              }
+
+              if (
+                JSON.stringify(prevSelectedvalues) !==
+                JSON.stringify(selectedValues)
+              ) {
+                this.setState(
+                  {
+                    selectedValues: Object.assign([], selectedValues),
+                    preSelectedValues: Object.assign([], selectedValues)
+                  },
+                  this.initialSetValue
+                );
+              }
+            }
+
+            listenerCallback() {
+              this.searchBox.current.focus();
+            }
+
+            componentWillUnmount() {
+              this.searchWrapper.current.removeEventListener(
+                "click",
+                this.listenerCallback
+              );
+            } // Skipcheck flag - value will be true when the func called from on deselect anything.
+
+            removeSelectedValuesFromOptions(skipCheck) {
+              const { isObject, displayValue, groupBy } = this.props;
+              const {
+                selectedValues = [],
+                unfilteredOptions,
+                options
+              } = this.state;
+
+              if (!skipCheck && groupBy) {
+                this.groupByOptions(options);
+              }
+
+              if (!selectedValues.length && !skipCheck) {
+                return;
+              }
+
+              if (isObject) {
+                let optionList = unfilteredOptions.filter(item => {
+                  return selectedValues.findIndex(
+                    v => v[displayValue] === item[displayValue]
+                  ) === -1
+                    ? true
+                    : false;
+                });
+
+                if (groupBy) {
+                  this.groupByOptions(optionList);
+                }
+
+                this.setState(
+                  {
+                    options: optionList,
+                    filteredOptions: optionList
+                  },
+                  this.filterOptionsByInput
+                );
+                return;
+              }
+
+              let optionList = unfilteredOptions.filter(
+                item => selectedValues.indexOf(item) === -1
+              );
+              this.setState(
+                {
+                  options: optionList,
+                  filteredOptions: optionList
+                },
+                this.filterOptionsByInput
+              );
+            }
+
+            groupByOptions(options) {
+              const { groupBy } = this.props;
+              const groupedObject = options.reduce(function(r, a) {
+                const key = a[groupBy] || "Others";
+                r[key] = r[key] || [];
+                r[key].push(a);
+                return r;
+              }, Object.create({}));
+              this.setState({
+                groupedObject
+              });
+            }
+
+            onChange(event) {
+              this.setState(
+                {
+                  inputValue: event.target.value
+                },
+                this.filterOptionsByInput
+              );
+            }
+
+            onKeyPress(event) {
+              if (this.props.onKeyPress && event.key == "Enter") {
+                this.props.onKeyPress(event);
+              }
+            }
+
+            filterOptionsByInput() {
+              let { options, filteredOptions, inputValue } = this.state;
+              const { isObject, displayValue } = this.props;
+
+              if (isObject) {
+                options = filteredOptions.filter(i =>
+                  this.matchValues(i[displayValue], inputValue)
+                );
+              } else {
+                options = filteredOptions.filter(i =>
+                  this.matchValues(i, inputValue)
+                );
+              }
+
+              this.groupByOptions(options);
+              this.setState({
+                options
+              });
+            }
+
+            matchValues(value, search) {
+              if (this.props.caseSensitiveSearch) {
+                return value.indexOf(search) > -1;
+              }
+
+              return value.toLowerCase().indexOf(search.toLowerCase()) > -1;
+            }
+
+            onArrowKeyNavigation(e) {
+              const {
+                options,
+                highlightOption,
+                toggleOptionsList,
+                inputValue,
+                selectedValues
+              } = this.state;
+
+              if (e.keyCode === 8 && !inputValue && selectedValues.length) {
+                this.onRemoveSelectedItem(selectedValues.length - 1);
+              }
+
+              if (!options.length) {
+                return;
+              }
+
+              if (e.keyCode === 38) {
+                if (highlightOption > 0) {
+                  this.setState(previousState => ({
+                    highlightOption: previousState.highlightOption - 1
+                  }));
+                } else {
+                  this.setState({
+                    highlightOption: options.length - 1
+                  });
+                }
+              } else if (e.keyCode === 40) {
+                if (highlightOption < options.length - 1) {
+                  this.setState(previousState => ({
+                    highlightOption: previousState.highlightOption + 1
+                  }));
+                } else {
+                  this.setState({
+                    highlightOption: 0
+                  });
+                }
+              } else if (
+                e.key === "Enter" &&
+                options.length &&
+                toggleOptionsList
+              ) {
+                if (highlightOption === -1) {
+                  return;
+                }
+
+                this.onSelectItem(options[highlightOption]);
+              } // TODO: Instead of scrollIntoView need to find better soln for scroll the dropwdown container.
+              // setTimeout(() => {
+              //   const element = document.querySelector("ul.optionContainer .highlight");
+              //   if (element) {
+              //     element.scrollIntoView();
+              //   }
+              // });
+            }
+
+            onRemoveSelectedItem(item) {
+              let { selectedValues, index = 0, isObject } = this.state;
+              const { onRemove, showCheckbox } = this.props;
+
+              if (isObject) {
+                index = selectedValues.findIndex(
+                  i => i[displayValue] === item[displayValue]
+                );
+              } else {
+                index = selectedValues.indexOf(item);
+              }
+
+              selectedValues.splice(index, 1);
+              onRemove(selectedValues, item);
+              this.setState(
+                {
+                  selectedValues
+                },
+                () => {
+                  if (!showCheckbox) {
+                    this.removeSelectedValuesFromOptions(true);
+                  }
+                }
+              );
+            }
+
+            onSelectItem(item) {
+              const { selectedValues } = this.state;
+              const {
+                selectionLimit,
+                onSelect,
+                singleSelect,
+                showCheckbox
+              } = this.props;
+              this.setState({
+                inputValue: ""
+              });
+
+              if (singleSelect) {
+                this.onSingleSelect(item);
+                onSelect([item], item);
+                return;
+              }
+
+              if (this.isSelectedValue(item)) {
+                this.onRemoveSelectedItem(item);
+                return;
+              }
+
+              if (selectionLimit == selectedValues.length) {
+                return;
+              }
+
+              selectedValues.push(item);
+              onSelect(selectedValues, item);
+              this.setState(
+                {
+                  selectedValues
+                },
+                () => {
+                  if (!showCheckbox) {
+                    this.removeSelectedValuesFromOptions(true);
+                  } else {
+                    this.filterOptionsByInput();
+                  }
+                }
+              );
+
+              if (!this.props.closeOnSelect) {
+                this.searchBox.current.focus();
+              }
+            }
+
+            onSingleSelect(item) {
+              this.setState({
+                selectedValues: [item],
+                toggleOptionsList: false
+              });
+            }
+
+            isSelectedValue(item) {
+              const { isObject, displayValue } = this.props;
+              const { selectedValues } = this.state;
+
+              if (isObject) {
+                return (
+                  selectedValues.filter(
+                    i => i[displayValue] === item[displayValue]
+                  ).length > 0
+                );
+              }
+
+              return selectedValues.filter(i => i === item).length > 0;
+            }
+
+            renderOptionList() {
+              const { groupBy, style, emptyRecordMsg } = this.props;
+              const { options } = this.state;
+              return /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                "createElement"
+              ](
+                "ul",
+                {
+                  className: `optionContainer`,
+                  style: style["optionContainer"]
+                },
+                options.length === 0 &&
+                  /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                    "createElement"
+                  ](
+                    "span",
+                    {
+                      style: style["notFound"],
+                      className: `notFound`
+                    },
+                    emptyRecordMsg
+                  ),
+                !groupBy
+                  ? this.renderNormalOption()
+                  : this.renderGroupByOptions()
+              );
+            }
+
+            renderGroupByOptions() {
+              const {
+                isObject = false,
+                displayValue,
+                showCheckbox,
+                style,
+                singleSelect
+              } = this.props;
+              const { groupedObject } = this.state;
+              return Object.keys(groupedObject).map(obj => {
+                return /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                  "createElement"
+                ](
+                  react__WEBPACK_IMPORTED_MODULE_0__["Fragment"],
+                  {
+                    key: obj
+                  },
+                  /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                    "createElement"
+                  ](
+                    "li",
+                    {
+                      className: "groupHeading",
+                      style: style["groupHeading"]
+                    },
+                    obj
+                  ),
+                  groupedObject[obj].map((option, i) =>
+                    /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                      "createElement"
+                    ](
+                      "li",
+                      {
+                        key: `option${i}`,
+                        style: style["option"],
+                        className: `groupChildEle ${this.fadeOutSelection(
+                          option
+                        )} && disableSelection option`,
+                        onClick: () => this.onSelectItem(option)
+                      },
+                      showCheckbox &&
+                        !singleSelect &&
+                        /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                          "createElement"
+                        ]("input", {
+                          type: "checkbox",
+                          className: "checkbox",
+                          readOnly: true,
+                          checked: this.isSelectedValue(option)
+                        }),
+                      isObject
+                        ? option[displayValue]
+                        : (option || "").toString()
+                    )
+                  )
+                );
+              });
+            }
+
+            renderNormalOption() {
+              const {
+                isObject = false,
+                displayValue,
+                showCheckbox,
+                style,
+                singleSelect
+              } = this.props;
+              const { highlightOption } = this.state;
+              return this.state.options.map((option, i) =>
+                /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                  "createElement"
+                ](
+                  "li",
+                  {
+                    key: `option${i}`,
+                    style: style["option"],
+                    className: `${
+                      highlightOption === i ? `highlightOption highlight` : ""
+                    } ${this.fadeOutSelection(option) &&
+                      "disableSelection"} option`,
+                    onClick: () => this.onSelectItem(option)
+                  },
+                  showCheckbox &&
+                    !singleSelect &&
+                    /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                      "createElement"
+                    ]("input", {
+                      type: "checkbox",
+                      readOnly: true,
+                      className: `checkbox checkbox`,
+                      checked: this.isSelectedValue(option)
+                    }),
+                  isObject ? option[displayValue] : (option || "").toString()
+                )
+              );
+            }
+
+            renderSelectedList() {
+              const {
+                isObject = false,
+                displayValue,
+                style,
+                singleSelect
+              } = this.props;
+              const { selectedValues, closeIconType } = this.state;
+              return selectedValues.map((value, index) =>
+                /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                  "createElement"
+                ](
+                  "span",
+                  {
+                    className: `chip ${singleSelect &&
+                      "singleChip"} ${this.isDisablePreSelectedValues(value) &&
+                      "disableSelection"}`,
+                    key: index,
+                    style: style["chips"]
+                  },
+                  !isObject ? (value || "").toString() : value[displayValue],
+                  /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                    "createElement"
+                  ]("i", {
+                    // className={`icon_cancel ${ms[closeIconType]} ${ms.closeIcon}`}
+                    className: "icon_cancel",
+                    onClick: () => this.onRemoveSelectedItem(value)
+                  })
+                )
+              );
+            }
+
+            isDisablePreSelectedValues(value) {
+              const {
+                isObject,
+                disablePreSelectedValues,
+                displayValue
+              } = this.props;
+              const { preSelectedValues } = this.state;
+
+              if (!disablePreSelectedValues || !preSelectedValues.length) {
+                return false;
+              }
+
+              if (isObject) {
+                return (
+                  preSelectedValues.filter(
+                    i => i[displayValue] === value[displayValue]
+                  ).length > 0
+                );
+              }
+
+              return preSelectedValues.filter(i => i === value).length > 0;
+            }
+
+            fadeOutSelection(item) {
+              const { selectionLimit, showCheckbox, singleSelect } = this.props;
+
+              if (singleSelect) {
+                return;
+              }
+
+              const { selectedValues } = this.state;
+
+              if (selectionLimit == -1) {
+                return false;
+              }
+
+              if (selectionLimit != selectedValues.length) {
+                return false;
+              }
+
+              if (selectionLimit == selectedValues.length) {
+                if (!showCheckbox) {
+                  return true;
+                } else {
+                  if (this.isSelectedValue(item)) {
+                    return false;
+                  }
+
+                  return true;
+                }
+              }
+            }
+
+            toggelOptionList() {
+              this.setState({
+                toggleOptionsList: !this.state.toggleOptionsList,
+                highlightOption: this.props.avoidHighlightFirstOption ? -1 : 0
+              });
+            }
+
+            renderMultiselectContainer() {
+              const {
+                inputValue,
+                toggleOptionsList,
+                selectedValues
+              } = this.state;
+              const {
+                placeholder,
+                style,
+                singleSelect,
+                id,
+                hidePlaceholder,
+                disable
+              } = this.props;
+              return /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                "createElement"
+              ](
+                "div",
+                {
+                  className: `multiSelectContainer ${
+                    disable ? `disable_ms disable_ms` : ""
+                  }`,
+                  id: id || "multiselectContainerReact",
+                  style: style["multiselectContainer"]
+                },
+                /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                  "createElement"
+                ](
+                  "div",
+                  {
+                    className: `searchWrapper ${
+                      singleSelect ? "singleSelect" : ""
+                    }`,
+                    ref: this.searchWrapper,
+                    style: style["searchBox"],
+                    onClick: singleSelect ? this.toggelOptionList : () => {}
+                  },
+                  this.renderSelectedList(),
+                  /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                    "createElement"
+                  ]("input", {
+                    type: "text",
+                    ref: this.searchBox,
+                    className: "searchBox",
+                    id: `${id || "search"}_input`,
+                    onChange: this.onChange,
+                    onKeyPress: this.onKeyPress,
+                    value: inputValue,
+                    onFocus: this.toggelOptionList,
+                    onBlur: () => setTimeout(this.toggelOptionList, 200),
+                    placeholder:
+                      (singleSelect && selectedValues.length) ||
+                      (hidePlaceholder && selectedValues.length)
+                        ? ""
+                        : placeholder,
+                    onKeyDown: this.onArrowKeyNavigation,
+                    style: style["inputField"],
+                    autoComplete: "off",
+                    disabled: singleSelect || disable
+                  }),
+                  singleSelect &&
+                    /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                      "createElement"
+                    ]("i", {
+                      className: `icon_cancel icon_down_dir`
+                    })
+                ),
+                /*#__PURE__*/ react__WEBPACK_IMPORTED_MODULE_0__[
+                  "createElement"
+                ](
+                  "div",
+                  {
+                    className: `optionListContainer optionListContainer ${
+                      toggleOptionsList ? "displayBlock" : "displayNone"
+                    }`
+                  },
+                  this.renderOptionList()
+                )
+              );
+            }
+
+            render() {
+              return this.renderMultiselectContainer();
+            }
+          }
+          Multiselect.defaultProps = {
+            options: [],
+            disablePreSelectedValues: false,
+            selectedValues: [],
+            isObject: true,
+            displayValue: "model",
+            showCheckbox: false,
+            selectionLimit: -1,
+            placeholder: "Select",
+            groupBy: "",
+            style: {},
+            emptyRecordMsg: "No Options Available",
+            onSelect: () => {},
+            onRemove: () => {},
+            closeIcon: "circle2",
+            singleSelect: false,
+            caseSensitiveSearch: false,
+            id: "",
+            closeOnSelect: true,
+            avoidHighlightFirstOption: false,
+            hidePlaceholder: false
+          };
 
           /***/
         },
@@ -56632,6 +59765,180 @@ object-assign
               };
             })();
 
+          var __awaiter =
+            (undefined && undefined.__awaiter) ||
+            function(thisArg, _arguments, P, generator) {
+              return new (P || (P = Promise))(function(resolve, reject) {
+                function fulfilled(value) {
+                  try {
+                    step(generator.next(value));
+                  } catch (e) {
+                    reject(e);
+                  }
+                }
+
+                function rejected(value) {
+                  try {
+                    step(generator["throw"](value));
+                  } catch (e) {
+                    reject(e);
+                  }
+                }
+
+                function step(result) {
+                  result.done
+                    ? resolve(result.value)
+                    : new P(function(resolve) {
+                        resolve(result.value);
+                      }).then(fulfilled, rejected);
+                }
+
+                step(
+                  (generator = generator.apply(
+                    thisArg,
+                    _arguments || []
+                  )).next()
+                );
+              });
+            };
+
+          var __generator =
+            (undefined && undefined.__generator) ||
+            function(thisArg, body) {
+              var _ = {
+                  label: 0,
+                  sent: function sent() {
+                    if (t[0] & 1) throw t[1];
+                    return t[1];
+                  },
+                  trys: [],
+                  ops: []
+                },
+                f,
+                y,
+                t,
+                g;
+              return (
+                (g = {
+                  next: verb(0),
+                  throw: verb(1),
+                  return: verb(2)
+                }),
+                typeof Symbol === "function" &&
+                  (g[Symbol.iterator] = function() {
+                    return this;
+                  }),
+                g
+              );
+
+              function verb(n) {
+                return function(v) {
+                  return step([n, v]);
+                };
+              }
+
+              function step(op) {
+                if (f) throw new TypeError("Generator is already executing.");
+
+                while (_) {
+                  try {
+                    if (
+                      ((f = 1),
+                      y &&
+                        (t =
+                          op[0] & 2
+                            ? y["return"]
+                            : op[0]
+                              ? y["throw"] ||
+                                ((t = y["return"]) && t.call(y), 0)
+                              : y.next) &&
+                        !(t = t.call(y, op[1])).done)
+                    )
+                      return t;
+                    if (((y = 0), t)) op = [op[0] & 2, t.value];
+
+                    switch (op[0]) {
+                      case 0:
+                      case 1:
+                        t = op;
+                        break;
+
+                      case 4:
+                        _.label++;
+                        return {
+                          value: op[1],
+                          done: false
+                        };
+
+                      case 5:
+                        _.label++;
+                        y = op[1];
+                        op = [0];
+                        continue;
+
+                      case 7:
+                        op = _.ops.pop();
+
+                        _.trys.pop();
+
+                        continue;
+
+                      default:
+                        if (
+                          !((t = _.trys),
+                          (t = t.length > 0 && t[t.length - 1])) &&
+                          (op[0] === 6 || op[0] === 2)
+                        ) {
+                          _ = 0;
+                          continue;
+                        }
+
+                        if (
+                          op[0] === 3 &&
+                          (!t || (op[1] > t[0] && op[1] < t[3]))
+                        ) {
+                          _.label = op[1];
+                          break;
+                        }
+
+                        if (op[0] === 6 && _.label < t[1]) {
+                          _.label = t[1];
+                          t = op;
+                          break;
+                        }
+
+                        if (t && _.label < t[2]) {
+                          _.label = t[2];
+
+                          _.ops.push(op);
+
+                          break;
+                        }
+
+                        if (t[2]) _.ops.pop();
+
+                        _.trys.pop();
+
+                        continue;
+                    }
+
+                    op = body.call(thisArg, _);
+                  } catch (e) {
+                    op = [6, e];
+                    y = 0;
+                  } finally {
+                    f = t = 0;
+                  }
+                }
+
+                if (op[0] & 5) throw op[1];
+                return {
+                  value: op[0] ? op[1] : void 0,
+                  done: true
+                };
+              }
+            };
+
           Object.defineProperty(exports, "__esModule", {
             value: true
           });
@@ -56645,6 +59952,12 @@ object-assign
           var CustomTextbox_1 = __webpack_require__(
             /*! ./CustomTextbox */ "./components/CustomTextbox.tsx"
           );
+
+          var axios_1 = __webpack_require__(
+            /*! axios */ "../node_modules/axios/index.js"
+          );
+
+          var config_1 = __webpack_require__(/*! ../config */ "./config.ts");
 
           var OpenNewCompanyPopup =
             /** @class */
@@ -56667,45 +59980,106 @@ object-assign
                 };
 
                 _this.handleSubmit = function(event) {
-                  event.preventDefault();
+                  return __awaiter(_this, void 0, void 0, function() {
+                    var errorData,
+                      _a,
+                      companyLogo,
+                      companyName,
+                      description,
+                      notes,
+                      company,
+                      healthCare,
+                      accountTier,
+                      renewalDate,
+                      industry,
+                      sendData,
+                      formData,
+                      data;
 
-                  _this.setState({
-                    isSubmitted: true
+                    return __generator(this, function(_b) {
+                      event.preventDefault();
+                      this.setState({
+                        isSubmitted: true
+                      });
+                      errorData = this.validate(true);
+
+                      if (
+                        errorData.companyName.isValid &&
+                        errorData.description.isValid &&
+                        errorData.notes.isValid &&
+                        errorData.healthCare.isValid &&
+                        errorData.company.isValid &&
+                        errorData.accountTier.isValid &&
+                        errorData.renewalDate.isValid &&
+                        errorData.industry.isValid
+                      ) {
+                        (_a = this.state),
+                          (companyLogo = _a.companyLogo),
+                          (companyName = _a.companyName),
+                          (description = _a.description),
+                          (notes = _a.notes),
+                          (company = _a.company),
+                          (healthCare = _a.healthCare),
+                          (accountTier = _a.accountTier),
+                          (renewalDate = _a.renewalDate),
+                          (industry = _a.industry);
+                        sendData = {
+                          companyLogo: companyLogo,
+                          companyName: companyName,
+                          description: description,
+                          notes: notes,
+                          company: company,
+                          healthCare: healthCare,
+                          accountTier: accountTier,
+                          renewalDate: renewalDate,
+                          industry: industry
+                        };
+                        console.log(sendData);
+                        formData = new FormData();
+                        formData.append("logo", companyLogo);
+                        formData.append("companyName", companyName);
+                        formData.append("description", description);
+                        formData.append("notes", notes);
+                        formData.append("company", company);
+                        formData.append("healthScore", healthCare);
+                        formData.append("accountTier", accountTier);
+                        formData.append("renewalDate", renewalDate);
+                        formData.append("industry", industry);
+                        data = {
+                          companyName: companyName,
+                          description: description,
+                          notes: notes,
+                          company: company,
+                          healthScore: healthCare,
+                          accountTier: accountTier,
+                          renewalDate: renewalDate,
+                          industry: industry
+                        };
+                        axios_1.default
+                          .post(
+                            config_1.config.SERVICEDESK_API_URL +
+                              "/api/companies",
+                            formData,
+                            {
+                              headers: {
+                                "content-type": "multipart/form-data"
+                              }
+                            }
+                          )
+                          .then(function(res) {
+                            console.log(res.data);
+                          })
+                          .catch(function(err) {
+                            return console.log(err);
+                          });
+                      }
+
+                      return [
+                        2
+                        /*return*/
+                      ];
+                    });
                   });
-
-                  var errorData = _this.validate(true);
-
-                  if (
-                    errorData.companyName.isValid &&
-                    errorData.description.isValid &&
-                    errorData.notes.isValid &&
-                    errorData.healthCare.isValid &&
-                    errorData.company.isValid &&
-                    errorData.accountTier.isValid &&
-                    errorData.renewalDate.isValid &&
-                    errorData.industry.isValid
-                  ) {
-                    var _a = _this.state,
-                      companyName = _a.companyName,
-                      description = _a.description,
-                      notes = _a.notes,
-                      company = _a.company,
-                      healthCare = _a.healthCare,
-                      accountTier = _a.accountTier,
-                      renewalDate = _a.renewalDate,
-                      industry = _a.industry;
-                    var sendData = {
-                      companyName: companyName,
-                      description: description,
-                      notes: notes,
-                      company: company,
-                      healthCare: healthCare,
-                      accountTier: accountTier,
-                      renewalDate: renewalDate,
-                      industry: industry
-                    };
-                    console.log(sendData);
-                  }
                 };
 
                 _this.validate = function(isSubmitted) {
@@ -56805,8 +60179,17 @@ object-assign
                   _this.setState(((_a = {}), (_a[name] = value), _a));
                 };
 
+                _this.handleImageChange = function(e) {
+                  console.log("file=", e.target.files[0]);
+
+                  _this.setState({
+                    companyLogo: e.target.files[0]
+                  });
+                };
+
                 _this.state = {
                   modal: false,
+                  companyLogo: null,
                   companyName: "",
                   description: "",
                   notes: "",
@@ -56823,6 +60206,7 @@ object-assign
               OpenNewCompanyPopup.prototype.render = function() {
                 var _a = this.state,
                   modal = _a.modal,
+                  companyLogo = _a.companyLogo,
                   companyName = _a.companyName,
                   description = _a.description,
                   notes = _a.notes,
@@ -56911,6 +60295,12 @@ object-assign
                             },
                             "Upload Logo"
                           ),
+                          React.createElement("input", {
+                            type: "file",
+                            id: "companyLogo",
+                            name: "companyLogo",
+                            onChange: this.handleImageChange
+                          }),
                           React.createElement(
                             "p",
                             {
@@ -57283,6 +60673,180 @@ object-assign
               };
             })();
 
+          var __awaiter =
+            (undefined && undefined.__awaiter) ||
+            function(thisArg, _arguments, P, generator) {
+              return new (P || (P = Promise))(function(resolve, reject) {
+                function fulfilled(value) {
+                  try {
+                    step(generator.next(value));
+                  } catch (e) {
+                    reject(e);
+                  }
+                }
+
+                function rejected(value) {
+                  try {
+                    step(generator["throw"](value));
+                  } catch (e) {
+                    reject(e);
+                  }
+                }
+
+                function step(result) {
+                  result.done
+                    ? resolve(result.value)
+                    : new P(function(resolve) {
+                        resolve(result.value);
+                      }).then(fulfilled, rejected);
+                }
+
+                step(
+                  (generator = generator.apply(
+                    thisArg,
+                    _arguments || []
+                  )).next()
+                );
+              });
+            };
+
+          var __generator =
+            (undefined && undefined.__generator) ||
+            function(thisArg, body) {
+              var _ = {
+                  label: 0,
+                  sent: function sent() {
+                    if (t[0] & 1) throw t[1];
+                    return t[1];
+                  },
+                  trys: [],
+                  ops: []
+                },
+                f,
+                y,
+                t,
+                g;
+              return (
+                (g = {
+                  next: verb(0),
+                  throw: verb(1),
+                  return: verb(2)
+                }),
+                typeof Symbol === "function" &&
+                  (g[Symbol.iterator] = function() {
+                    return this;
+                  }),
+                g
+              );
+
+              function verb(n) {
+                return function(v) {
+                  return step([n, v]);
+                };
+              }
+
+              function step(op) {
+                if (f) throw new TypeError("Generator is already executing.");
+
+                while (_) {
+                  try {
+                    if (
+                      ((f = 1),
+                      y &&
+                        (t =
+                          op[0] & 2
+                            ? y["return"]
+                            : op[0]
+                              ? y["throw"] ||
+                                ((t = y["return"]) && t.call(y), 0)
+                              : y.next) &&
+                        !(t = t.call(y, op[1])).done)
+                    )
+                      return t;
+                    if (((y = 0), t)) op = [op[0] & 2, t.value];
+
+                    switch (op[0]) {
+                      case 0:
+                      case 1:
+                        t = op;
+                        break;
+
+                      case 4:
+                        _.label++;
+                        return {
+                          value: op[1],
+                          done: false
+                        };
+
+                      case 5:
+                        _.label++;
+                        y = op[1];
+                        op = [0];
+                        continue;
+
+                      case 7:
+                        op = _.ops.pop();
+
+                        _.trys.pop();
+
+                        continue;
+
+                      default:
+                        if (
+                          !((t = _.trys),
+                          (t = t.length > 0 && t[t.length - 1])) &&
+                          (op[0] === 6 || op[0] === 2)
+                        ) {
+                          _ = 0;
+                          continue;
+                        }
+
+                        if (
+                          op[0] === 3 &&
+                          (!t || (op[1] > t[0] && op[1] < t[3]))
+                        ) {
+                          _.label = op[1];
+                          break;
+                        }
+
+                        if (op[0] === 6 && _.label < t[1]) {
+                          _.label = t[1];
+                          t = op;
+                          break;
+                        }
+
+                        if (t && _.label < t[2]) {
+                          _.label = t[2];
+
+                          _.ops.push(op);
+
+                          break;
+                        }
+
+                        if (t[2]) _.ops.pop();
+
+                        _.trys.pop();
+
+                        continue;
+                    }
+
+                    op = body.call(thisArg, _);
+                  } catch (e) {
+                    op = [6, e];
+                    y = 0;
+                  } finally {
+                    f = t = 0;
+                  }
+                }
+
+                if (op[0] & 5) throw op[1];
+                return {
+                  value: op[0] ? op[1] : void 0,
+                  done: true
+                };
+              }
+            };
+
           Object.defineProperty(exports, "__esModule", {
             value: true
           });
@@ -57295,6 +60859,16 @@ object-assign
 
           var CustomTextbox_1 = __webpack_require__(
             /*! ./CustomTextbox */ "./components/CustomTextbox.tsx"
+          );
+
+          var Customselectbox_1 = __webpack_require__(
+            /*! ./Customselectbox */ "./components/Customselectbox.tsx"
+          );
+
+          var config_1 = __webpack_require__(/*! ../config */ "./config.ts");
+
+          var RestService_1 = __webpack_require__(
+            /*! ../domain/_service/RestService */ "./domain/_service/RestService.ts"
           );
 
           var OpenNewContactPopup =
@@ -57396,7 +60970,15 @@ object-assign
                     timeZone: validObj,
                     language: validObj,
                     tag: validObj,
-                    about: validObj
+                    about: validObj,
+                    companyName: validObj,
+                    description: validObj,
+                    notes: validObj,
+                    company2: validObj,
+                    healthCare: validObj,
+                    accountTier: validObj,
+                    renewalDate: validObj,
+                    industry: validObj
                   };
 
                   if (isSubmitted) {
@@ -57414,7 +60996,15 @@ object-assign
                       timeZone = _a.timeZone,
                       language = _a.language,
                       tag = _a.tag,
-                      about = _a.about;
+                      about = _a.about,
+                      companyName = _a.companyName,
+                      description = _a.description,
+                      notes = _a.notes,
+                      company2 = _a.company2,
+                      healthCare = _a.healthCare,
+                      accountTier = _a.accountTier,
+                      renewalDate = _a.renewalDate,
+                      industry = _a.industry;
 
                     if (!fullName) {
                       retData.fullName = {
@@ -57513,6 +61103,62 @@ object-assign
                         message: "About detail is required"
                       };
                     }
+
+                    if (!companyName) {
+                      retData.companyName = {
+                        isValid: false,
+                        message: "Company Name is required"
+                      };
+                    }
+
+                    if (!description) {
+                      retData.description = {
+                        isValid: false,
+                        message: "Description is required"
+                      };
+                    }
+
+                    if (!notes) {
+                      retData.notes = {
+                        isValid: false,
+                        message: "Notes is required"
+                      };
+                    }
+
+                    if (!company2) {
+                      retData.company2 = {
+                        isValid: false,
+                        message: "Company is required"
+                      };
+                    }
+
+                    if (!healthCare) {
+                      retData.healthCare = {
+                        isValid: false,
+                        message: "Health Care is required"
+                      };
+                    }
+
+                    if (!accountTier) {
+                      retData.accountTier = {
+                        isValid: false,
+                        message: "Account Tier Name is required"
+                      };
+                    }
+
+                    if (!renewalDate) {
+                      retData.renewalDate = {
+                        isValid: false,
+                        message: "Renewal Date is required"
+                      };
+                    }
+
+                    if (!industry) {
+                      retData.industry = {
+                        isValid: false,
+                        message: "Industry Name is required"
+                      };
+                    }
                   }
 
                   return retData;
@@ -57528,6 +61174,36 @@ object-assign
                   _this.setState(((_a = {}), (_a[name] = value), _a));
                 };
 
+                _this.handleSelectBox = function(e) {
+                  var _a;
+
+                  var _b = e.target,
+                    name = _b.name,
+                    value = _b.value;
+
+                  _this.setState(((_a = {}), (_a[name] = value), _a));
+
+                  console.log("company : ", _this.state.company);
+
+                  _this.setState({
+                    companyName: _this.state.company.companyName,
+                    description: _this.state.company.description,
+                    notes: _this.state.company.notes,
+                    healthScore: _this.state.company.healthScore,
+                    accountTier: _this.state.company.accountTier,
+                    renewalDate: _this.state.company.renewalDate,
+                    industry: _this.state.company.industry
+                  });
+
+                  console.log("Company Name=", _this.state.companyName);
+                  console.log("Company description=", _this.state.description);
+                  console.log("Company notes=", _this.state.notes);
+                  console.log("Company healthScore=", _this.state.healthScore);
+                  console.log("Company accountTier=", _this.state.accountTier);
+                  console.log("Company renewalDate=", _this.state.renewalDate);
+                  console.log("Company industry=", _this.state.industry);
+                };
+
                 _this.state = {
                   modal: false,
                   fullName: "",
@@ -57538,21 +61214,93 @@ object-assign
                   mobilePhone: "",
                   twitter: "",
                   uniqueId: "",
-                  company: "",
+                  company: null,
                   address: "",
                   timeZone: "",
                   language: "",
                   tag: "",
                   about: "",
-                  isSubmitted: false
+                  isSubmitted: false,
+                  companyList: [],
+                  companyLogo: null,
+                  companyName: "",
+                  description: "",
+                  notes: "",
+                  company2: "",
+                  healthCare: "",
+                  accountTier: "",
+                  renewalDate: "",
+                  industry: ""
                 };
                 return _this;
               }
+
+              OpenNewContactPopup.prototype.componentDidMount = function() {
+                return __awaiter(this, void 0, void 0, function() {
+                  var err_1;
+
+                  var _this = this;
+
+                  return __generator(this, function(_a) {
+                    switch (_a.label) {
+                      case 0:
+                        _a.trys.push([0, 2, , 3]);
+
+                        return [
+                          4,
+                          /*yield*/
+                          RestService_1.RestService.getData(
+                            config_1.config.SERVICEDESK_API_URL +
+                              "/api/companies",
+                            null,
+                            null
+                          ).then(function(response) {
+                            _this.setState({
+                              companyList: response
+                            });
+                          })
+                        ];
+
+                      case 1:
+                        _a.sent();
+
+                        return [
+                          3,
+                          /*break*/
+                          3
+                        ];
+
+                      case 2:
+                        err_1 = _a.sent();
+                        console.log(
+                          "Loading company data failed. Error: ",
+                          err_1
+                        );
+                        return [
+                          3,
+                          /*break*/
+                          3
+                        ];
+
+                      case 3:
+                        console.log(
+                          "companyNameList  : ",
+                          this.state.companyList
+                        );
+                        return [
+                          2
+                          /*return*/
+                        ];
+                    }
+                  });
+                });
+              };
 
               OpenNewContactPopup.prototype.render = function() {
                 var _a = this.state,
                   modal = _a.modal,
                   isSubmitted = _a.isSubmitted,
+                  companyList = _a.companyList,
                   fullName = _a.fullName,
                   title = _a.title,
                   email = _a.email,
@@ -57566,7 +61314,15 @@ object-assign
                   timeZone = _a.timeZone,
                   language = _a.language,
                   tag = _a.tag,
-                  about = _a.about;
+                  about = _a.about,
+                  companyName = _a.companyName,
+                  description = _a.description,
+                  notes = _a.notes,
+                  company2 = _a.company2,
+                  healthCare = _a.healthCare,
+                  accountTier = _a.accountTier,
+                  renewalDate = _a.renewalDate,
+                  industry = _a.industry;
                 var errorData = this.validate(isSubmitted);
                 return React.createElement(
                   reactstrap_1.Modal,
@@ -57967,18 +61723,34 @@ object-assign
                               },
                               "Company"
                             ),
-                            React.createElement(CustomTextbox_1.CustomTextbox, {
-                              containerClass: "form-group-inner",
-                              inputClass: "form-control",
-                              htmlFor: "company",
-                              id: "company",
-                              placeholder: "",
-                              name: "company",
-                              value: company,
-                              onChange: this.handleStateChange,
-                              isValid: errorData.company.isValid,
-                              message: errorData.company.message
-                            })
+                            React.createElement(
+                              Customselectbox_1.Customselectbox,
+                              {
+                                containerClass: "form-group-inner",
+                                inputClass: "form-control",
+                                htmlFor: "company",
+                                id: "company",
+                                name: "company",
+                                value: company,
+                                arrayData: companyList,
+                                onChange: this.handleSelectBox,
+                                isValid: errorData.company.isValid,
+                                message: errorData.company.message
+                              }
+                            ),
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block text-right p-t-5"
+                              },
+                              React.createElement(
+                                "button",
+                                {
+                                  className: "add-conatct"
+                                },
+                                "Add a Company"
+                              )
+                            )
                           )
                         )
                       ),
@@ -57990,7 +61762,7 @@ object-assign
                         React.createElement(
                           "div",
                           {
-                            className: "col-lg-12 col-md-12 col-sm-12"
+                            className: "col-lg-6 col-md-6 col-sm-12"
                           },
                           React.createElement(
                             "div",
@@ -58000,22 +61772,53 @@ object-assign
                             React.createElement(
                               "label",
                               {
-                                htmlFor: "address"
+                                htmlFor: "companyName"
                               },
-                              "Address"
+                              "Company Name*"
                             ),
                             React.createElement(CustomTextbox_1.CustomTextbox, {
                               containerClass: "form-group-inner",
                               inputClass: "form-control",
-                              htmlFor: "address",
-                              id: "address",
-                              rows: 3,
-                              placeholder: "Enter the address of this person",
-                              name: "address",
-                              value: address,
+                              htmlFor: "companyName",
+                              id: "companyName",
+                              placeholder: "",
+                              name: "companyName",
+                              value: companyName,
                               onChange: this.handleStateChange,
-                              isValid: errorData.address.isValid,
-                              message: errorData.address.message
+                              isValid: errorData.companyName.isValid,
+                              message: errorData.companyName.message
+                            })
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-6 col-md-6 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "description"
+                              },
+                              "Description"
+                            ),
+                            React.createElement(CustomTextbox_1.CustomTextbox, {
+                              containerClass: "form-group-inner",
+                              inputClass: "form-control",
+                              htmlFor: "description",
+                              id: "description",
+                              placeholder:
+                                "Write something that describe this company",
+                              name: "description",
+                              value: description,
+                              onChange: this.handleStateChange,
+                              isValid: errorData.description.isValid,
+                              message: errorData.description.message
                             })
                           )
                         )
@@ -58038,22 +61841,160 @@ object-assign
                             React.createElement(
                               "label",
                               {
-                                htmlFor: "timeZone"
+                                htmlFor: "notes"
                               },
-                              "Time Zone"
+                              "Notes"
+                            ),
+                            React.createElement(CustomTextbox_1.CustomTextbox, {
+                              containerClass: "form-group-inner",
+                              inputClass: "form-control",
+                              htmlFor: "notes",
+                              id: "notes",
+                              placeholder:
+                                "Add notes about this company - make something about a recent deal, etc.",
+                              name: "notes",
+                              value: notes,
+                              onChange: this.handleStateChange,
+                              isValid: errorData.notes.isValid,
+                              message: errorData.notes.message
+                            })
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-6 col-md-6 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "company"
+                              },
+                              "Company"
+                            ),
+                            React.createElement(CustomTextbox_1.CustomTextbox, {
+                              containerClass: "form-group-inner",
+                              inputClass: "form-control",
+                              htmlFor: "company2",
+                              id: "company2",
+                              placeholder:
+                                "eg: My company1.com, mycompany2.com",
+                              name: "company2",
+                              value: company2,
+                              onChange: this.handleStateChange,
+                              isValid: errorData.company2.isValid,
+                              message: errorData.company2.message
+                            })
+                          )
+                        )
+                      ),
+                      React.createElement(
+                        "div",
+                        {
+                          className: "row"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-6 col-md-6 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "healthCare"
+                              },
+                              "Health Score"
+                            ),
+                            React.createElement(CustomTextbox_1.CustomTextbox, {
+                              containerClass: "form-group-inner",
+                              inputClass: "form-control",
+                              htmlFor: "healthCare",
+                              id: "healthCare",
+                              placeholder: "Any",
+                              name: "healthCare",
+                              value: healthCare,
+                              onChange: this.handleStateChange,
+                              isValid: errorData.healthCare.isValid,
+                              message: errorData.healthCare.message
+                            })
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-6 col-md-6 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "accountTier"
+                              },
+                              "Account tier"
+                            ),
+                            React.createElement(CustomTextbox_1.CustomTextbox, {
+                              containerClass: "form-group-inner",
+                              inputClass: "form-control",
+                              htmlFor: "accountTier",
+                              id: "accountTier",
+                              placeholder: "Any",
+                              name: "accountTier",
+                              value: accountTier,
+                              onChange: this.handleStateChange,
+                              isValid: errorData.accountTier.isValid,
+                              message: errorData.accountTier.message
+                            })
+                          )
+                        )
+                      ),
+                      React.createElement(
+                        "div",
+                        {
+                          className: "row"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-6 col-md-6 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "renewalDate"
+                              },
+                              "Renewal Date"
                             ),
                             React.createElement(CustomTextbox_1.CustomTextbox, {
                               containerClass: "form-group-inner",
                               type: "date",
                               inputClass: "form-control",
-                              htmlFor: "timeZone",
-                              id: "timeZone",
-                              placeholder: "(GMT +05:30) Chennai",
-                              name: "timeZone",
-                              value: timeZone,
+                              htmlFor: "renewalDate",
+                              id: "renewalDate",
+                              placeholder: "Any",
+                              name: "renewalDate",
+                              value: renewalDate,
                               onChange: this.handleStateChange,
-                              isValid: errorData.timeZone.isValid,
-                              message: errorData.timeZone.message
+                              isValid: errorData.renewalDate.isValid,
+                              message: errorData.renewalDate.message
                             })
                           )
                         ),
@@ -58070,89 +62011,21 @@ object-assign
                             React.createElement(
                               "label",
                               {
-                                htmlFor: "language"
+                                htmlFor: "industry"
                               },
-                              "Language"
+                              "Industry"
                             ),
                             React.createElement(CustomTextbox_1.CustomTextbox, {
                               containerClass: "form-group-inner",
                               inputClass: "form-control",
-                              htmlFor: "language",
-                              id: "language",
-                              placeholder: "English",
-                              name: "language",
-                              value: language,
+                              htmlFor: "industry",
+                              id: "industry",
+                              placeholder: "Any",
+                              name: "industry",
+                              value: industry,
                               onChange: this.handleStateChange,
-                              isValid: errorData.language.isValid,
-                              message: errorData.language.message
-                            })
-                          )
-                        )
-                      ),
-                      React.createElement(
-                        "div",
-                        {
-                          className: "row"
-                        },
-                        React.createElement(
-                          "div",
-                          {
-                            className: "col-lg-6 col-md-6 col-sm-12"
-                          },
-                          React.createElement(
-                            "div",
-                            {
-                              className: "form-group"
-                            },
-                            React.createElement(
-                              "label",
-                              {
-                                htmlFor: "tag"
-                              },
-                              "Tags"
-                            ),
-                            React.createElement(CustomTextbox_1.CustomTextbox, {
-                              containerClass: "form-group-inner",
-                              inputClass: "form-control",
-                              htmlFor: "tag",
-                              id: "tag",
-                              placeholder: "",
-                              name: "tag",
-                              value: tag,
-                              onChange: this.handleStateChange,
-                              isValid: errorData.tag.isValid,
-                              message: errorData.tag.message
-                            })
-                          )
-                        ),
-                        React.createElement(
-                          "div",
-                          {
-                            className: "col-lg-6 col-md-6 col-sm-12"
-                          },
-                          React.createElement(
-                            "div",
-                            {
-                              className: "form-group"
-                            },
-                            React.createElement(
-                              "label",
-                              {
-                                htmlFor: "about"
-                              },
-                              "About"
-                            ),
-                            React.createElement(CustomTextbox_1.CustomTextbox, {
-                              containerClass: "form-group-inner",
-                              inputClass: "form-control",
-                              htmlFor: "about",
-                              id: "about",
-                              placeholder: "Enter some text",
-                              name: "about",
-                              value: about,
-                              onChange: this.handleStateChange,
-                              isValid: errorData.about.isValid,
-                              message: errorData.about.message
+                              isValid: errorData.industry.isValid,
+                              message: errorData.industry.message
                             })
                           )
                         )
@@ -58417,6 +62290,46 @@ object-assign
                   _this.setState(((_a = {}), (_a[name] = value), _a));
                 };
 
+                _this.onChangeEmail = function(e) {
+                  var lastId = 0;
+                  var newEmail = _this.state.option;
+
+                  if (e.target.value != "") {
+                    for (var i = 0; i < _this.state.option.length; i++) {
+                      lastId = _this.state.option[i].id;
+                    }
+
+                    newEmail.push({
+                      name: e.target.value,
+                      id: lastId + 1
+                    });
+                  }
+
+                  _this.setState({
+                    option: newEmail
+                  });
+                };
+
+                _this.onChangeToEmail = function(e) {
+                  var lastToId = 0;
+                  var newToEmail = _this.state.toOptions;
+
+                  if (e.target.value != "") {
+                    for (var i = 0; i < _this.state.toOptions.length; i++) {
+                      lastToId = _this.state.toOptions[i].id;
+                    }
+
+                    newToEmail.push({
+                      name: e.target.value,
+                      id: lastToId + 1
+                    });
+                  }
+
+                  _this.setState({
+                    toOptions: newToEmail
+                  });
+                };
+
                 _this.state = {
                   modal: false,
                   from: "",
@@ -58479,13 +62392,9 @@ object-assign
                 return _this;
               }
 
-              OpenNewEmailPopup.prototype.onSelect = function() {
-                console.log("fghfghf");
-              };
+              OpenNewEmailPopup.prototype.onSelect = function() {};
 
-              OpenNewEmailPopup.prototype.onRemove = function() {
-                console.log("remove");
-              };
+              OpenNewEmailPopup.prototype.onRemove = function() {};
 
               OpenNewEmailPopup.prototype.render = function() {
                 var _a = this.state,
@@ -58573,7 +62482,7 @@ object-assign
                                 selectedValues: this.state.selectedValue,
                                 onSelect: this.onSelect,
                                 onRemove: this.onRemove,
-                                // onChange={this.getSelectedValue}
+                                onKeyPress: this.onChangeEmail,
                                 closeIcon: "close",
                                 displayValue: "name"
                               }
@@ -58610,6 +62519,7 @@ object-assign
                                 selectedValues: this.state.selectedValue,
                                 onSelect: this.onSelect,
                                 onRemove: this.onRemove,
+                                onKeyPress: this.onChangeToEmail,
                                 closeIcon: "close",
                                 displayValue: "name"
                               }
@@ -58886,10 +62796,10 @@ object-assign
           /***/
         },
 
-      /***/ "./components/OpenNewTicketPopup.tsx":
-        /*!*******************************************!*\
-  !*** ./components/OpenNewTicketPopup.tsx ***!
-  \*******************************************/
+      /***/ "./components/OpenNewScheduleReports.tsx":
+        /*!***********************************************!*\
+  !*** ./components/OpenNewScheduleReports.tsx ***!
+  \***********************************************/
         /*! no static exports found */
         /***/ function(module, exports, __webpack_require__) {
           "use strict";
@@ -58935,6 +62845,725 @@ object-assign
             /*! reactstrap */ "../node_modules/reactstrap/es/index.js"
           );
 
+          var Customselectbox_1 = __webpack_require__(
+            /*! ./Customselectbox */ "./components/Customselectbox.tsx"
+          );
+
+          var CustomTextbox_1 = __webpack_require__(
+            /*! ./CustomTextbox */ "./components/CustomTextbox.tsx"
+          );
+
+          var OpenNewScheduleReports =
+            /** @class */
+            (function(_super) {
+              __extends(OpenNewScheduleReports, _super);
+
+              function OpenNewScheduleReports(props) {
+                var _this = _super.call(this, props) || this;
+
+                _this.toggle = function() {
+                  _this.setState({
+                    modal: !_this.state.modal
+                  });
+                };
+
+                _this.handleClose = function() {
+                  _this.setState({
+                    modal: false
+                  });
+                };
+
+                _this.handleStateChange = function(e) {
+                  var _a;
+
+                  var _b = e.target,
+                    name = _b.name,
+                    value = _b.value;
+
+                  _this.setState(((_a = {}), (_a[name] = value), _a));
+                };
+
+                _this.handleSubmit = function(event) {
+                  event.preventDefault();
+
+                  _this.setState({
+                    isSubmitted: true
+                  });
+
+                  var errorData = _this.validate(true);
+
+                  if (
+                    errorData.generateReport.isValid &&
+                    errorData.day.isValid &&
+                    errorData.time.isValid &&
+                    errorData.email.isValid &&
+                    errorData.subject.isValid &&
+                    errorData.description.isValid
+                  ) {
+                    var _a = _this.state,
+                      generateReport = _a.generateReport,
+                      day = _a.day,
+                      time = _a.time,
+                      email = _a.email,
+                      subject = _a.subject,
+                      description = _a.description;
+                    var sendData = {
+                      generateReport: generateReport,
+                      day: day,
+                      email: email,
+                      time: time,
+                      subject: subject,
+                      description: description
+                    };
+                    console.log(sendData);
+                  }
+                };
+
+                _this.validate = function(isSubmitted) {
+                  var validObj = {
+                    isValid: true,
+                    message: ""
+                  };
+                  var retData = {
+                    generateReport: validObj,
+                    day: validObj,
+                    time: validObj,
+                    email: validObj,
+                    subject: validObj,
+                    description: validObj
+                  };
+
+                  if (isSubmitted) {
+                    var _a = _this.state,
+                      generateReport = _a.generateReport,
+                      day = _a.day,
+                      time = _a.time,
+                      email = _a.email,
+                      subject = _a.subject,
+                      description = _a.description;
+
+                    if (!generateReport) {
+                      retData.generateReport = {
+                        isValid: false,
+                        message: "Generate Report Name is required"
+                      };
+                    }
+
+                    if (!day) {
+                      retData.day = {
+                        isValid: false,
+                        message: "Day is required"
+                      };
+                    }
+
+                    if (!time) {
+                      retData.time = {
+                        isValid: false,
+                        message: "Time is required"
+                      };
+                    }
+
+                    if (!email) {
+                      retData.email = {
+                        isValid: false,
+                        message: "Email is required"
+                      };
+                    }
+
+                    if (!subject) {
+                      retData.subject = {
+                        isValid: false,
+                        message: "Subject is required"
+                      };
+                    }
+
+                    if (!description) {
+                      retData.description = {
+                        isValid: false,
+                        message: "Description is required"
+                      };
+                    }
+                  }
+
+                  return retData;
+                };
+
+                _this.state = {
+                  modal: false,
+                  generateReport: "",
+                  day: "",
+                  time: "",
+                  email: "",
+                  subject: "",
+                  description: "",
+                  isSubmitted: false
+                };
+                return _this;
+              }
+
+              OpenNewScheduleReports.prototype.render = function() {
+                var _a = this.state,
+                  modal = _a.modal,
+                  generateReport = _a.generateReport,
+                  day = _a.day,
+                  time = _a.time,
+                  email = _a.email,
+                  subject = _a.subject,
+                  description = _a.description,
+                  isSubmitted = _a.isSubmitted;
+                var errorData = this.validate(isSubmitted);
+                return React.createElement(
+                  reactstrap_1.Modal,
+                  {
+                    isOpen: modal,
+                    toggle: this.toggle,
+                    className: "modal-container"
+                  },
+                  React.createElement(
+                    reactstrap_1.ModalBody,
+                    {
+                      style: {
+                        height: "calc(75vh - 50px)",
+                        overflowY: "auto",
+                        overflowX: "hidden"
+                      }
+                    },
+                    React.createElement(
+                      "div",
+                      {
+                        className:
+                          "d-block width-100 contact-popup-container new-ticket-container"
+                      },
+                      React.createElement(
+                        "div",
+                        {
+                          className: "d-block width-100 p-b-20 heading"
+                        },
+                        React.createElement(
+                          "h4",
+                          {
+                            className: "d-block"
+                          },
+                          "Schedule Reports"
+                        ),
+                        React.createElement(
+                          "span",
+                          {
+                            className: "d-block"
+                          },
+                          "Helpdesk In-Depth"
+                        )
+                      ),
+                      React.createElement(
+                        "div",
+                        {
+                          className: "row"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-4 col-md-4 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "GenerateReport"
+                              },
+                              "Generate Report"
+                            ),
+                            React.createElement(
+                              Customselectbox_1.Customselectbox,
+                              {
+                                containerClass: "form-group-inner",
+                                inputClass: "form-control",
+                                htmlFor: "generateReport",
+                                id: "generateReport",
+                                name: "generateReport",
+                                value: generateReport,
+                                arrayData: {
+                                  0: "Daily",
+                                  1: "Weekly",
+                                  2: "Month"
+                                },
+                                onChange: this.handleStateChange,
+                                isValid: errorData.generateReport.isValid,
+                                message: errorData.generateReport.message
+                              }
+                            )
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-4 col-md-4 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "On"
+                              },
+                              "On"
+                            ),
+                            React.createElement(
+                              Customselectbox_1.Customselectbox,
+                              {
+                                containerClass: "form-group-inner",
+                                inputClass: "form-control",
+                                htmlFor: "day",
+                                id: "day",
+                                name: "day",
+                                value: day,
+                                arrayData: {
+                                  0: "1st",
+                                  1: "2nd",
+                                  2: "3rd",
+                                  3: "4th",
+                                  4: "5th",
+                                  5: "6th",
+                                  6: "Last day"
+                                },
+                                onChange: this.handleStateChange,
+                                isValid: errorData.day.isValid,
+                                message: errorData.day.message
+                              }
+                            )
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-4 col-md-4 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "from"
+                              },
+                              "At"
+                            ),
+                            React.createElement(
+                              Customselectbox_1.Customselectbox,
+                              {
+                                containerClass: "form-group-inner",
+                                inputClass: "form-control",
+                                htmlFor: "time",
+                                id: "time",
+                                name: "time",
+                                value: time,
+                                arrayData: {
+                                  0: "01:00",
+                                  1: "02:00",
+                                  2: "03:00",
+                                  3: "04:00",
+                                  4: "05:00",
+                                  5: "06:00"
+                                },
+                                onChange: this.handleStateChange,
+                                isValid: errorData.time.isValid,
+                                message: errorData.time.message
+                              }
+                            )
+                          )
+                        )
+                      ),
+                      React.createElement(
+                        "div",
+                        {
+                          className: "row"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-12 col-md-12 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "Email"
+                              },
+                              "Email"
+                            ),
+                            React.createElement(CustomTextbox_1.CustomTextbox, {
+                              containerClass: "form-group-inner",
+                              inputClass: "form-control",
+                              htmlFor: "Email",
+                              id: "email",
+                              placeholder: "Write Email Id.",
+                              name: "email",
+                              value: email,
+                              onChange: this.handleStateChange,
+                              isValid: errorData.email.isValid,
+                              message: errorData.email.message
+                            })
+                          )
+                        )
+                      ),
+                      React.createElement(
+                        "div",
+                        {
+                          className: "row"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-12 col-md-12 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "Subject"
+                              },
+                              "Subject"
+                            ),
+                            React.createElement(CustomTextbox_1.CustomTextbox, {
+                              containerClass: "form-group-inner",
+                              inputClass: "form-control",
+                              htmlFor: "Subject",
+                              id: "subject",
+                              placeholder: "Write subject of the report.",
+                              name: "subject",
+                              value: subject,
+                              onChange: this.handleStateChange,
+                              isValid: errorData.subject.isValid,
+                              message: errorData.subject.message
+                            })
+                          )
+                        )
+                      ),
+                      React.createElement(
+                        "div",
+                        {
+                          className: "row"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-12 col-md-12 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "Description"
+                              },
+                              "Description"
+                            ),
+                            React.createElement(CustomTextbox_1.CustomTextbox, {
+                              containerClass: "form-group-inner",
+                              inputClass: "form-control",
+                              htmlFor: "Description",
+                              id: "description",
+                              placeholder:
+                                "Write something that describe the reports.",
+                              name: "description",
+                              value: description,
+                              onChange: this.handleStateChange,
+                              isValid: errorData.description.isValid,
+                              message: errorData.description.message
+                            })
+                          )
+                        )
+                      ),
+                      React.createElement(
+                        "div",
+                        {
+                          className: "row"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-12 col-md-12 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className:
+                                "d-block text-center p-t-20 contact-popup-buttons"
+                            },
+                            React.createElement(
+                              "button",
+                              {
+                                className: "cancel",
+                                onClick: this.handleClose
+                              },
+                              "Cancel"
+                            ),
+                            React.createElement(
+                              "button",
+                              {
+                                className: "save",
+                                onClick: this.handleSubmit
+                              },
+                              "Save"
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                );
+              };
+
+              return OpenNewScheduleReports;
+            })(React.Component);
+
+          exports.OpenNewScheduleReports = OpenNewScheduleReports;
+
+          /***/
+        },
+
+      /***/ "./components/OpenNewTicketPopup.tsx":
+        /*!*******************************************!*\
+  !*** ./components/OpenNewTicketPopup.tsx ***!
+  \*******************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var __extends =
+            (undefined && undefined.__extends) ||
+            (function() {
+              var extendStatics =
+                Object.setPrototypeOf ||
+                ({
+                  __proto__: []
+                } instanceof Array &&
+                  function(d, b) {
+                    d.__proto__ = b;
+                  }) ||
+                function(d, b) {
+                  for (var p in b) {
+                    if (b.hasOwnProperty(p)) d[p] = b[p];
+                  }
+                };
+
+              return function(d, b) {
+                extendStatics(d, b);
+
+                function __() {
+                  this.constructor = d;
+                }
+
+                d.prototype =
+                  b === null
+                    ? Object.create(b)
+                    : ((__.prototype = b.prototype), new __());
+              };
+            })();
+
+          var __awaiter =
+            (undefined && undefined.__awaiter) ||
+            function(thisArg, _arguments, P, generator) {
+              return new (P || (P = Promise))(function(resolve, reject) {
+                function fulfilled(value) {
+                  try {
+                    step(generator.next(value));
+                  } catch (e) {
+                    reject(e);
+                  }
+                }
+
+                function rejected(value) {
+                  try {
+                    step(generator["throw"](value));
+                  } catch (e) {
+                    reject(e);
+                  }
+                }
+
+                function step(result) {
+                  result.done
+                    ? resolve(result.value)
+                    : new P(function(resolve) {
+                        resolve(result.value);
+                      }).then(fulfilled, rejected);
+                }
+
+                step(
+                  (generator = generator.apply(
+                    thisArg,
+                    _arguments || []
+                  )).next()
+                );
+              });
+            };
+
+          var __generator =
+            (undefined && undefined.__generator) ||
+            function(thisArg, body) {
+              var _ = {
+                  label: 0,
+                  sent: function sent() {
+                    if (t[0] & 1) throw t[1];
+                    return t[1];
+                  },
+                  trys: [],
+                  ops: []
+                },
+                f,
+                y,
+                t,
+                g;
+              return (
+                (g = {
+                  next: verb(0),
+                  throw: verb(1),
+                  return: verb(2)
+                }),
+                typeof Symbol === "function" &&
+                  (g[Symbol.iterator] = function() {
+                    return this;
+                  }),
+                g
+              );
+
+              function verb(n) {
+                return function(v) {
+                  return step([n, v]);
+                };
+              }
+
+              function step(op) {
+                if (f) throw new TypeError("Generator is already executing.");
+
+                while (_) {
+                  try {
+                    if (
+                      ((f = 1),
+                      y &&
+                        (t =
+                          op[0] & 2
+                            ? y["return"]
+                            : op[0]
+                              ? y["throw"] ||
+                                ((t = y["return"]) && t.call(y), 0)
+                              : y.next) &&
+                        !(t = t.call(y, op[1])).done)
+                    )
+                      return t;
+                    if (((y = 0), t)) op = [op[0] & 2, t.value];
+
+                    switch (op[0]) {
+                      case 0:
+                      case 1:
+                        t = op;
+                        break;
+
+                      case 4:
+                        _.label++;
+                        return {
+                          value: op[1],
+                          done: false
+                        };
+
+                      case 5:
+                        _.label++;
+                        y = op[1];
+                        op = [0];
+                        continue;
+
+                      case 7:
+                        op = _.ops.pop();
+
+                        _.trys.pop();
+
+                        continue;
+
+                      default:
+                        if (
+                          !((t = _.trys),
+                          (t = t.length > 0 && t[t.length - 1])) &&
+                          (op[0] === 6 || op[0] === 2)
+                        ) {
+                          _ = 0;
+                          continue;
+                        }
+
+                        if (
+                          op[0] === 3 &&
+                          (!t || (op[1] > t[0] && op[1] < t[3]))
+                        ) {
+                          _.label = op[1];
+                          break;
+                        }
+
+                        if (op[0] === 6 && _.label < t[1]) {
+                          _.label = t[1];
+                          t = op;
+                          break;
+                        }
+
+                        if (t && _.label < t[2]) {
+                          _.label = t[2];
+
+                          _.ops.push(op);
+
+                          break;
+                        }
+
+                        if (t[2]) _.ops.pop();
+
+                        _.trys.pop();
+
+                        continue;
+                    }
+
+                    op = body.call(thisArg, _);
+                  } catch (e) {
+                    op = [6, e];
+                    y = 0;
+                  } finally {
+                    f = t = 0;
+                  }
+                }
+
+                if (op[0] & 5) throw op[1];
+                return {
+                  value: op[0] ? op[1] : void 0,
+                  done: true
+                };
+              }
+            };
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+
+          var React = __webpack_require__(/*! react */ "react");
+
+          var reactstrap_1 = __webpack_require__(
+            /*! reactstrap */ "../node_modules/reactstrap/es/index.js"
+          );
+
           var CustomTextbox_1 = __webpack_require__(
             /*! ./CustomTextbox */ "./components/CustomTextbox.tsx"
           );
@@ -58945,6 +63574,12 @@ object-assign
 
           var CustomTextareabox_1 = __webpack_require__(
             /*! ./CustomTextareabox */ "./components/CustomTextareabox.tsx"
+          );
+
+          var config_1 = __webpack_require__(/*! ../config */ "./config.ts");
+
+          var axios_1 = __webpack_require__(
+            /*! axios */ "../node_modules/axios/index.js"
           );
 
           var OpenNewTicketPopup =
@@ -58968,45 +63603,92 @@ object-assign
                 };
 
                 _this.handleSubmit = function(event) {
-                  event.preventDefault();
+                  return __awaiter(_this, void 0, void 0, function() {
+                    var errorData,
+                      _a,
+                      contact,
+                      subject,
+                      type,
+                      subjectText,
+                      priority,
+                      assign,
+                      description,
+                      tags,
+                      sendData,
+                      formData;
 
-                  _this.setState({
-                    isSubmitted: true
+                    return __generator(this, function(_b) {
+                      event.preventDefault();
+                      this.setState({
+                        isSubmitted: true
+                      });
+                      errorData = this.validate(true);
+
+                      if (
+                        errorData.contact.isValid &&
+                        errorData.subject.isValid &&
+                        errorData.type.isValid &&
+                        errorData.subjectText.isValid &&
+                        errorData.priority.isValid &&
+                        errorData.assign.isValid &&
+                        errorData.description.isValid &&
+                        errorData.tags.isValid
+                      ) {
+                        (_a = this.state),
+                          (contact = _a.contact),
+                          (subject = _a.subject),
+                          (type = _a.type),
+                          (subjectText = _a.subjectText),
+                          (priority = _a.priority),
+                          (assign = _a.assign),
+                          (description = _a.description),
+                          (tags = _a.tags);
+                        sendData = {
+                          contact: contact,
+                          subject: subject,
+                          type: type,
+                          subjectText: subjectText,
+                          priority: priority,
+                          assign: assign,
+                          description: description,
+                          tags: tags
+                        };
+                        console.log(sendData);
+                        formData = new FormData();
+                        formData.append("contact", contact);
+                        formData.append("subject", subject);
+                        formData.append("type", type);
+                        formData.append("subjectText", subjectText);
+                        formData.append("priority", priority);
+                        formData.append("assignTo", assign);
+                        formData.append("description", description);
+                        formData.append("tags", tags);
+                        axios_1.default
+                          .post(
+                            config_1.config.SERVICEDESK_API_URL +
+                              "/api/tickets",
+                            formData,
+                            {}
+                          )
+                          .then(function(res) {
+                            console.log(res.data);
+                          })
+                          .catch(function(err) {
+                            return console.log(err);
+                          }); //   const res= await fetch(config.SERVICEDESK_API_URL+"/api/tickets", {
+                        //     method: 'post',
+                        //     body: formData,
+                        //   })
+                        //     .then((response) => response.json());
+                        //     console.log(res);
+                      }
+
+                      return [
+                        2
+                        /*return*/
+                      ];
+                    });
                   });
-
-                  var errorData = _this.validate(true);
-
-                  if (
-                    errorData.contact.isValid &&
-                    errorData.subject.isValid &&
-                    errorData.type.isValid &&
-                    errorData.subjectText.isValid &&
-                    errorData.priority.isValid &&
-                    errorData.assign.isValid &&
-                    errorData.description.isValid &&
-                    errorData.tags.isValid
-                  ) {
-                    var _a = _this.state,
-                      contact = _a.contact,
-                      subject = _a.subject,
-                      type = _a.type,
-                      subjectText = _a.subjectText,
-                      priority = _a.priority,
-                      assign = _a.assign,
-                      description = _a.description,
-                      tags = _a.tags;
-                    var sendData = {
-                      contact: contact,
-                      subject: subject,
-                      type: type,
-                      subjectText: subjectText,
-                      priority: priority,
-                      assign: assign,
-                      description: description,
-                      tags: tags
-                    };
-                    console.log(sendData);
-                  }
                 };
 
                 _this.validate = function(isSubmitted) {
@@ -59108,6 +63790,8 @@ object-assign
 
                 _this.state = {
                   modal: false,
+                  conatctFullNameList: [],
+                  contactIndexsList: [],
                   contact: "",
                   subject: "",
                   type: "",
@@ -59121,8 +63805,62 @@ object-assign
                 return _this;
               }
 
+              OpenNewTicketPopup.prototype.componentDidMount = function() {
+                return __awaiter(this, void 0, void 0, function() {
+                  var res,
+                    conatctFullNameList,
+                    conatctFullNameJson,
+                    contactIndexsList,
+                    i,
+                    id,
+                    fullName;
+                  return __generator(this, function(_a) {
+                    switch (_a.label) {
+                      case 0:
+                        return [
+                          4,
+                          /*yield*/
+                          fetch(
+                            config_1.config.SERVICEDESK_API_URL +
+                              "/api/contacts",
+                            {
+                              method: "get"
+                            }
+                          ).then(function(response) {
+                            return response.json();
+                          })
+                        ];
+
+                      case 1:
+                        res = _a.sent();
+                        conatctFullNameList = [];
+                        conatctFullNameJson = {};
+                        contactIndexsList = [];
+
+                        for (i in res) {
+                          id = res[i].id;
+                          fullName = res[i].fullName;
+                          conatctFullNameList.push(res[i].fullName);
+                          contactIndexsList.push(res[i].id);
+                        } // console.log(conatctFullNameJson);
+
+                        this.setState({
+                          conatctFullNameList: conatctFullNameList,
+                          contactIndexsList: contactIndexsList
+                        });
+                        return [
+                          2
+                          /*return*/
+                        ];
+                    }
+                  });
+                });
+              };
+
               OpenNewTicketPopup.prototype.render = function() {
                 var _a = this.state,
+                  conatctFullNameList = _a.conatctFullNameList,
+                  contactIndexsList = _a.contactIndexsList,
                   modal = _a.modal,
                   contact = _a.contact,
                   subject = _a.subject,
@@ -59207,11 +63945,7 @@ object-assign
                                 id: "contact",
                                 name: "contact",
                                 value: contact,
-                                arrayData: {
-                                  0: "abc",
-                                  1: "def",
-                                  2: "ghi"
-                                },
+                                arrayData: conatctFullNameList,
                                 onChange: this.handleStateChange,
                                 isValid: errorData.contact.isValid,
                                 message: errorData.contact.message
@@ -59603,6 +64337,38 @@ object-assign
           /***/
         },
 
+      /***/ "./components/table.css":
+        /*!******************************!*\
+  !*** ./components/table.css ***!
+  \******************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          var content = __webpack_require__(
+            /*! !../../node_modules/css-loader??ref--7-1!./table.css */ "../node_modules/css-loader/index.js?!./components/table.css"
+          );
+
+          if (typeof content === "string") content = [[module.i, content, ""]];
+
+          var transform;
+          var insertInto;
+
+          var options = { hmr: true };
+
+          options.transform = transform;
+          options.insertInto = undefined;
+
+          var update = __webpack_require__(
+            /*! ../../node_modules/style-loader/lib/addStyles.js */ "../node_modules/style-loader/lib/addStyles.js"
+          )(content, options);
+
+          if (content.locals) module.exports = content.locals;
+
+          if (false) {
+          }
+
+          /***/
+        },
+
       /***/ "./components/table.tsx":
         /*!******************************!*\
   !*** ./components/table.tsx ***!
@@ -59648,6 +64414,8 @@ object-assign
 
           var React = __webpack_require__(/*! react */ "react");
 
+          __webpack_require__(/*! ./table.css */ "./components/table.css");
+
           var sortEnum = {
             NONE: 0,
             ASCENDING: 1,
@@ -59661,6 +64429,47 @@ object-assign
 
               function Table(props) {
                 var _this = _super.call(this, props) || this;
+
+                _this.checkAllAlerts = function(e) {
+                  var checked = e.target.checked;
+                  var displayData = _this.state.displayData;
+
+                  for (var j = 0; j < displayData.length; j++) {
+                    displayData[j].checkStatus = checked;
+                  }
+
+                  _this.setState({
+                    displayData: displayData,
+                    isAllChecked: checked
+                  });
+                };
+
+                _this.onChangeParentCheckbox = function(e, index) {
+                  var displayData = _this.state.displayData;
+                  var checked = e.target.checked;
+                  var status = false;
+                  var countCheckedCheckbox = 0;
+                  displayData[index].checkStatus = checked;
+
+                  for (var j = 0; j < displayData.length; j++) {
+                    if (displayData[j].checkStatus == true) {
+                      countCheckedCheckbox++;
+                    } else {
+                      countCheckedCheckbox--;
+                    }
+                  }
+
+                  if (countCheckedCheckbox == displayData.length) {
+                    status = true;
+                  } else {
+                    status = false;
+                  }
+
+                  _this.setState({
+                    displayData: displayData,
+                    isAllChecked: status
+                  });
+                };
 
                 _this.handleChange = function(e) {
                   var displayData = _this.state.displayData;
@@ -59689,53 +64498,149 @@ object-assign
 
                 _this.onSearchChange = function(e) {
                   var value = e.target.value;
+                  console.log(value);
 
                   _this.setState({
-                    searchKey: value
+                    searchKey: value,
+                    currentPage: 0,
+                    sortType: sortEnum.NONE,
+                    sortKey: ""
                   });
 
-                  var searchData = _this.state.searchData;
-                  var searchResult = [];
+                  var data = _this.state.data;
+                  var searchKey = _this.props.searchKey;
+                  console.log(searchKey);
+                  var queryResult = [];
+                  console.log(data);
 
-                  for (var i = 0; i < searchData.length; i++) {
+                  for (var i = 0; i < data.length; i++) {
                     if (
-                      searchData[i].requesterName.indexOf(value) !== -1 ||
+                      data[i][searchKey].indexOf(value) !== -1 ||
                       value === ""
                     ) {
-                      searchResult.push(searchData[i]);
+                      queryResult.push(data[i]);
                     } else if (
-                      searchData[i].requesterName
-                        .toLowerCase()
-                        .indexOf(value) !== -1 ||
+                      data[i][searchKey].toLowerCase().indexOf(value) !== -1 ||
                       value === ""
                     ) {
-                      searchResult.push(searchData[i]);
+                      queryResult.push(data[i]);
                     }
                   }
 
-                  _this.calculateTotalPages(searchResult);
-
                   _this.setState({
-                    displayData: searchResult,
-                    currentPage: 0
+                    displayData: queryResult
                   });
+
+                  _this.calculateTotalPages(queryResult);
                 };
 
                 _this.state = {
-                  displayData: _this.props.valueFromData.TicketsData,
-                  searchData: _this.props.valueFromData.TicketsData,
+                  data: _this.props.valueFromData.data,
+                  displayData: _this.props.valueFromData.data,
                   perPageLimit: _this.props.perPageLimit,
                   noOfRecordPerPage: _this.props.perPageLimit,
                   columns: _this.props.valueFromData.columns,
-                  storeColumsData: _this.props.valueFromData.columns,
                   totalPages: "",
                   currentPage: 0,
-                  start_index: 1,
                   searchKey: "",
-                  ending_index: _this.props.perPageLimit
+                  sortType: sortEnum.NONE,
+                  sortKey: "",
+                  isAllChecked: false,
+                  visibleCheckbox: _this.props.visiblecheckboxStatus
                 };
                 return _this;
               }
+
+              Table.prototype.tableBodyData = function() {
+                var _this = this;
+
+                var _a = this.state,
+                  displayData = _a.displayData,
+                  searchKey = _a.searchKey,
+                  perPageLimit = _a.perPageLimit,
+                  currentPage = _a.currentPage,
+                  columns = _a.columns,
+                  visibleCheckbox = _a.visibleCheckbox;
+                var retData = [];
+                var length = displayData.length;
+                var cLength = columns.length;
+
+                if (length > 0) {
+                  var _loop_1 = function _loop_1(i) {
+                    if (
+                      i >= currentPage * perPageLimit &&
+                      i <= currentPage * perPageLimit + (perPageLimit - 1)
+                    ) {
+                      var tdJSX = [];
+
+                      if (visibleCheckbox == true) {
+                        tdJSX.push(
+                          React.createElement(
+                            "td",
+                            null,
+                            React.createElement("input", {
+                              type: "checkbox",
+                              checked: displayData[i].checkStatus,
+                              className: "checkbox",
+                              onChange: function onChange(e) {
+                                _this.onChangeParentCheckbox(e, i);
+                              }
+                            })
+                          )
+                        );
+                      }
+
+                      var row = displayData[i];
+
+                      for (var j = 0; j < cLength; j++) {
+                        var column = columns[j];
+
+                        if (column.renderCallback) {
+                          var jsx = column.renderCallback(row[column.key]);
+                          tdJSX.push(jsx);
+                        } else {
+                          tdJSX.push(
+                            React.createElement("td", null, row[column.key])
+                          );
+                        }
+                      }
+
+                      retData.push(
+                        React.createElement(
+                          "tr",
+                          {
+                            key: i
+                          },
+                          tdJSX
+                        )
+                      );
+                    }
+                  };
+
+                  for (var i = 0; i < length; i++) {
+                    _loop_1(i);
+                  }
+                } else {
+                  retData.push(
+                    React.createElement(
+                      "tr",
+                      null,
+                      React.createElement(
+                        "td",
+                        {
+                          colSpan: cLength,
+                          style: {
+                            textAlign: "center"
+                          }
+                        },
+                        "There is no data"
+                      )
+                    )
+                  );
+                }
+
+                return retData;
+              };
 
               Table.prototype.componentDidMount = function() {
                 this.calculateTotalPages(this.state.displayData);
@@ -59752,148 +64657,69 @@ object-assign
               };
 
               Table.prototype.tableHeader = function() {
-                var columns = this.state.columns;
+                var _this = this;
+
+                var _a = this.state,
+                  sortType = _a.sortType,
+                  sortKey = _a.sortKey,
+                  columns = _a.columns,
+                  visibleCheckbox = _a.visibleCheckbox;
                 var length = columns.length;
                 var retData = [];
 
-                for (var i = 0; i < length; i++) {
+                if (visibleCheckbox == true) {
+                  retData.push(
+                    React.createElement(
+                      "th",
+                      null,
+                      React.createElement("input", {
+                        type: "checkbox",
+                        checked: this.state.isAllChecked,
+                        onChange: this.checkAllAlerts,
+                        className: "checkbox"
+                      })
+                    )
+                  );
+                }
+
+                var _loop_2 = function _loop_2(i) {
                   var item = columns[i];
+                  var icon = "sort-none";
+                  var onClickSortType = sortEnum.ASCENDING;
+
+                  if (sortType === sortEnum.ASCENDING && sortKey === item.key) {
+                    icon = "sort-ascending";
+                    onClickSortType = sortEnum.DESCENDING;
+                  } else if (
+                    sortType === sortEnum.DESCENDING &&
+                    sortKey === item.key
+                  ) {
+                    icon = "sort-descending";
+                    onClickSortType = sortEnum.ASCENDING;
+                  }
+
                   retData.push(
                     React.createElement(
                       "th",
                       {
                         key: i
                       },
-                      item.label
+                      item.label,
+                      React.createElement("span", {
+                        onClick: function onClick(e) {
+                          _this.sortTable(item.key, e, onClickSortType);
+                        },
+                        className: "sort-icon " + icon
+                      })
                     )
                   );
+                };
+
+                for (var i = 0; i < length; i++) {
+                  _loop_2(i);
                 }
 
                 return retData;
-              };
-
-              Table.prototype.tableBodyData = function() {
-                var _a = this.state,
-                  displayData = _a.displayData,
-                  perPageLimit = _a.perPageLimit,
-                  currentPage = _a.currentPage,
-                  start_index = _a.start_index,
-                  ending_index = _a.ending_index;
-                var tableClasses = this.props.tableClasses;
-                var retuData = [];
-                var length = displayData.length;
-
-                if (length > 0) {
-                  for (var i = 0; i < length; i++) {
-                    var row = displayData[i];
-
-                    if (
-                      (i >= currentPage * perPageLimit &&
-                        i <= currentPage * perPageLimit + (perPageLimit - 1)) ||
-                      (i >= start_index - 1 && i <= ending_index - 1)
-                    ) {
-                      retuData.push(
-                        React.createElement(
-                          "tr",
-                          null,
-                          React.createElement("td", null, row.index),
-                          React.createElement(
-                            "td",
-                            null,
-                            React.createElement("span", {
-                              className: "image"
-                            }),
-                            row.requesterName
-                          ),
-                          React.createElement(
-                            "td",
-                            {
-                              className: "subjects"
-                            },
-                            row.subject
-                          ),
-                          tableClasses.statusClassOpen != undefined &&
-                            tableClasses.statusClassClose != undefined &&
-                            tableClasses.statusClassPendding != undefined &&
-                            React.createElement(
-                              "td",
-                              null,
-                              React.createElement(
-                                "span",
-                                {
-                                  className:
-                                    row.status == "Open"
-                                      ? tableClasses.statusClassOpen
-                                      : row.status == "Closed"
-                                        ? tableClasses.statusClassClose
-                                        : tableClasses.statusClassPendding
-                                },
-                                row.status
-                              )
-                            ),
-                          tableClasses.Classfafarrow != undefined &&
-                            React.createElement(
-                              "td",
-                              null,
-                              row.status,
-                              " ",
-                              React.createElement("i", {
-                                className: "fa fa-chevron-down"
-                              })
-                            ),
-                          React.createElement(
-                            "td",
-                            null,
-                            React.createElement(
-                              "span",
-                              {
-                                className: "priority"
-                              },
-                              row.priority
-                            )
-                          ),
-                          React.createElement("td", null, row.Assignee),
-                          React.createElement(
-                            "td",
-                            {
-                              className: "date"
-                            },
-                            row.createDate
-                          ),
-                          React.createElement("td", null, row.agents),
-                          React.createElement(
-                            "td",
-                            null,
-                            row.groups,
-                            " ",
-                            React.createElement(
-                              "a",
-                              {
-                                href: "#",
-                                className: "float-right"
-                              },
-                              React.createElement("i", {
-                                className: "fa fa-ellipsis-v"
-                              })
-                            )
-                          )
-                        )
-                      );
-                    }
-                  }
-                } else {
-                  retuData.push(
-                    React.createElement(
-                      "div",
-                      {
-                        className: "d-block width-100 there-no-data"
-                      },
-                      "There is no data"
-                    )
-                  );
-                }
-
-                return retuData;
               };
 
               Table.prototype.peginationOfTable = function() {
@@ -59904,7 +64730,7 @@ object-assign
                   totalPages = _a.totalPages;
                 var rows = [];
 
-                var _loop_1 = function _loop_1(i) {
+                var _loop_3 = function _loop_3(i) {
                   rows.push(
                     React.createElement(
                       "li",
@@ -59931,7 +64757,7 @@ object-assign
                 };
 
                 for (var i = 0; i < totalPages; i++) {
-                  _loop_1(i);
+                  _loop_3(i);
                 }
 
                 return React.createElement(
@@ -59982,34 +64808,21 @@ object-assign
               };
 
               Table.prototype.navigatePage = function(target, e, i) {
+                if (i === void 0) {
+                  i = null;
+                }
+
                 var _a = this.state,
                   totalPages = _a.totalPages,
-                  currentPage = _a.currentPage,
-                  start_index = _a.start_index,
-                  perPageLimit = _a.perPageLimit,
-                  ending_index = _a.ending_index,
-                  displayData = _a.displayData;
+                  currentPage = _a.currentPage;
                 e.preventDefault();
 
                 switch (target) {
                   case "pre":
                     if (currentPage !== 0) {
                       this.setState({
-                        currentPage: currentPage - 1,
-                        start_index: start_index - perPageLimit
+                        currentPage: currentPage - 1
                       });
-
-                      if (ending_index != displayData.length) {
-                        this.setState({
-                          ending_index: ending_index - perPageLimit
-                        });
-                      } else {
-                        this.setState({
-                          ending_index:
-                            ending_index -
-                            (displayData.length - start_index + 1)
-                        });
-                      }
                     }
 
                     break;
@@ -60017,55 +64830,16 @@ object-assign
                   case "next":
                     if (currentPage !== totalPages - 1) {
                       this.setState({
-                        currentPage: currentPage + 1,
-                        start_index: start_index + perPageLimit
+                        currentPage: currentPage + 1
                       });
-
-                      if (ending_index + perPageLimit < displayData.length) {
-                        this.setState({
-                          ending_index: ending_index + perPageLimit
-                        });
-                      } else {
-                        this.setState({
-                          ending_index:
-                            ending_index + (displayData.length - ending_index)
-                        });
-                      }
                     }
 
                     break;
 
                   case "btn-click":
-                    if ((i + 1) * perPageLimit < displayData.length) {
-                      this.setState({
-                        currentPage: i,
-                        start_index: i * perPageLimit + 1,
-                        ending_index: (i + 1) * perPageLimit
-                      });
-                    } else if (
-                      displayData.length >=
-                      ending_index + (displayData.length - ending_index)
-                    ) {
-                      this.setState({
-                        currentPage: i,
-                        start_index: i * perPageLimit + 1,
-                        ending_index:
-                          ending_index + (displayData.length - ending_index)
-                      });
-                    } else {
-                      this.setState({
-                        currentPage: i,
-                        start_index:
-                          displayData.length -
-                          (displayData.length - ending_index) +
-                          1,
-                        ending_index:
-                          parseInt(ending_index) +
-                          parseInt(displayData.length) -
-                          parseInt(ending_index)
-                      });
-                    }
-
+                    this.setState({
+                      currentPage: i
+                    });
                     break;
                 }
               };
@@ -60102,17 +64876,59 @@ object-assign
                 return pageData;
               };
 
+              Table.prototype.sortTable = function(sortkey, e, sortVal) {
+                this.setState({
+                  sortType: sortVal,
+                  sortKey: sortkey
+                });
+                e.preventDefault();
+                var data = this.props.valueFromData.data;
+
+                if (sortVal === sortEnum.ASCENDING) {
+                  data.sort(function(a, b) {
+                    return a[sortkey].localeCompare(b[sortkey]);
+                  });
+                } else if (sortVal === sortEnum.DESCENDING) {
+                  data
+                    .sort(function(a, b) {
+                      return a[sortkey].localeCompare(b[sortkey]);
+                    })
+                    .reverse();
+                }
+
+                this.setState({
+                  displayData: data
+                });
+              };
+
               Table.prototype.render = function() {
                 var _a = this.state,
                   displayData = _a.displayData,
-                  start_index = _a.start_index,
-                  ending_index = _a.ending_index,
-                  perPageLimit = _a.perPageLimit;
-                var tableClasses = this.props.tableClasses;
+                  perPageLimit = _a.perPageLimit,
+                  currentPage = _a.currentPage;
+                var _b = this.props,
+                  tableClasses = _b.tableClasses,
+                  showingLine = _b.showingLine;
+                var startIndex = perPageLimit * currentPage + 1;
+                var endIndex = perPageLimit * (currentPage + 1);
+
+                if (endIndex > displayData.length) {
+                  endIndex = displayData.length;
+                }
+
+                if (showingLine) {
+                  showingLine = showingLine.replace("%start%", startIndex);
+                  showingLine = showingLine.replace("%end%", endIndex);
+                  showingLine = showingLine.replace(
+                    "%total%",
+                    displayData.length
+                  );
+                }
+
                 return React.createElement(
                   "div",
                   {
-                    className: tableClasses.allSupport
+                    className: tableClasses.parentClass + " custom-table"
                   },
                   React.createElement(
                     "div",
@@ -60129,13 +64945,7 @@ object-assign
                         {
                           className: "d-inline-block showing"
                         },
-                        "Latest Tickets (Showing ",
-                        start_index,
-                        " to ",
-                        ending_index,
-                        " of ",
-                        displayData.length,
-                        " Tickets)"
+                        showingLine
                       ),
                       React.createElement(
                         "div",
@@ -60200,12 +65010,12 @@ object-assign
                   React.createElement(
                     "div",
                     {
-                      className: tableClasses.ticketsTable
+                      className: tableClasses.tableParent
                     },
                     React.createElement(
                       "table",
                       {
-                        className: tableClasses.ticketTable
+                        className: tableClasses.table
                       },
                       React.createElement(
                         "thead",
@@ -60247,7 +65057,8 @@ object-assign
             value: true
           });
           exports.config = {
-            basePath: "/plugins/xformation-servicedesk-ui-plugin/page"
+            basePath: "/plugins/xformation-servicedesk-ui-plugin/page",
+            SERVICEDESK_API_URL: "http://localhost:7100"
           };
 
           /***/
@@ -60370,6 +65181,26 @@ object-assign
             /*! ../../components/Breadcrumbs */ "./components/Breadcrumbs.tsx"
           );
 
+          var OpenNewContactPopup_1 = __webpack_require__(
+            /*! ../../components/OpenNewContactPopup */ "./components/OpenNewContactPopup.tsx"
+          );
+
+          var OpenNewCompanyPopup_1 = __webpack_require__(
+            /*! ../../components/OpenNewCompanyPopup */ "./components/OpenNewCompanyPopup.tsx"
+          );
+
+          var OpenNewEmailPopup_1 = __webpack_require__(
+            /*! ../../components/OpenNewEmailPopup */ "./components/OpenNewEmailPopup.tsx"
+          );
+
+          var OpenNewTicketPopup_1 = __webpack_require__(
+            /*! ../../components/OpenNewTicketPopup */ "./components/OpenNewTicketPopup.tsx"
+          );
+
+          var table_1 = __webpack_require__(
+            /*! ./../../components/table */ "./components/table.tsx"
+          );
+
           var AllCompanies =
             /** @class */
             (function(_super) {
@@ -60402,442 +65233,56 @@ object-assign
                   });
                 };
 
-                _this.calculateTotalPages = function(displayData) {
-                  var perPageLimit = _this.state.perPageLimit;
-                  var indexOfLastData = Math.ceil(
-                    displayData.length / perPageLimit
-                  );
-
-                  _this.setState({
-                    totalPages: indexOfLastData
-                  });
-                };
-
-                _this.allCompaniesSetData = function() {
-                  var _a = _this.state,
-                    allCompaniesSetData = _a.allCompaniesSetData,
-                    perPageLimit = _a.perPageLimit,
-                    currentPage = _a.currentPage;
-                  var retData = [];
-                  var length = allCompaniesSetData.length;
-
-                  if (length > 0) {
-                    var _loop_1 = function _loop_1(i) {
-                      if (
-                        i >= currentPage * perPageLimit &&
-                        i <= currentPage * perPageLimit + (perPageLimit - 1)
-                      ) {
-                        var data = allCompaniesSetData[i];
-                        retData.push(
+                _this.tableValue = {
+                  columns: [
+                    {
+                      label: "Company",
+                      key: "company",
+                      renderCallback: function renderCallback(value) {
+                        var strClass = "image";
+                        return React.createElement(
+                          "td",
+                          null,
                           React.createElement(
-                            "tr",
-                            null,
-                            React.createElement(
-                              "td",
-                              null,
-                              React.createElement("input", {
-                                type: "checkbox",
-                                className: "checkbox",
-                                checked: data.checkStatus,
-                                onChange: function onChange(e) {
-                                  _this.onClickChildCheckbox(e, i);
-                                }
-                              }),
-                              React.createElement(
-                                "span",
-                                {
-                                  className: "image"
-                                },
-                                React.createElement("img", {
-                                  src: company_icon_png_1.default,
-                                  alt: ""
-                                })
-                              ),
-                              data.company
-                            ),
-                            React.createElement(
-                              "td",
-                              null,
-                              data.contacts,
-                              " ",
-                              React.createElement(
-                                "a",
-                                {
-                                  href: "#",
-                                  className: "float-right"
-                                },
-                                React.createElement("i", {
-                                  className: "fa fa-ellipsis-v"
-                                })
-                              )
-                            )
+                            "span",
+                            {
+                              className: strClass
+                            },
+                            React.createElement("img", {
+                              src: company_icon_png_1.default,
+                              alt: ""
+                            })
+                          ),
+                          value
+                        );
+                      }
+                    },
+                    {
+                      label: "Contacts",
+                      key: "contacts",
+                      renderCallback: function renderCallback(value) {
+                        var strClass1 = "float-right";
+                        var strClass2 = "fa fa-ellipsis-v";
+                        return React.createElement(
+                          "td",
+                          null,
+                          value,
+                          " ",
+                          React.createElement(
+                            "a",
+                            {
+                              href: "#",
+                              className: strClass1
+                            },
+                            React.createElement("i", {
+                              className: strClass2
+                            })
                           )
                         );
                       }
-                    };
-
-                    for (var i = 0; i < length; i++) {
-                      _loop_1(i);
-                    }
-                  } else {
-                    retData.push(
-                      React.createElement(
-                        "tr",
-                        null,
-                        React.createElement(
-                          "td",
-                          {
-                            className: "text-center there-no-data",
-                            colSpan: 2
-                          },
-                          "There is no data"
-                        )
-                      )
-                    );
-                  }
-
-                  return retData;
-                };
-
-                _this.onSearchChange = function(e) {
-                  var value = e.target.value;
-
-                  _this.setState({
-                    searchKey: value
-                  });
-
-                  var duplicateAllCompanies = _this.state.duplicateAllCompanies;
-                  var searchResult = [];
-
-                  for (var i = 0; i < duplicateAllCompanies.length; i++) {
-                    if (
-                      duplicateAllCompanies[i].company.indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllCompanies[i]);
-                    } else if (
-                      duplicateAllCompanies[i].company
-                        .toLowerCase()
-                        .indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllCompanies[i]);
-                    }
-
-                    if (
-                      duplicateAllCompanies[i].contacts.indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllCompanies[i]);
-                    } else if (
-                      duplicateAllCompanies[i].contacts
-                        .toLowerCase()
-                        .indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllCompanies[i]);
-                    }
-                  }
-
-                  _this.calculateTotalPages(searchResult);
-
-                  _this.setState({
-                    allCompaniesSetData: searchResult,
-                    currentPage: 0
-                  });
-                };
-
-                _this.onClickChildCheckbox = function(e, index) {
-                  var allCompaniesSetData = _this.state.allCompaniesSetData;
-                  var countCheckedCheckbox = 0;
-                  var selectedData = false;
-                  var checked = e.target.checked;
-                  allCompaniesSetData[index].checkStatus = checked;
-
-                  for (var j = 0; j < allCompaniesSetData.length; j++) {
-                    if (allCompaniesSetData[j].checkStatus == true) {
-                      countCheckedCheckbox++;
-                    } else {
-                      countCheckedCheckbox--;
-                    }
-                  }
-
-                  if (countCheckedCheckbox == allCompaniesSetData.length) {
-                    selectedData = true;
-                  } else {
-                    selectedData = false;
-                  }
-
-                  _this.setState({
-                    selectAll: selectedData,
-                    allCompaniesSetData: allCompaniesSetData
-                  });
-                };
-
-                _this.onClickSelectAll = function(e) {
-                  var allCompaniesSetData = _this.state.allCompaniesSetData;
-
-                  for (var j = 0; j < allCompaniesSetData.length; j++) {
-                    allCompaniesSetData[j].checkStatus = e.target.checked;
-                  }
-
-                  _this.setState({
-                    allCompaniesSetData: allCompaniesSetData,
-                    selectAll: e.target.checked
-                  });
-                };
-
-                _this.handleChange = function(e) {
-                  var allCompaniesSetData = _this.state.allCompaniesSetData;
-                  var totalData = allCompaniesSetData.length;
-
-                  if (e.target.value !== "all") {
-                    var indexOfLastData = Math.ceil(totalData / e.target.value);
-
-                    _this.setState({
-                      perPageLimit: e.target.value,
-                      totalPages: indexOfLastData
-                    });
-                  } else {
-                    var indexOfLastData = Math.ceil(totalData / totalData);
-
-                    _this.setState({
-                      perPageLimit: totalData,
-                      totalPages: indexOfLastData
-                    });
-                  }
-                };
-
-                _this.state = {
-                  searchKey: "",
-                  totalPages: "",
-                  currentPage: 0,
-                  perPageLimit: 10,
-                  openCreateMenu: false,
-                  selectAll: false,
-                  allCompaniesSetData: [
-                    {
-                      company: "Rodney Artichoke",
-                      contacts: "02",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK Founder & Co",
-                      contacts: "01",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Ram Fabrication",
-                      contacts: "08",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK+",
-                      contacts: "05",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Digital Media",
-                      contacts: "07",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RT Groups",
-                      contacts: "04",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RNKV Steels",
-                      contacts: "12",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Studiogreen",
-                      contacts: "09",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK+",
-                      contacts: "05",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Digital Media",
-                      contacts: "07",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RT Groups",
-                      contacts: "04",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RNKV Steels",
-                      contacts: "12",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Studiogreen",
-                      contacts: "09",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Rodney Artichoke",
-                      contacts: "02",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK Founder & Co",
-                      contacts: "01",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Ram Fabrication",
-                      contacts: "08",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK+",
-                      contacts: "05",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Digital Media",
-                      contacts: "07",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RT Groups",
-                      contacts: "04",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RNKV Steels",
-                      contacts: "12",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Studiogreen",
-                      contacts: "09",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK+",
-                      contacts: "05",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Rodney Artichoke",
-                      contacts: "02",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK Founder & Co",
-                      contacts: "01",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Ram Fabrication",
-                      contacts: "08",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK+",
-                      contacts: "05",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Digital Media",
-                      contacts: "07",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RT Groups",
-                      contacts: "04",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RNKV Steels",
-                      contacts: "12",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Studiogreen",
-                      contacts: "09",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK+",
-                      contacts: "05",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Digital Media",
-                      contacts: "07",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RT Groups",
-                      contacts: "04",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RNKV Steels",
-                      contacts: "12",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Studiogreen",
-                      contacts: "09",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Rodney Artichoke",
-                      contacts: "02",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK Founder & Co",
-                      contacts: "01",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Ram Fabrication",
-                      contacts: "08",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK+",
-                      contacts: "05",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Digital Media",
-                      contacts: "07",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RT Groups",
-                      contacts: "04",
-                      checkStatus: false
-                    },
-                    {
-                      company: "RNKV Steels",
-                      contacts: "12",
-                      checkStatus: false
-                    },
-                    {
-                      company: "Studiogreen",
-                      contacts: "09",
-                      checkStatus: false
-                    },
-                    {
-                      company: "AK+",
-                      contacts: "05",
-                      checkStatus: false
                     }
                   ],
-                  duplicateAllCompanies: [
+                  data: [
                     {
                       company: "Rodney Artichoke",
                       contacts: "02",
@@ -61060,6 +65505,16 @@ object-assign
                     }
                   ]
                 };
+                (_this.perPageLimit = 10),
+                  (_this.checkboxValue = true),
+                  (_this.state = {
+                    searchKey: "",
+                    totalPages: "",
+                    currentPage: 0,
+                    perPageLimit: 10,
+                    openCreateMenu: false,
+                    selectAll: false
+                  });
                 _this.breadCrumbs = [
                   {
                     label: "Home",
@@ -61077,177 +65532,8 @@ object-assign
                 return _this;
               }
 
-              AllCompanies.prototype.componentDidMount = function() {
-                this.calculateTotalPages(this.state.allCompaniesSetData);
-              };
-
-              AllCompanies.prototype.peginationOfBox = function() {
-                var _this = this;
-
-                var _a = this.state,
-                  currentPage = _a.currentPage,
-                  totalPages = _a.totalPages,
-                  allCompaniesSetData = _a.allCompaniesSetData;
-                var rows = [];
-
-                var _loop_2 = function _loop_2(i) {
-                  console.log(currentPage);
-                  rows.push(
-                    React.createElement(
-                      "li",
-                      {
-                        className: "",
-                        key: i
-                      },
-                      React.createElement(
-                        "a",
-                        {
-                          className: currentPage === i ? "active" : "deactive",
-                          href: "#",
-                          onClick: function onClick(e) {
-                            return _this.navigatePage("btn-click", e, i);
-                          }
-                        },
-                        i + 1
-                      )
-                    )
-                  );
-                };
-
-                for (var i = 0; i < totalPages; i++) {
-                  _loop_2(i);
-                }
-
-                return React.createElement(
-                  "ul",
-                  null,
-                  React.createElement(
-                    "li",
-                    {
-                      className: "previous"
-                    },
-                    React.createElement(
-                      "a",
-                      {
-                        className: currentPage === 0 ? "desable" : "enable",
-                        href: "#",
-                        onClick: function onClick(e) {
-                          return _this.navigatePage("pre", e, "");
-                        }
-                      },
-                      "Previous"
-                    )
-                  ),
-                  rows,
-                  React.createElement(
-                    "li",
-                    {
-                      className: "next"
-                    },
-                    React.createElement(
-                      "a",
-                      {
-                        className:
-                          currentPage === this.state.totalPages - 1
-                            ? "desable"
-                            : "enable",
-                        href: "#",
-                        onClick: function onClick(e) {
-                          return _this.navigatePage("next", e, "");
-                        }
-                      },
-                      "Next"
-                    )
-                  )
-                );
-              };
-
-              AllCompanies.prototype.navigatePage = function(target, e, i) {
-                var _a = this.state,
-                  totalPages = _a.totalPages,
-                  currentPage = _a.currentPage,
-                  start_index = _a.start_index,
-                  perPageLimit = _a.perPageLimit,
-                  ending_index = _a.ending_index,
-                  allCompaniesSetData = _a.allCompaniesSetData;
-                e.preventDefault();
-
-                switch (target) {
-                  case "pre":
-                    if (currentPage !== 0) {
-                      this.setState({
-                        currentPage: currentPage - 1,
-                        start_index: start_index - perPageLimit
-                      });
-
-                      if (ending_index != allCompaniesSetData.length) {
-                        this.setState({
-                          ending_index: ending_index - perPageLimit
-                        });
-                      } else {
-                        this.setState({
-                          ending_index:
-                            ending_index -
-                            (allCompaniesSetData.length - start_index + 1)
-                        });
-                      }
-                    }
-
-                    break;
-
-                  case "next":
-                    if (currentPage !== totalPages - 1) {
-                      this.setState({
-                        currentPage: currentPage + 1,
-                        start_index: start_index + perPageLimit
-                      });
-
-                      if (
-                        ending_index + perPageLimit <
-                        allCompaniesSetData.length
-                      ) {
-                        this.setState({
-                          ending_index: ending_index + perPageLimit
-                        });
-                      } else {
-                        this.setState({
-                          ending_index:
-                            ending_index +
-                            (allCompaniesSetData.length - ending_index)
-                        });
-                      }
-                    }
-
-                    break;
-
-                  case "btn-click":
-                    if ((i + 1) * perPageLimit < allCompaniesSetData.length) {
-                      this.setState({
-                        currentPage: i,
-                        start_index: i * perPageLimit + 1,
-                        ending_index: (i + 1) * perPageLimit
-                      });
-                    } else {
-                      this.setState({
-                        currentPage: i,
-                        start_index: i * perPageLimit + 1,
-                        ending_index:
-                          ending_index +
-                          (allCompaniesSetData.length - ending_index)
-                      });
-                    }
-
-                    break;
-                }
-              };
-
               AllCompanies.prototype.render = function() {
-                var _this = this;
-
-                var _a = this.state,
-                  allCompaniesSetData = _a.allCompaniesSetData,
-                  selectAll = _a.selectAll,
-                  openCreateMenu = _a.openCreateMenu;
+                var openCreateMenu = this.state.openCreateMenu;
                 return React.createElement(
                   "div",
                   {
@@ -61349,176 +65635,40 @@ object-assign
                         {
                           className: "d-block p-t-20 all-companies-tabel"
                         },
-                        React.createElement(
-                          "div",
-                          {
-                            className: "row"
+                        React.createElement(table_1.default, {
+                          valueFromData: this.tableValue,
+                          perPageLimit: this.perPageLimit,
+                          visiblecheckboxStatus: this.checkboxValue,
+                          tableClasses: {
+                            table: "companies-tabel",
+                            tableParent: "d-block  p-t-5 companies-main-tabel",
+                            parentClass: "d-block p-t-20 all-companies-tabel"
                           },
-                          React.createElement(
-                            "div",
-                            {
-                              className: "col-lg-9 col-md-12 col-sm-12"
-                            },
-                            React.createElement(
-                              "div",
-                              {
-                                className: "d-inline-block select-all"
-                              },
-                              React.createElement("input", {
-                                type: "checkbox",
-                                className: "checkbox",
-                                checked: selectAll,
-                                onChange: function onChange(e) {
-                                  _this.onClickSelectAll(e);
-                                }
-                              }),
-                              React.createElement(
-                                "label",
-                                {
-                                  className: "d-inline-block"
-                                },
-                                "Select All"
-                              )
-                            ),
-                            React.createElement(
-                              "div",
-                              {
-                                className: "d-inline-block showby"
-                              },
-                              React.createElement(
-                                "label",
-                                {
-                                  className: "d-inline-block"
-                                },
-                                "Show"
-                              ),
-                              React.createElement(
-                                "select",
-                                {
-                                  onChange: this.handleChange,
-                                  className: "form-control"
-                                },
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "10"
-                                  },
-                                  "10"
-                                ),
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "20"
-                                  },
-                                  "20"
-                                ),
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "30"
-                                  },
-                                  "30"
-                                ),
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "40"
-                                  },
-                                  "40"
-                                ),
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "50"
-                                  },
-                                  "50"
-                                ),
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "all"
-                                  },
-                                  "All"
-                                )
-                              ),
-                              React.createElement(
-                                "span",
-                                null,
-                                "entries per page"
-                              )
-                            )
-                          ),
-                          React.createElement(
-                            "div",
-                            {
-                              className:
-                                "col-lg-3 col-md-12 col-sm-12 text-right"
-                            },
-                            React.createElement(
-                              "div",
-                              {
-                                className:
-                                  "d-inline-block form-group filter-search-control"
-                              },
-                              React.createElement(
-                                "form",
-                                null,
-                                React.createElement("input", {
-                                  type: "text",
-                                  className: "input-group-text",
-                                  onChange: this.onSearchChange,
-                                  value: this.state.searchKey
-                                }),
-                                React.createElement(
-                                  "button",
-                                  null,
-                                  React.createElement("i", {
-                                    className: "fa fa-search"
-                                  })
-                                )
-                              )
-                            )
-                          )
-                        ),
-                        React.createElement(
-                          "div",
-                          {
-                            className: "d-block p-t-5 companies-main-tabel"
-                          },
-                          React.createElement(
-                            "table",
-                            {
-                              className: "companies-tabel"
-                            },
-                            React.createElement(
-                              "thead",
-                              null,
-                              React.createElement(
-                                "tr",
-                                null,
-                                React.createElement("th", null, "Company"),
-                                React.createElement("th", null, "Contacts")
-                              )
-                            ),
-                            React.createElement(
-                              "tbody",
-                              null,
-                              this.allCompaniesSetData()
-                            )
-                          )
-                        ),
-                        allCompaniesSetData.length > 0 &&
-                          React.createElement(
-                            "div",
-                            {
-                              className:
-                                "d-block width-100 p-t-15 text-right pagination"
-                            },
-                            this.peginationOfBox()
-                          )
+                          searchKey: "company",
+                          showingLine:
+                            "Latest Companies (Showing %start% to %end% of %total% Companies)"
+                        })
                       )
                     )
-                  )
+                  ),
+                  React.createElement(
+                    OpenNewContactPopup_1.OpenNewContactPopup,
+                    {
+                      ref: this.openNewContactRef
+                    }
+                  ),
+                  React.createElement(
+                    OpenNewCompanyPopup_1.OpenNewCompanyPopup,
+                    {
+                      ref: this.openNewCompanyRef
+                    }
+                  ),
+                  React.createElement(OpenNewEmailPopup_1.OpenNewEmailPopup, {
+                    ref: this.openNewEmailRef
+                  }),
+                  React.createElement(OpenNewTicketPopup_1.OpenNewTicketPopup, {
+                    ref: this.openNewTicketRef
+                  })
                 );
               };
 
@@ -61646,6 +65796,10 @@ object-assign
             /*! ../../components/OpenNewTicketPopup */ "./components/OpenNewTicketPopup.tsx"
           );
 
+          var table_1 = __webpack_require__(
+            /*! ./../../components/table */ "./components/table.tsx"
+          );
+
           var AllContacts =
             /** @class */
             (function(_super) {
@@ -61678,502 +65832,49 @@ object-assign
                   });
                 };
 
-                _this.calculateTotalPages = function(displayData) {
-                  var perPageLimit = _this.state.perPageLimit;
-                  var indexOfLastData = Math.ceil(
-                    displayData.length / perPageLimit
-                  );
-
-                  _this.setState({
-                    totalPages: indexOfLastData
-                  });
-                };
-
-                _this.allContactsSetData = function() {
-                  var _a = _this.state,
-                    allContactsSetData = _a.allContactsSetData,
-                    perPageLimit = _a.perPageLimit,
-                    currentPage = _a.currentPage;
-                  var retData = [];
-                  var length = allContactsSetData.length;
-
-                  if (length > 0) {
-                    var _loop_1 = function _loop_1(i) {
-                      if (
-                        i >= currentPage * perPageLimit &&
-                        i <= currentPage * perPageLimit + (perPageLimit - 1)
-                      ) {
-                        var data = allContactsSetData[i];
-                        retData.push(
-                          React.createElement(
-                            "tr",
-                            null,
-                            React.createElement(
-                              "td",
-                              null,
-                              React.createElement("input", {
-                                type: "checkbox",
-                                className: "checkbox",
-                                checked: data.checkStatus,
-                                onChange: function onChange(e) {
-                                  _this.onClickChildCheckbox(e, i);
-                                }
-                              }),
-                              React.createElement("span", {
-                                className: "image"
-                              }),
-                              " ",
-                              data.contact
-                            ),
-                            React.createElement("td", null, data.title),
-                            React.createElement("td", null, data.company),
-                            React.createElement("td", null, data.emailAddress),
-                            React.createElement("td", null, data.workPhone),
-                            React.createElement("td", null, data.facebook),
-                            React.createElement(
-                              "td",
-                              null,
-                              data.twitter,
-                              " ",
-                              React.createElement(
-                                "a",
-                                {
-                                  href: "#",
-                                  className: "float-right"
-                                },
-                                React.createElement("i", {
-                                  className: "fa fa-ellipsis-v"
-                                })
-                              )
-                            )
-                          )
+                _this.tableValue = {
+                  columns: [
+                    {
+                      label: "Contact",
+                      key: "contact",
+                      renderCallback: function renderCallback(value) {
+                        var strClass = "image";
+                        return React.createElement(
+                          "td",
+                          null,
+                          React.createElement("span", {
+                            className: strClass
+                          }),
+                          value
                         );
                       }
-                    };
-
-                    for (var i = 0; i < length; i++) {
-                      _loop_1(i);
-                    }
-                  } else {
-                    retData.push(
-                      React.createElement(
-                        "tr",
-                        null,
-                        React.createElement(
-                          "td",
-                          {
-                            className: "text-center there-no-data",
-                            colSpan: 7
-                          },
-                          "There is no data"
-                        )
-                      )
-                    );
-                  }
-
-                  return retData;
-                };
-
-                _this.onClickChildCheckbox = function(e, index) {
-                  var allContactsSetData = _this.state.allContactsSetData;
-                  var countCheckedCheckbox = 0;
-                  var selectedData = false;
-                  var checked = e.target.checked;
-                  allContactsSetData[index].checkStatus = checked;
-
-                  for (var j = 0; j < allContactsSetData.length; j++) {
-                    if (allContactsSetData[j].checkStatus == true) {
-                      countCheckedCheckbox++;
-                    } else {
-                      countCheckedCheckbox--;
-                    }
-                  }
-
-                  if (countCheckedCheckbox == allContactsSetData.length) {
-                    selectedData = true;
-                  } else {
-                    selectedData = false;
-                  }
-
-                  _this.setState({
-                    selectAll: selectedData,
-                    allContactsSetData: allContactsSetData
-                  });
-                };
-
-                _this.onClickSelectAll = function(e) {
-                  var allContactsSetData = _this.state.allContactsSetData;
-
-                  for (var j = 0; j < allContactsSetData.length; j++) {
-                    allContactsSetData[j].checkStatus = e.target.checked;
-                  }
-
-                  _this.setState({
-                    allContactsSetData: allContactsSetData,
-                    selectAll: e.target.checked
-                  });
-                };
-
-                _this.onSearchChange = function(e) {
-                  var value = e.target.value;
-
-                  _this.setState({
-                    searchKey: value
-                  });
-
-                  var duplicateAllContacts = _this.state.duplicateAllContacts;
-                  var searchResult = [];
-
-                  for (var i = 0; i < duplicateAllContacts.length; i++) {
-                    if (
-                      duplicateAllContacts[i].contact.indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    } else if (
-                      duplicateAllContacts[i].contact
-                        .toLowerCase()
-                        .indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    }
-
-                    if (
-                      duplicateAllContacts[i].title.indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    } else if (
-                      duplicateAllContacts[i].title
-                        .toLowerCase()
-                        .indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    }
-
-                    if (
-                      duplicateAllContacts[i].company.indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    } else if (
-                      duplicateAllContacts[i].company
-                        .toLowerCase()
-                        .indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    }
-
-                    if (
-                      duplicateAllContacts[i].emailAddress.indexOf(value) !==
-                        -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    } else if (
-                      duplicateAllContacts[i].emailAddress
-                        .toLowerCase()
-                        .indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    }
-
-                    if (
-                      duplicateAllContacts[i].workPhone.indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    } else if (
-                      duplicateAllContacts[i].workPhone
-                        .toLowerCase()
-                        .indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    }
-
-                    if (
-                      duplicateAllContacts[i].facebook.indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    } else if (
-                      duplicateAllContacts[i].facebook
-                        .toLowerCase()
-                        .indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    }
-
-                    if (
-                      duplicateAllContacts[i].twitter.indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    } else if (
-                      duplicateAllContacts[i].twitter
-                        .toLowerCase()
-                        .indexOf(value) !== -1 ||
-                      value === ""
-                    ) {
-                      searchResult.push(duplicateAllContacts[i]);
-                    }
-                  }
-
-                  _this.calculateTotalPages(searchResult);
-
-                  _this.setState({
-                    allContactsSetData: searchResult,
-                    currentPage: 0
-                  });
-                };
-
-                _this.handleChange = function(e) {
-                  var allContactsSetData = _this.state.allContactsSetData;
-                  var totalData = allContactsSetData.length;
-
-                  if (e.target.value !== "all") {
-                    var indexOfLastData = Math.ceil(totalData / e.target.value);
-
-                    _this.setState({
-                      perPageLimit: e.target.value,
-                      totalPages: indexOfLastData
-                    });
-                  } else {
-                    var indexOfLastData = Math.ceil(totalData / totalData);
-
-                    _this.setState({
-                      perPageLimit: totalData,
-                      totalPages: indexOfLastData
-                    });
-                  }
-                };
-
-                _this.state = {
-                  searchKey: "",
-                  totalPages: "",
-                  currentPage: 0,
-                  perPageLimit: 8,
-                  selectAll: false,
-                  openCreateMenu: false,
-                  allContactsSetData: [
-                    {
-                      contact: "Rodney Artichoke",
-                      title: "HR Manager",
-                      company: "RGK Groups",
-                      emailAddress: "support@artichoke.com",
-                      workPhone: "(+1) 224 547 8425",
-                      facebook: "Articho142",
-                      twitter: "Rodney124",
-                      checkStatus: false
                     },
                     {
-                      contact: "Jason Response",
-                      title: "HR Manager",
-                      company: "RGK Groups",
-                      emailAddress: "support@artichoke.com",
-                      workPhone: "(+1) 224 547 8425",
-                      facebook: "Articho142",
-                      twitter: "Rodney124",
-                      checkStatus: false
+                      label: "Title",
+                      key: "title"
                     },
                     {
-                      contact: "Fig Nelson",
-                      title: "HR Manager",
-                      company: "RNKV Steels",
-                      emailAddress: "contact@rnvksteels.com",
-                      workPhone: "(+3) 954 247 3126",
-                      facebook: "Nelson126",
-                      twitter: "nelson236",
-                      checkStatus: false
+                      label: "Company",
+                      key: "company"
                     },
                     {
-                      contact: "Inverness McKenzie",
-                      title: "Steel Worker",
-                      company: "Ram Fabrication",
-                      emailAddress: "ramsteel@gmail.com",
-                      workPhone: "(+1) 387 267 5931",
-                      facebook: "McKenzie195",
-                      twitter: "Inverness198",
-                      checkStatus: false
+                      label: "Email Address",
+                      key: "emailAddress"
                     },
                     {
-                      contact: "Fergus Douchebag",
-                      title: "Graphic Designer",
-                      company: "AK+",
-                      emailAddress: "info@fergus.com",
-                      workPhone: "(+1) 174 217 8425",
-                      facebook: "Fergus Douch",
-                      twitter: "Douchebag102",
-                      checkStatus: false
+                      label: "Work Phone",
+                      key: "workPhone"
                     },
                     {
-                      contact: "Dominic L. Ement",
-                      title: "Marketing Manager",
-                      company: "RT Groups",
-                      emailAddress: "d.ement@gmail.com",
-                      workPhone: "(+1) 482 268 8410",
-                      facebook: "L.ement143",
-                      twitter: "Dominic148",
-                      checkStatus: false
+                      label: "Facebook",
+                      key: "facebook"
                     },
                     {
-                      contact: "Niles Peppertrout",
-                      title: "Art Director",
-                      company: "StudioGreen",
-                      emailAddress: "niles1547@gamil.com",
-                      workPhone: "(+1) 247 147 2687",
-                      facebook: "Niles1124",
-                      twitter: "Peppertrout12",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Pelican Steve",
-                      title: "Designer",
-                      company: "Digital Media",
-                      emailAddress: "info@digital.com",
-                      workPhone: "(+1) 412 578 2548",
-                      facebook: "Steve154",
-                      twitter: "Pelican111",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Inverness McKenzie",
-                      title: "Steel Worker",
-                      company: "Ram Fabrication",
-                      emailAddress: "ramsteel@gmail.com",
-                      workPhone: "(+1) 387 267 5931",
-                      facebook: "McKenzie195",
-                      twitter: "Inverness198",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Fergus Douchebag",
-                      title: "Graphic Designer",
-                      company: "AK+",
-                      emailAddress: "info@fergus.com",
-                      workPhone: "(+1) 174 217 8425",
-                      facebook: "Fergus Douch",
-                      twitter: "Douchebag102",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Dominic L. Ement",
-                      title: "Marketing Manager",
-                      company: "RT Groups",
-                      emailAddress: "d.ement@gmail.com",
-                      workPhone: "(+1) 482 268 8410",
-                      facebook: "L.ement143",
-                      twitter: "Dominic148",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Niles Peppertrout",
-                      title: "Art Director",
-                      company: "StudioGreen",
-                      emailAddress: "niles1547@gamil.com",
-                      workPhone: "(+1) 247 147 2687",
-                      facebook: "Niles1124",
-                      twitter: "Peppertrout12",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Pelican Steve",
-                      title: "Designer",
-                      company: "Digital Media",
-                      emailAddress: "info@digital.com",
-                      workPhone: "(+1) 412 578 2548",
-                      facebook: "Steve154",
-                      twitter: "Pelican111",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Jason Response",
-                      title: "HR Manager",
-                      company: "RGK Groups",
-                      emailAddress: "support@artichoke.com",
-                      workPhone: "(+1) 224 547 8425",
-                      facebook: "Articho142",
-                      twitter: "Rodney124",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Fig Nelson",
-                      title: "HR Manager",
-                      company: "RNKV Steels",
-                      emailAddress: "contact@rnvksteels.com",
-                      workPhone: "(+3) 954 247 3126",
-                      facebook: "Nelson126",
-                      twitter: "nelson236",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Inverness McKenzie",
-                      title: "Steel Worker",
-                      company: "Ram Fabrication",
-                      emailAddress: "ramsteel@gmail.com",
-                      workPhone: "(+1) 387 267 5931",
-                      facebook: "McKenzie195",
-                      twitter: "Inverness198",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Fergus Douchebag",
-                      title: "Graphic Designer",
-                      company: "AK+",
-                      emailAddress: "info@fergus.com",
-                      workPhone: "(+1) 174 217 8425",
-                      facebook: "Fergus Douch",
-                      twitter: "Douchebag102",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Dominic L. Ement",
-                      title: "Marketing Manager",
-                      company: "RT Groups",
-                      emailAddress: "d.ement@gmail.com",
-                      workPhone: "(+1) 482 268 8410",
-                      facebook: "L.ement143",
-                      twitter: "Dominic148",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Niles Peppertrout",
-                      title: "Art Director",
-                      company: "StudioGreen",
-                      emailAddress: "niles1547@gamil.com",
-                      workPhone: "(+1) 247 147 2687",
-                      facebook: "Niles1124",
-                      twitter: "Peppertrout12",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Pelican Steve",
-                      title: "Designer",
-                      company: "Digital Media",
-                      emailAddress: "info@digital.com",
-                      workPhone: "(+1) 412 578 2548",
-                      facebook: "Steve154",
-                      twitter: "Pelican111",
-                      checkStatus: false
-                    },
-                    {
-                      contact: "Inverness McKenzie",
-                      title: "Steel Worker",
-                      company: "Ram Fabrication",
-                      emailAddress: "ramsteel@gmail.com",
-                      workPhone: "(+1) 387 267 5931",
-                      facebook: "McKenzie195",
-                      twitter: "Inverness198",
-                      checkStatus: false
+                      label: "Twitter",
+                      key: "twitter"
                     }
                   ],
-                  duplicateAllContacts: [
+                  data: [
                     {
                       contact: "Rodney Artichoke",
                       title: "HR Manager",
@@ -62386,16 +66087,21 @@ object-assign
                     }
                   ]
                 };
-                _this.breadCrumbs = [
-                  {
-                    label: "Home",
-                    route: "/"
-                  },
-                  {
-                    label: "Monitor | Alerts",
-                    isCurrentPage: true
-                  }
-                ];
+                _this.state = {
+                  openCreateMenu: false
+                };
+                (_this.checkboxValue = false),
+                  (_this.perPageLimit = 6),
+                  (_this.breadCrumbs = [
+                    {
+                      label: "Home",
+                      route: "/"
+                    },
+                    {
+                      label: "Monitor | Alerts",
+                      isCurrentPage: true
+                    }
+                  ]);
                 _this.openNewContactRef = React.createRef();
                 _this.openNewCompanyRef = React.createRef();
                 _this.openNewEmailRef = React.createRef();
@@ -62403,179 +66109,8 @@ object-assign
                 return _this;
               }
 
-              AllContacts.prototype.componentDidMount = function() {
-                this.calculateTotalPages(this.state.allContactsSetData);
-              };
-
-              AllContacts.prototype.peginationOfBox = function() {
-                var _this = this;
-
-                var _a = this.state,
-                  currentPage = _a.currentPage,
-                  totalPages = _a.totalPages;
-                var rows = [];
-
-                var _loop_2 = function _loop_2(i) {
-                  rows.push(
-                    React.createElement(
-                      "li",
-                      {
-                        className: "",
-                        key: i
-                      },
-                      React.createElement(
-                        "a",
-                        {
-                          className: currentPage === i ? "active" : "deactive",
-                          href: "#",
-                          onClick: function onClick(e) {
-                            return _this.navigatePage("btn-click", e, i);
-                          }
-                        },
-                        i + 1
-                      )
-                    )
-                  );
-                };
-
-                for (var i = 0; i < totalPages; i++) {
-                  _loop_2(i);
-                }
-
-                if (totalPages != 0) {
-                  return React.createElement(
-                    "ul",
-                    null,
-                    React.createElement(
-                      "li",
-                      {
-                        className: "previous"
-                      },
-                      React.createElement(
-                        "a",
-                        {
-                          className: currentPage === 0 ? "desable" : "enable",
-                          href: "#",
-                          onClick: function onClick(e) {
-                            return _this.navigatePage("pre", e, "");
-                          }
-                        },
-                        "Previous"
-                      )
-                    ),
-                    rows,
-                    React.createElement(
-                      "li",
-                      {
-                        className: "next"
-                      },
-                      React.createElement(
-                        "a",
-                        {
-                          className:
-                            currentPage === this.state.totalPages - 1
-                              ? "desable"
-                              : "enable",
-                          href: "#",
-                          onClick: function onClick(e) {
-                            return _this.navigatePage("next", e, "");
-                          }
-                        },
-                        "Next"
-                      )
-                    )
-                  );
-                } else {
-                  return React.createElement("ul", null);
-                }
-              };
-
-              AllContacts.prototype.navigatePage = function(target, e, i) {
-                var _a = this.state,
-                  totalPages = _a.totalPages,
-                  currentPage = _a.currentPage,
-                  start_index = _a.start_index,
-                  perPageLimit = _a.perPageLimit,
-                  ending_index = _a.ending_index,
-                  allContactsSetData = _a.allContactsSetData;
-                e.preventDefault();
-
-                switch (target) {
-                  case "pre":
-                    if (currentPage !== 0) {
-                      this.setState({
-                        currentPage: currentPage - 1,
-                        start_index: start_index - perPageLimit
-                      });
-
-                      if (ending_index != allContactsSetData.length) {
-                        this.setState({
-                          ending_index: ending_index - perPageLimit
-                        });
-                      } else {
-                        this.setState({
-                          ending_index:
-                            ending_index -
-                            (allContactsSetData.length - start_index + 1)
-                        });
-                      }
-                    }
-
-                    break;
-
-                  case "next":
-                    if (currentPage !== totalPages - 1) {
-                      this.setState({
-                        currentPage: currentPage + 1,
-                        start_index: start_index + perPageLimit
-                      });
-
-                      if (
-                        ending_index + perPageLimit <
-                        allContactsSetData.length
-                      ) {
-                        this.setState({
-                          ending_index: ending_index + perPageLimit
-                        });
-                      } else {
-                        this.setState({
-                          ending_index:
-                            ending_index +
-                            (allContactsSetData.length - ending_index)
-                        });
-                      }
-                    }
-
-                    break;
-
-                  case "btn-click":
-                    if ((i + 1) * perPageLimit < allContactsSetData.length) {
-                      this.setState({
-                        currentPage: i,
-                        start_index: i * perPageLimit + 1,
-                        ending_index: (i + 1) * perPageLimit
-                      });
-                    } else {
-                      this.setState({
-                        currentPage: i,
-                        start_index: i * perPageLimit + 1,
-                        ending_index:
-                          ending_index +
-                          (allContactsSetData.length - ending_index)
-                      });
-                    }
-
-                    break;
-                }
-              };
-
               AllContacts.prototype.render = function() {
-                var _this = this;
-
-                var _a = this.state,
-                  allContactsSetData = _a.allContactsSetData,
-                  selectAll = _a.selectAll,
-                  openCreateMenu = _a.openCreateMenu;
+                var openCreateMenu = this.state.openCreateMenu;
                 return React.createElement(
                   "div",
                   {
@@ -62672,188 +66207,19 @@ object-assign
                       {
                         className: "common-container border-bottom-0 p-t-0"
                       },
-                      React.createElement(
-                        "div",
-                        {
-                          className: "d-block p-t-20 all-contacts-tabel"
+                      React.createElement(table_1.default, {
+                        valueFromData: this.tableValue,
+                        perPageLimit: this.perPageLimit,
+                        visiblecheckboxStatus: this.checkboxValue,
+                        tableClasses: {
+                          table: "contact-tabel",
+                          tableParent: "d-block p-t-5 contacts-tabel",
+                          parentClass: "d-block p-t-20 all-contacts-tabel"
                         },
-                        React.createElement(
-                          "div",
-                          {
-                            className: "row"
-                          },
-                          React.createElement(
-                            "div",
-                            {
-                              className: "col-lg-9 col-md-12 col-sm-12"
-                            },
-                            React.createElement(
-                              "div",
-                              {
-                                className: "d-inline-block select-all"
-                              },
-                              React.createElement("input", {
-                                type: "checkbox",
-                                className: "checkbox",
-                                checked: selectAll,
-                                onChange: function onChange(e) {
-                                  _this.onClickSelectAll(e);
-                                }
-                              }),
-                              React.createElement(
-                                "label",
-                                {
-                                  className: "d-inline-block"
-                                },
-                                "Select All"
-                              )
-                            ),
-                            React.createElement(
-                              "div",
-                              {
-                                className: "d-inline-block showby"
-                              },
-                              React.createElement(
-                                "label",
-                                {
-                                  className: "d-inline-block"
-                                },
-                                "Show"
-                              ),
-                              React.createElement(
-                                "select",
-                                {
-                                  onChange: this.handleChange,
-                                  className: "form-control"
-                                },
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "8"
-                                  },
-                                  "8"
-                                ),
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "16"
-                                  },
-                                  "16"
-                                ),
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "24"
-                                  },
-                                  "24"
-                                ),
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "32"
-                                  },
-                                  "32"
-                                ),
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "40"
-                                  },
-                                  "40"
-                                ),
-                                React.createElement(
-                                  "option",
-                                  {
-                                    value: "all"
-                                  },
-                                  "All"
-                                )
-                              ),
-                              React.createElement(
-                                "span",
-                                null,
-                                "entries per page"
-                              )
-                            )
-                          ),
-                          React.createElement(
-                            "div",
-                            {
-                              className:
-                                "col-lg-3 col-md-12 col-sm-12 text-right"
-                            },
-                            React.createElement(
-                              "div",
-                              {
-                                className:
-                                  "d-inline-block form-group filter-search-control"
-                              },
-                              React.createElement(
-                                "form",
-                                null,
-                                React.createElement("input", {
-                                  type: "text",
-                                  className: "input-group-text",
-                                  onChange: this.onSearchChange,
-                                  value: this.state.searchKey
-                                }),
-                                React.createElement(
-                                  "button",
-                                  null,
-                                  React.createElement("i", {
-                                    className: "fa fa-search"
-                                  })
-                                )
-                              )
-                            )
-                          )
-                        ),
-                        React.createElement(
-                          "div",
-                          {
-                            className: "d-block p-t-5 contacts-tabel"
-                          },
-                          React.createElement(
-                            "table",
-                            {
-                              className: "contact-tabel"
-                            },
-                            React.createElement(
-                              "thead",
-                              null,
-                              React.createElement(
-                                "tr",
-                                null,
-                                React.createElement("th", null, "Contact"),
-                                React.createElement("th", null, "Title"),
-                                React.createElement("th", null, "Company"),
-                                React.createElement(
-                                  "th",
-                                  null,
-                                  "Email Address"
-                                ),
-                                React.createElement("th", null, "Work Phone"),
-                                React.createElement("th", null, "Facebook"),
-                                React.createElement("th", null, "Twitter")
-                              )
-                            ),
-                            React.createElement(
-                              "tbody",
-                              null,
-                              this.allContactsSetData()
-                            )
-                          )
-                        ),
-                        allContactsSetData.length > 0 &&
-                          React.createElement(
-                            "div",
-                            {
-                              className:
-                                "d-block width-100 p-t-15 text-right pagination"
-                            },
-                            this.peginationOfBox()
-                          )
-                      )
+                        searchKey: "contact",
+                        showingLine:
+                          "All Contacts (Showing %start% to %end% of %total% Contacts)"
+                      })
                     )
                   ),
                   React.createElement(
@@ -62936,6 +66302,479 @@ object-assign
           /***/
         },
 
+      /***/ "./domain/Charts/index.tsx":
+        /*!*********************************!*\
+  !*** ./domain/Charts/index.tsx ***!
+  \*********************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var __extends =
+            (undefined && undefined.__extends) ||
+            (function() {
+              var extendStatics =
+                Object.setPrototypeOf ||
+                ({
+                  __proto__: []
+                } instanceof Array &&
+                  function(d, b) {
+                    d.__proto__ = b;
+                  }) ||
+                function(d, b) {
+                  for (var p in b) {
+                    if (b.hasOwnProperty(p)) d[p] = b[p];
+                  }
+                };
+
+              return function(d, b) {
+                extendStatics(d, b);
+
+                function __() {
+                  this.constructor = d;
+                }
+
+                d.prototype =
+                  b === null
+                    ? Object.create(b)
+                    : ((__.prototype = b.prototype), new __());
+              };
+            })();
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+
+          var React = __webpack_require__(/*! react */ "react");
+
+          var Breadcrumbs_1 = __webpack_require__(
+            /*! ../../components/Breadcrumbs */ "./components/Breadcrumbs.tsx"
+          );
+
+          var react_router_dom_1 = __webpack_require__(
+            /*! react-router-dom */ "../node_modules/react-router-dom/esm/react-router-dom.js"
+          );
+
+          var config_1 = __webpack_require__(/*! ../../config */ "./config.ts");
+
+          var react_chartjs_2_1 = __webpack_require__(
+            /*! react-chartjs-2 */ "../node_modules/react-chartjs-2/es/index.js"
+          );
+
+          var Charts =
+            /** @class */
+            (function(_super) {
+              __extends(Charts, _super);
+
+              function Charts(props) {
+                var _this = _super.call(this, props) || this;
+
+                _this.barChart1Data = {
+                  labels: ["Email", "Widget", "Chat"],
+                  datasets: [
+                    {
+                      type: "bar",
+                      label: "",
+                      backgroundColor: "rgba(31, 120, 180, 1)",
+                      borderColor: "rgba(31, 120, 180, 1)",
+                      borderWidth: 1,
+                      hoverBackgroundColor: "rgba(31, 120, 180, 1)",
+                      hoverBorderColor: "rgba(31, 120, 180, 1)",
+                      data: [100, 380, 200]
+                    }
+                  ]
+                };
+                _this.barChart2Data = {
+                  labels: ["Low", "Medium", "High"],
+                  datasets: [
+                    {
+                      type: "bar",
+                      label: "",
+                      backgroundColor: "rgba(31, 120, 180, 1)",
+                      borderColor: "rgba(31, 120, 180, 1)",
+                      borderWidth: 1,
+                      hoverBackgroundColor: "rgba(31, 120, 180, 1)",
+                      hoverBorderColor: "rgba(31, 120, 180, 1)",
+                      data: [280, 180, 350]
+                    }
+                  ]
+                };
+                _this.barChart3Data = {
+                  labels: ["Open", "Inprogress", "Closed"],
+                  datasets: [
+                    {
+                      type: "bar",
+                      label: "",
+                      backgroundColor: "rgba(31, 120, 180, 1)",
+                      borderColor: "rgba(31, 120, 180, 1)",
+                      borderWidth: 1,
+                      hoverBackgroundColor: "rgba(31, 120, 180, 1)",
+                      hoverBorderColor: "rgba(31, 120, 180, 1)",
+                      data: [390, 270, 200]
+                    }
+                  ]
+                };
+                _this.barChart4Data = {
+                  labels: ["Question", "Issue"],
+                  datasets: [
+                    {
+                      type: "bar",
+                      label: "",
+                      backgroundColor: "rgba(31, 120, 180, 1)",
+                      borderColor: "rgba(31, 120, 180, 1)",
+                      borderWidth: 1,
+                      hoverBackgroundColor: "rgba(31, 120, 180, 1)",
+                      hoverBorderColor: "rgba(31, 120, 180, 1)",
+                      data: [320, 150]
+                    }
+                  ]
+                };
+                _this.state = {};
+                _this.breadCrumbs = [
+                  {
+                    label: "Home",
+                    route: "/"
+                  },
+                  {
+                    label: "Monitor | Alerts",
+                    isCurrentPage: true
+                  }
+                ];
+                return _this;
+              }
+
+              Charts.prototype.render = function() {
+                return React.createElement(
+                  "div",
+                  {
+                    className: "servicedesk-dashboard-container"
+                  },
+                  React.createElement(Breadcrumbs_1.Breadcrumbs, {
+                    breadcrumbs: this.breadCrumbs,
+                    pageTitle: "TICKETING TOOL"
+                  }),
+                  React.createElement(
+                    "div",
+                    {
+                      className: "servicedesk-page-container"
+                    },
+                    React.createElement(
+                      "div",
+                      {
+                        className: "common-container"
+                      },
+                      React.createElement(
+                        "div",
+                        {
+                          className: "row"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-8 col-md-8 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "page-heading"
+                            },
+                            React.createElement("h1", null, "Created Tickets")
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-4 col-md-4 col-sm-12 text-right"
+                          },
+                          React.createElement(
+                            react_router_dom_1.Link,
+                            {
+                              to: config_1.config.basePath + "/reporthelpdesh",
+                              className:
+                                "blue-button m-r-0 m-b-0 min-width-inherit width-auto create-btn"
+                            },
+                            "Back"
+                          )
+                        )
+                      )
+                    ),
+                    React.createElement(
+                      "div",
+                      {
+                        className: "common-container border-bottom-0 p-b-0"
+                      },
+                      React.createElement(
+                        "div",
+                        {
+                          className: "charts-boxs"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "row"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "col-lg-6 col-md-6 col-sm-12"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block width-100 chart-box"
+                              },
+                              React.createElement(react_chartjs_2_1.Bar, {
+                                data: this.barChart1Data,
+                                options: {
+                                  maintainAspectRatio: false,
+                                  legend: {
+                                    display: false,
+                                    position: "right"
+                                  },
+                                  scales: {
+                                    yAxes: [
+                                      {
+                                        // gridLines: {
+                                        //     color: "rgba(240, 243, 247, 1)",
+                                        // },
+                                        ticks: {
+                                          fontColor: "rgba(169, 185, 198, 1)",
+                                          fontSize: 12,
+                                          beginAtZero: true,
+                                          min: 0,
+                                          max: 400
+                                        }
+                                      }
+                                    ],
+                                    xAxes: [
+                                      {
+                                        gridLines: {
+                                          color: "rgba(240, 243, 247, 1)"
+                                        },
+                                        ticks: {
+                                          fontColor: "rgba(169, 185, 198, 1)",
+                                          fontSize: 12
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              })
+                            )
+                          ),
+                          React.createElement(
+                            "div",
+                            {
+                              className: "col-lg-6 col-md-6 col-sm-12"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block width-100 chart-box"
+                              },
+                              React.createElement(react_chartjs_2_1.Bar, {
+                                data: this.barChart2Data,
+                                options: {
+                                  maintainAspectRatio: false,
+                                  legend: {
+                                    display: false,
+                                    position: "right"
+                                  },
+                                  scales: {
+                                    yAxes: [
+                                      {
+                                        // gridLines: {
+                                        //     color: "rgba(240, 243, 247, 1)",
+                                        // },
+                                        ticks: {
+                                          fontColor: "rgba(169, 185, 198, 1)",
+                                          fontSize: 12,
+                                          beginAtZero: true,
+                                          min: 0,
+                                          max: 400
+                                        }
+                                      }
+                                    ],
+                                    xAxes: [
+                                      {
+                                        gridLines: {
+                                          color: "rgba(240, 243, 247, 1)"
+                                        },
+                                        ticks: {
+                                          fontColor: "rgba(169, 185, 198, 1)",
+                                          fontSize: 12
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              })
+                            )
+                          ),
+                          React.createElement(
+                            "div",
+                            {
+                              className: "col-lg-6 col-md-6 col-sm-12"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block width-100 chart-box"
+                              },
+                              React.createElement(react_chartjs_2_1.Bar, {
+                                data: this.barChart3Data,
+                                options: {
+                                  maintainAspectRatio: false,
+                                  legend: {
+                                    display: false,
+                                    position: "right"
+                                  },
+                                  scales: {
+                                    yAxes: [
+                                      {
+                                        // gridLines: {
+                                        //     color: "rgba(240, 243, 247, 1)",
+                                        // },
+                                        ticks: {
+                                          fontColor: "rgba(169, 185, 198, 1)",
+                                          fontSize: 12,
+                                          beginAtZero: true,
+                                          min: 0,
+                                          max: 400
+                                        }
+                                      }
+                                    ],
+                                    xAxes: [
+                                      {
+                                        gridLines: {
+                                          color: "rgba(240, 243, 247, 1)"
+                                        },
+                                        ticks: {
+                                          fontColor: "rgba(169, 185, 198, 1)",
+                                          fontSize: 12
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              })
+                            )
+                          ),
+                          React.createElement(
+                            "div",
+                            {
+                              className: "col-lg-6 col-md-6 col-sm-12"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block width-100 chart-box"
+                              },
+                              React.createElement(react_chartjs_2_1.Bar, {
+                                data: this.barChart3Data,
+                                options: {
+                                  maintainAspectRatio: false,
+                                  legend: {
+                                    display: false,
+                                    position: "right"
+                                  },
+                                  scales: {
+                                    yAxes: [
+                                      {
+                                        // gridLines: {
+                                        //     color: "rgba(240, 243, 247, 1)",
+                                        // },
+                                        ticks: {
+                                          fontColor: "rgba(169, 185, 198, 1)",
+                                          fontSize: 12,
+                                          beginAtZero: true,
+                                          min: 0,
+                                          max: 400
+                                        }
+                                      }
+                                    ],
+                                    xAxes: [
+                                      {
+                                        gridLines: {
+                                          color: "rgba(240, 243, 247, 1)"
+                                        },
+                                        ticks: {
+                                          fontColor: "rgba(169, 185, 198, 1)",
+                                          fontSize: 12
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              })
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                );
+              };
+
+              return Charts;
+            })(React.Component);
+
+          exports.Charts = Charts;
+
+          /***/
+        },
+
+      /***/ "./domain/ChartsApp.tsx":
+        /*!******************************!*\
+  !*** ./domain/ChartsApp.tsx ***!
+  \******************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+
+          var React = __webpack_require__(/*! react */ "react");
+
+          var ReactDOM = __webpack_require__(/*! react-dom */ "react-dom");
+
+          var react_router_dom_1 = __webpack_require__(
+            /*! react-router-dom */ "../node_modules/react-router-dom/esm/react-router-dom.js"
+          );
+
+          var Charts_1 = __webpack_require__(
+            /*! ./Charts */ "./domain/Charts/index.tsx"
+          );
+
+          var config_1 = __webpack_require__(/*! ../config */ "./config.ts");
+
+          function init() {
+            setTimeout(function() {
+              ReactDOM.render(
+                React.createElement(
+                  react_router_dom_1.BrowserRouter,
+                  null,
+                  React.createElement(
+                    react_router_dom_1.Switch,
+                    null,
+                    React.createElement(react_router_dom_1.Route, {
+                      path: config_1.config.basePath + "/charts",
+                      component: Charts_1.Charts
+                    })
+                  )
+                ),
+                document.getElementById("servicedesk-main-container")
+              );
+            }, 100);
+          }
+
+          exports.default = init;
+
+          /***/
+        },
+
       /***/ "./domain/Dashboard/index.tsx":
         /*!************************************!*\
   !*** ./domain/Dashboard/index.tsx ***!
@@ -62974,6 +66813,180 @@ object-assign
                     : ((__.prototype = b.prototype), new __());
               };
             })();
+
+          var __awaiter =
+            (undefined && undefined.__awaiter) ||
+            function(thisArg, _arguments, P, generator) {
+              return new (P || (P = Promise))(function(resolve, reject) {
+                function fulfilled(value) {
+                  try {
+                    step(generator.next(value));
+                  } catch (e) {
+                    reject(e);
+                  }
+                }
+
+                function rejected(value) {
+                  try {
+                    step(generator["throw"](value));
+                  } catch (e) {
+                    reject(e);
+                  }
+                }
+
+                function step(result) {
+                  result.done
+                    ? resolve(result.value)
+                    : new P(function(resolve) {
+                        resolve(result.value);
+                      }).then(fulfilled, rejected);
+                }
+
+                step(
+                  (generator = generator.apply(
+                    thisArg,
+                    _arguments || []
+                  )).next()
+                );
+              });
+            };
+
+          var __generator =
+            (undefined && undefined.__generator) ||
+            function(thisArg, body) {
+              var _ = {
+                  label: 0,
+                  sent: function sent() {
+                    if (t[0] & 1) throw t[1];
+                    return t[1];
+                  },
+                  trys: [],
+                  ops: []
+                },
+                f,
+                y,
+                t,
+                g;
+              return (
+                (g = {
+                  next: verb(0),
+                  throw: verb(1),
+                  return: verb(2)
+                }),
+                typeof Symbol === "function" &&
+                  (g[Symbol.iterator] = function() {
+                    return this;
+                  }),
+                g
+              );
+
+              function verb(n) {
+                return function(v) {
+                  return step([n, v]);
+                };
+              }
+
+              function step(op) {
+                if (f) throw new TypeError("Generator is already executing.");
+
+                while (_) {
+                  try {
+                    if (
+                      ((f = 1),
+                      y &&
+                        (t =
+                          op[0] & 2
+                            ? y["return"]
+                            : op[0]
+                              ? y["throw"] ||
+                                ((t = y["return"]) && t.call(y), 0)
+                              : y.next) &&
+                        !(t = t.call(y, op[1])).done)
+                    )
+                      return t;
+                    if (((y = 0), t)) op = [op[0] & 2, t.value];
+
+                    switch (op[0]) {
+                      case 0:
+                      case 1:
+                        t = op;
+                        break;
+
+                      case 4:
+                        _.label++;
+                        return {
+                          value: op[1],
+                          done: false
+                        };
+
+                      case 5:
+                        _.label++;
+                        y = op[1];
+                        op = [0];
+                        continue;
+
+                      case 7:
+                        op = _.ops.pop();
+
+                        _.trys.pop();
+
+                        continue;
+
+                      default:
+                        if (
+                          !((t = _.trys),
+                          (t = t.length > 0 && t[t.length - 1])) &&
+                          (op[0] === 6 || op[0] === 2)
+                        ) {
+                          _ = 0;
+                          continue;
+                        }
+
+                        if (
+                          op[0] === 3 &&
+                          (!t || (op[1] > t[0] && op[1] < t[3]))
+                        ) {
+                          _.label = op[1];
+                          break;
+                        }
+
+                        if (op[0] === 6 && _.label < t[1]) {
+                          _.label = t[1];
+                          t = op;
+                          break;
+                        }
+
+                        if (t && _.label < t[2]) {
+                          _.label = t[2];
+
+                          _.ops.push(op);
+
+                          break;
+                        }
+
+                        if (t[2]) _.ops.pop();
+
+                        _.trys.pop();
+
+                        continue;
+                    }
+
+                    op = body.call(thisArg, _);
+                  } catch (e) {
+                    op = [6, e];
+                    y = 0;
+                  } finally {
+                    f = t = 0;
+                  }
+                }
+
+                if (op[0] & 5) throw op[1];
+                return {
+                  value: op[0] ? op[1] : void 0,
+                  done: true
+                };
+              }
+            };
 
           Object.defineProperty(exports, "__esModule", {
             value: true
@@ -63112,6 +67125,39 @@ object-assign
                   _this.openNewTicketRef.current.toggle();
                 };
 
+                var res = function res() {
+                  return __awaiter(_this, void 0, void 0, function() {
+                    var res;
+                    return __generator(this, function(_a) {
+                      switch (_a.label) {
+                        case 0:
+                          return [
+                            4,
+                            /*yield*/
+                            fetch(
+                              config_1.config.SERVICEDESK_API_URL +
+                                "/api/tickets",
+                              {
+                                method: "get"
+                              }
+                            ).then(function(response) {
+                              return response.json();
+                            })
+                          ];
+
+                        case 1:
+                          res = _a.sent();
+                          return [
+                            2,
+                            /*return*/
+                            res
+                          ];
+                      }
+                    });
+                  });
+                };
+
+                console.log("data in constructor", res());
                 _this.tableValue = {
                   columns: [
                     {
@@ -63120,15 +67166,38 @@ object-assign
                     },
                     {
                       label: "Requester Name",
-                      key: "requestername"
+                      key: "contact"
                     },
                     {
                       label: "Subjects",
-                      key: "subjects"
+                      key: "subject"
                     },
                     {
                       label: "Status",
-                      key: "status"
+                      key: "status",
+                      renderCallback: function renderCallback(value) {
+                        var strClass = "";
+
+                        if (value === "Open") {
+                          strClass = "yellow-green";
+                        } else if (value === "Closed") {
+                          strClass = "red";
+                        } else if (value === "Pending") {
+                          strClass = "orange";
+                        }
+
+                        return React.createElement(
+                          "td",
+                          null,
+                          React.createElement(
+                            "span",
+                            {
+                              className: strClass
+                            },
+                            value
+                          )
+                        );
+                      }
                     },
                     {
                       label: "Priority",
@@ -63143,15 +67212,16 @@ object-assign
                       key: "createDate"
                     }
                   ],
-                  TicketsData: [
+                  data: [
                     {
                       index: "#27",
                       requesterName: "Rodney Artichoke",
                       subject: "I need help with aading a New Contact....",
                       status: "Open",
                       priority: "Low",
-                      Assignee: "Fergus Douchebag",
-                      createDate: "10 July 2020"
+                      assignee: "Fergus Douchebag",
+                      createDate: "10 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#39",
@@ -63160,8 +67230,9 @@ object-assign
                         "I need help with aading a New Contact data to be pre...",
                       status: "Closed",
                       priority: "Medium",
-                      Assignee: "Bodrum Salvador",
-                      createDate: "12 July 2020"
+                      assignee: "Bodrum Salvador",
+                      createDate: "12 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#47",
@@ -63169,8 +67240,9 @@ object-assign
                       subject: "Mobile Campaign",
                       status: "Pending",
                       priority: "Low",
-                      Assignee: "Inverness McKenzie",
-                      createDate: "15 July 2020"
+                      assignee: "Inverness McKenzie",
+                      createDate: "15 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#52",
@@ -63178,8 +67250,9 @@ object-assign
                       subject: "Service related announcements",
                       status: "Open",
                       priority: "Hign",
-                      Assignee: "Abraham Pigeon",
-                      createDate: "16 July 2020"
+                      assignee: "Abraham Pigeon",
+                      createDate: "16 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#87",
@@ -63187,8 +67260,9 @@ object-assign
                       subject: "I need help with aading a New Contact....",
                       status: "Closed",
                       priority: "Low",
-                      Assignee: "Fergus Douchebag",
-                      createDate: "19 July 2020"
+                      assignee: "Fergus Douchebag",
+                      createDate: "19 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#92",
@@ -63196,8 +67270,9 @@ object-assign
                       subject: "Adding a payment methods",
                       status: "Pending",
                       priority: "Medium",
-                      Assignee: "Jarvis Pepperspray",
-                      createDate: "22 July 2020"
+                      assignee: "Jarvis Pepperspray",
+                      createDate: "22 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#52",
@@ -63205,8 +67280,9 @@ object-assign
                       subject: "Service related announcements",
                       status: "Open",
                       priority: "Hign",
-                      Assignee: "Abraham Pigeon",
-                      createDate: "16 July 2020"
+                      assignee: "Abraham Pigeon",
+                      createDate: "16 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#87",
@@ -63214,8 +67290,9 @@ object-assign
                       subject: "I need help with aading a New Contact....",
                       status: "Closed",
                       priority: "Low",
-                      Assignee: "Fergus Douchebag",
-                      createDate: "19 July 2020"
+                      assignee: "Fergus Douchebag",
+                      createDate: "19 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#92",
@@ -63223,8 +67300,9 @@ object-assign
                       subject: "Adding a payment methods",
                       status: "Pending",
                       priority: "Medium",
-                      Assignee: "Jarvis Pepperspray",
-                      createDate: "22 July 2020"
+                      assignee: "Jarvis Pepperspray",
+                      createDate: "22 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#39",
@@ -63233,8 +67311,9 @@ object-assign
                         "I need help with aading a New Contact data to be pre...",
                       status: "Closed",
                       priority: "Medium",
-                      Assignee: "Bodrum Salvador",
-                      createDate: "12 July 2020"
+                      assignee: "Bodrum Salvador",
+                      createDate: "12 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#47",
@@ -63242,8 +67321,9 @@ object-assign
                       subject: "Mobile Campaign",
                       status: "Pending",
                       priority: "Low",
-                      Assignee: "Inverness McKenzie",
-                      createDate: "15 July 2020"
+                      assignee: "Inverness McKenzie",
+                      createDate: "15 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#52",
@@ -63251,8 +67331,9 @@ object-assign
                       subject: "Service related announcements",
                       status: "Open",
                       priority: "Hign",
-                      Assignee: "Abraham Pigeon",
-                      createDate: "16 July 2020"
+                      assignee: "Abraham Pigeon",
+                      createDate: "16 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#47",
@@ -63260,8 +67341,9 @@ object-assign
                       subject: "Mobile Campaign",
                       status: "Pending",
                       priority: "Low",
-                      Assignee: "Inverness McKenzie",
-                      createDate: "15 July 2020"
+                      assignee: "Inverness McKenzie",
+                      createDate: "15 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#52",
@@ -63269,8 +67351,9 @@ object-assign
                       subject: "Service related announcements",
                       status: "Open",
                       priority: "Hign",
-                      Assignee: "Abraham Pigeon",
-                      createDate: "16 July 2020"
+                      assignee: "Abraham Pigeon",
+                      createDate: "16 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#87",
@@ -63278,8 +67361,9 @@ object-assign
                       subject: "I need help with aading a New Contact....",
                       status: "Closed",
                       priority: "Low",
-                      Assignee: "Fergus Douchebag",
-                      createDate: "19 July 2020"
+                      assignee: "Fergus Douchebag",
+                      createDate: "19 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#92",
@@ -63287,8 +67371,9 @@ object-assign
                       subject: "Adding a payment methods",
                       status: "Pending",
                       priority: "Medium",
-                      Assignee: "Jarvis Pepperspray",
-                      createDate: "22 July 2020"
+                      assignee: "Jarvis Pepperspray",
+                      createDate: "22 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#52",
@@ -63296,8 +67381,9 @@ object-assign
                       subject: "Service related announcements",
                       status: "Open",
                       priority: "Hign",
-                      Assignee: "Abraham Pigeon",
-                      createDate: "16 July 2020"
+                      assignee: "Abraham Pigeon",
+                      createDate: "16 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#87",
@@ -63305,8 +67391,9 @@ object-assign
                       subject: "I need help with aading a New Contact....",
                       status: "Closed",
                       priority: "Low",
-                      Assignee: "Fergus Douchebag",
-                      createDate: "19 July 2020"
+                      assignee: "Fergus Douchebag",
+                      createDate: "19 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#92",
@@ -63314,8 +67401,9 @@ object-assign
                       subject: "Adding a payment methods",
                       status: "Pending",
                       priority: "Medium",
-                      Assignee: "Jarvis Pepperspray",
-                      createDate: "22 July 2020"
+                      assignee: "Jarvis Pepperspray",
+                      createDate: "22 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#39",
@@ -63324,8 +67412,9 @@ object-assign
                         "I need help with aading a New Contact data to be pre...",
                       status: "Closed",
                       priority: "Medium",
-                      Assignee: "Bodrum Salvador",
-                      createDate: "12 July 2020"
+                      assignee: "Bodrum Salvador",
+                      createDate: "12 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#27",
@@ -63333,8 +67422,9 @@ object-assign
                       subject: "I need help with aading a New Contact....",
                       status: "Open",
                       priority: "Low",
-                      Assignee: "Fergus Douchebag",
-                      createDate: "10 July 2020"
+                      assignee: "Fergus Douchebag",
+                      createDate: "10 July 2020",
+                      checkStatus: false
                     },
                     {
                       index: "#39",
@@ -63343,14 +67433,17 @@ object-assign
                         "I need help with aading a New Contact data to be pre...",
                       status: "Closed",
                       priority: "Medium",
-                      Assignee: "Bodrum Salvador",
-                      createDate: "12 July 2020"
+                      assignee: "Bodrum Salvador",
+                      createDate: "12 July 2020",
+                      checkStatus: false
                     }
                   ]
                 };
                 (_this.perPageLimit = 6),
+                  (_this.checkboxValue = false),
                   (_this.state = {
                     openCreateMenu: false,
+                    ticketData2: [],
                     ticketingData: [
                       {
                         ticketingImage: "",
@@ -63474,6 +67567,46 @@ object-assign
                 }
 
                 return retData;
+              };
+
+              Dashboard.prototype.componentDidMount = function() {
+                return __awaiter(this, void 0, void 0, function() {
+                  var res;
+                  return __generator(this, function(_a) {
+                    switch (_a.label) {
+                      case 0:
+                        return [
+                          4,
+                          /*yield*/
+                          fetch(
+                            config_1.config.SERVICEDESK_API_URL +
+                              "/api/tickets",
+                            {
+                              method: "get"
+                            }
+                          ).then(function(response) {
+                            return response.json();
+                          })
+                        ];
+
+                      case 1:
+                        res = _a.sent();
+                        this.ticketData = res;
+                        this.setState({
+                          ticketData2: eval(res)
+                        });
+                        console.log("tickte=", res);
+                        console.log(
+                          "table data in state variable 2=" +
+                            this.state.ticketData2
+                        );
+                        return [
+                          2
+                          /*return*/
+                        ];
+                    }
+                  });
+                });
               };
 
               Dashboard.prototype.performerAgentsData = function() {
@@ -63887,14 +68020,15 @@ object-assign
                         React.createElement(table_1.default, {
                           valueFromData: this.tableValue,
                           perPageLimit: this.perPageLimit,
+                          visiblecheckboxStatus: this.checkboxValue,
                           tableClasses: {
-                            ticketTable: "ticket-tabel",
-                            ticketsTable: "d-block p-t-5 tickets-tabel",
-                            allSupport: "all-support-ticket-tabel",
-                            statusClassOpen: "yellow-green",
-                            statusClassClose: "red",
-                            statusClassPendding: "orange"
-                          }
+                            table: "ticket-tabel",
+                            tableParent: "d-block p-t-5 tickets-tabel",
+                            parentClass: "all-support-ticket-tabel"
+                          },
+                          searchKey: "subject",
+                          showingLine:
+                            "Latest Tickets (Showing %start% to %end% of %total% Tickets)"
                         })
                       )
                     )
@@ -64080,138 +68214,170 @@ object-assign
                   });
                 };
 
-                _this.perPageLimit = 3;
-                _this.tableValue = {
-                  columns: [
-                    {
-                      label: "ID",
-                      key: "id"
-                    },
-                    {
-                      label: "Requester Name",
-                      key: "requestername"
-                    },
-                    {
-                      label: "Subjects",
-                      key: "subjects"
-                    },
-                    {
-                      label: "Status",
-                      key: "status"
-                    },
-                    {
-                      label: "Priority",
-                      key: "priority"
-                    },
-                    {
-                      label: "Assignee",
-                      key: "assignee"
-                    },
-                    {
-                      label: "Create Date",
-                      key: "createDate"
-                    },
-                    {
-                      label: "Agents",
-                      key: "agents"
-                    },
-                    {
-                      label: "Groups",
-                      key: "groups"
-                    }
-                  ],
-                  TicketsData: [
-                    {
-                      index: "#27",
-                      requesterName: "Rodney Artichoke",
-                      subject: "I need help with aading a New Contact....",
-                      status: "Open",
-                      priority: "Low",
-                      Assignee: "Fergus Douchebag",
-                      createDate: "10 July 2020",
-                      agents: "Jacob Jones",
-                      groups: "Billings"
-                    },
-                    {
-                      index: "#39",
-                      requesterName: "Chaplain Mondover",
-                      subject:
-                        "I need help with aading a New Contact data to be pre...",
-                      status: "Closed",
-                      priority: "Medium",
-                      Assignee: "Bodrum Salvador",
-                      createDate: "12 July 2020",
-                      agents: "Jacob Jones",
-                      groups: "Billings"
-                    },
-                    {
-                      index: "#47",
-                      requesterName: "Rodney Artichoke",
-                      subject: "Mobile Campaign",
-                      status: "Pending",
-                      priority: "Low",
-                      Assignee: "Inverness McKenzie",
-                      createDate: "15 July 2020",
-                      agents: "Jacob Jones",
-                      groups: "Billings"
-                    },
-                    {
-                      index: "#52",
-                      requesterName: "Inverness McKenzie",
-                      subject: "Service related announcements",
-                      status: "Open",
-                      priority: "Hign",
-                      Assignee: "Abraham Pigeon",
-                      createDate: "16 July 2020",
-                      agents: "Jacob Jones",
-                      groups: "Billings"
-                    },
-                    {
-                      index: "#87",
-                      requesterName: "Douglas Lyphe",
-                      subject: "I need help with aading a New Contact....",
-                      status: "Closed",
-                      priority: "Low",
-                      Assignee: "Fergus Douchebag",
-                      createDate: "19 July 2020",
-                      agents: "Jacob Jones",
-                      groups: "Billings"
-                    },
-                    {
-                      index: "#92",
-                      requesterName: "Theodore Handle",
-                      subject: "Adding a payment methods",
-                      status: "Pending",
-                      priority: "Low",
-                      Assignee: "Jarvis Pepperspray",
-                      createDate: "22 July 2020",
-                      agents: "Jacob Jones",
-                      groups: "Billings"
-                    },
-                    {
-                      index: "#27",
-                      requesterName: "Rodney Artichoke",
-                      subject: "I need help with aading a New Contact....",
-                      status: "Open",
-                      priority: "Low",
-                      Assignee: "Fergus Douchebag",
-                      createDate: "10 July 2020",
-                      agents: "Jacob Jones",
-                      groups: "Billings"
-                    },
-                    {
-                      index: "#27",
-                      requesterName: "Rodney Artichoke",
-                      subject: "I need help with aading a New Contact....",
-                      status: "Open",
-                      priority: "Low",
-                      Assignee: "Fergus Douchebag",
-                      createDate: "10 July 2020",
-                      agents: "Jacob Jones",
-                      groups: "Billings"
-                    }
-                  ]
-                };
+                _this.perPageLimit = 6;
+                (_this.checkboxValue = false),
+                  (_this.tableValue = {
+                    columns: [
+                      {
+                        label: "ID",
+                        key: "index"
+                      },
+                      {
+                        label: "Requester Name",
+                        key: "requesterName"
+                      },
+                      {
+                        label: "Subjects",
+                        key: "subject"
+                      },
+                      {
+                        label: "Status",
+                        key: "status",
+                        renderCallback: function renderCallback(value) {
+                          var strClass = "";
+
+                          if (value === "Open") {
+                            strClass = "yellow-green";
+                          } else if (value === "Closed") {
+                            strClass = "red";
+                          } else if (value === "Pending") {
+                            strClass = "orange";
+                          }
+
+                          return React.createElement(
+                            "td",
+                            null,
+                            React.createElement(
+                              "span",
+                              {
+                                className: strClass
+                              },
+                              value
+                            )
+                          );
+                        }
+                      },
+                      {
+                        label: "Priority",
+                        key: "priority"
+                      },
+                      {
+                        label: "Assignee",
+                        key: "Assignee"
+                      },
+                      {
+                        label: "Create Date",
+                        key: "createDate"
+                      },
+                      {
+                        label: "Agents",
+                        key: "agents"
+                      },
+                      {
+                        label: "Groups",
+                        key: "groups"
+                      }
+                    ],
+                    data: [
+                      {
+                        index: "#27",
+                        requesterName: "Rodney Artichoke",
+                        subject: "I need help with aading a New Contact....",
+                        status: "Open",
+                        priority: "Low",
+                        Assignee: "Fergus Douchebag",
+                        createDate: "10 July 2020",
+                        agents: "Jacob Jones",
+                        groups: "Billings",
+                        checkStatus: false
+                      },
+                      {
+                        index: "#39",
+                        requesterName: "Chaplain Mondover",
+                        subject:
+                          "I need help with aading a New Contact data to be pre...",
+                        status: "Closed",
+                        priority: "Medium",
+                        Assignee: "Bodrum Salvador",
+                        createDate: "12 July 2020",
+                        agents: "Jacob Jones",
+                        groups: "Billings",
+                        checkStatus: false
+                      },
+                      {
+                        index: "#47",
+                        requesterName: "Rodney Artichoke",
+                        subject: "Mobile Campaign",
+                        status: "Pending",
+                        priority: "Low",
+                        Assignee: "Inverness McKenzie",
+                        createDate: "15 July 2020",
+                        agents: "Jacob Jones",
+                        groups: "Billings",
+                        checkStatus: false
+                      },
+                      {
+                        index: "#52",
+                        requesterName: "Inverness McKenzie",
+                        subject: "Service related announcements",
+                        status: "Open",
+                        priority: "Hign",
+                        Assignee: "Abraham Pigeon",
+                        createDate: "16 July 2020",
+                        agents: "Jacob Jones",
+                        groups: "Billings",
+                        checkStatus: false
+                      },
+                      {
+                        index: "#87",
+                        requesterName: "Douglas Lyphe",
+                        subject: "I need help with aading a New Contact....",
+                        status: "Closed",
+                        priority: "Low",
+                        Assignee: "Fergus Douchebag",
+                        createDate: "19 July 2020",
+                        agents: "Jacob Jones",
+                        groups: "Billings",
+                        checkStatus: false
+                      },
+                      {
+                        index: "#92",
+                        requesterName: "Theodore Handle",
+                        subject: "Adding a payment methods",
+                        status: "Pending",
+                        priority: "Low",
+                        Assignee: "Jarvis Pepperspray",
+                        createDate: "22 July 2020",
+                        agents: "Jacob Jones",
+                        groups: "Billings",
+                        checkStatus: false
+                      },
+                      {
+                        index: "#27",
+                        requesterName: "Rodney Artichoke",
+                        subject: "I need help with aading a New Contact....",
+                        status: "Open",
+                        priority: "Low",
+                        Assignee: "Fergus Douchebag",
+                        createDate: "10 July 2020",
+                        agents: "Jacob Jones",
+                        groups: "Billings",
+                        checkStatus: false
+                      },
+                      {
+                        index: "#27",
+                        requesterName: "Rodney Artichoke",
+                        subject: "I need help with aading a New Contact....",
+                        status: "Open",
+                        priority: "Low",
+                        Assignee: "Fergus Douchebag",
+                        createDate: "10 July 2020",
+                        agents: "Jacob Jones",
+                        groups: "Billings",
+                        checkStatus: false
+                      }
+                    ]
+                  });
                 _this.state = {
                   page_type: "",
                   openCreateMenu: false
@@ -65009,12 +69175,15 @@ object-assign
                         React.createElement(table_1.default, {
                           valueFromData: this.tableValue,
                           perPageLimit: this.perPageLimit,
+                          visiblecheckboxStatus: this.checkboxValue,
                           tableClasses: {
-                            ticketTable: "open-ticket-tabel",
-                            ticketsTable: "d-block p-t-5 open-tickets-tabel",
-                            allSupport: "all-open-ticket-tabel",
-                            Classfafarrow: "fa fa-chevron-down"
-                          }
+                            table: "open-ticket-tabel",
+                            tableParent: "d-block p-t-5 open-tickets-tabel",
+                            parentClass: "all-open-ticket-tabel"
+                          },
+                          searchKey: "subject",
+                          showingLine:
+                            "Latest Tickets (Showing %start% to %end% of %total% Tickets)"
                         })
                       )
                     )
@@ -65086,6 +69255,1630 @@ object-assign
                     React.createElement(react_router_dom_1.Route, {
                       path: config_1.config.basePath + "/opentickets",
                       component: OpenTickets_1.OpenTickets
+                    })
+                  )
+                ),
+                document.getElementById("servicedesk-main-container")
+              );
+            }, 100);
+          }
+
+          exports.default = init;
+
+          /***/
+        },
+
+      /***/ "./domain/ReportHelpdesh/index.tsx":
+        /*!*****************************************!*\
+  !*** ./domain/ReportHelpdesh/index.tsx ***!
+  \*****************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var __extends =
+            (undefined && undefined.__extends) ||
+            (function() {
+              var extendStatics =
+                Object.setPrototypeOf ||
+                ({
+                  __proto__: []
+                } instanceof Array &&
+                  function(d, b) {
+                    d.__proto__ = b;
+                  }) ||
+                function(d, b) {
+                  for (var p in b) {
+                    if (b.hasOwnProperty(p)) d[p] = b[p];
+                  }
+                };
+
+              return function(d, b) {
+                extendStatics(d, b);
+
+                function __() {
+                  this.constructor = d;
+                }
+
+                d.prototype =
+                  b === null
+                    ? Object.create(b)
+                    : ((__.prototype = b.prototype), new __());
+              };
+            })();
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+
+          var React = __webpack_require__(/*! react */ "react");
+
+          var Breadcrumbs_1 = __webpack_require__(
+            /*! ../../components/Breadcrumbs */ "./components/Breadcrumbs.tsx"
+          );
+
+          var react_router_dom_1 = __webpack_require__(
+            /*! react-router-dom */ "../node_modules/react-router-dom/esm/react-router-dom.js"
+          );
+
+          var config_1 = __webpack_require__(/*! ../../config */ "./config.ts");
+
+          var OpenNewContactPopup_1 = __webpack_require__(
+            /*! ../../components/OpenNewContactPopup */ "./components/OpenNewContactPopup.tsx"
+          );
+
+          var OpenNewCompanyPopup_1 = __webpack_require__(
+            /*! ../../components/OpenNewCompanyPopup */ "./components/OpenNewCompanyPopup.tsx"
+          );
+
+          var OpenNewEmailPopup_1 = __webpack_require__(
+            /*! ../../components/OpenNewEmailPopup */ "./components/OpenNewEmailPopup.tsx"
+          );
+
+          var OpenNewTicketPopup_1 = __webpack_require__(
+            /*! ../../components/OpenNewTicketPopup */ "./components/OpenNewTicketPopup.tsx"
+          );
+
+          var OpenNewScheduleReports_1 = __webpack_require__(
+            /*! ../../components/OpenNewScheduleReports */ "./components/OpenNewScheduleReports.tsx"
+          );
+
+          var ReportHelpdesh =
+            /** @class */
+            (function(_super) {
+              __extends(ReportHelpdesh, _super);
+
+              function ReportHelpdesh(props) {
+                var _this = _super.call(this, props) || this;
+
+                _this.onClickOpenNewContact = function(e) {
+                  _this.openNewContactRef.current.toggle();
+                };
+
+                _this.onClickOpenNewCompany = function(e) {
+                  _this.openNewCompanyRef.current.toggle();
+                };
+
+                _this.onClickOpenNewEmail = function(e) {
+                  _this.openNewEmailRef.current.toggle();
+                };
+
+                _this.onClickOpenNewTicket = function(e) {
+                  _this.openNewTicketRef.current.toggle();
+                };
+
+                _this.onClickOpenNewScheduleReports = function(e) {
+                  _this.openNewScheduleReportsRef.current.toggle();
+                };
+
+                _this.onClickOpenSubLink = function() {
+                  var menu = !_this.state.openCreateMenu;
+
+                  _this.setState({
+                    openCreateMenu: menu
+                  });
+                };
+
+                _this.displayTicketData = function() {
+                  var TicketsData = _this.state.TicketsData;
+                  var retData = [];
+
+                  for (var i = 0; i < TicketsData.length; i++) {
+                    var row = TicketsData[i];
+                    retData.push(
+                      React.createElement(
+                        "div",
+                        {
+                          className: "col-xl-3 col-lg-4 col-md-6 col-sm-12"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "d-block text-center desk-box"
+                          },
+                          React.createElement(
+                            react_router_dom_1.Link,
+                            {
+                              to: config_1.config.basePath + "/charts",
+                              className: "d-block text-center"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block text-right icon"
+                              },
+                              React.createElement(
+                                "button",
+                                {
+                                  className:
+                                    "white-button min-width-inherit width-auto m-r-0"
+                                },
+                                React.createElement("i", {
+                                  className: "fa fa-eye"
+                                })
+                              )
+                            ),
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block number"
+                              },
+                              row.NoOfTickets
+                            ),
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block text"
+                              },
+                              row.TicketStatus
+                            )
+                          )
+                        )
+                      )
+                    );
+                  }
+
+                  return retData;
+                };
+
+                _this.state = {
+                  openCreateMenu: false,
+                  TicketsData: [
+                    {
+                      NoOfTickets: "500",
+                      TicketStatus: "Created Tickets"
+                    },
+                    {
+                      NoOfTickets: "200",
+                      TicketStatus: "Resolved Tickets"
+                    },
+                    {
+                      NoOfTickets: "100",
+                      TicketStatus: "Unresolved Tickets"
+                    },
+                    {
+                      NoOfTickets: "150",
+                      TicketStatus: "Reopen Tickets"
+                    },
+                    {
+                      NoOfTickets: "2 Min 3 Sec",
+                      TicketStatus: "Average 1st Response Time"
+                    },
+                    {
+                      NoOfTickets: "5 Min 20 Sec",
+                      TicketStatus: "Average Response Time"
+                    },
+                    {
+                      NoOfTickets: "23 Min 10 Sec",
+                      TicketStatus: "Average Resolution Time"
+                    },
+                    {
+                      NoOfTickets: "10 Min 2 Sec",
+                      TicketStatus: "Average 1st Assign Time"
+                    },
+                    {
+                      NoOfTickets: "20%",
+                      TicketStatus: "First Contact Resolution"
+                    },
+                    {
+                      NoOfTickets: " 90%",
+                      TicketStatus: "First response SLA"
+                    },
+                    {
+                      NoOfTickets: "50%",
+                      TicketStatus: "Resolution SLA"
+                    }
+                  ]
+                };
+                _this.breadCrumbs = [
+                  {
+                    label: "Home",
+                    route: "/"
+                  },
+                  {
+                    label: "Monitor | Alerts",
+                    isCurrentPage: true
+                  }
+                ];
+                _this.openNewContactRef = React.createRef();
+                _this.openNewCompanyRef = React.createRef();
+                _this.openNewEmailRef = React.createRef();
+                _this.openNewTicketRef = React.createRef();
+                _this.openNewScheduleReportsRef = React.createRef();
+                return _this;
+              }
+
+              ReportHelpdesh.prototype.render = function() {
+                var openCreateMenu = this.state.openCreateMenu;
+                return React.createElement(
+                  "div",
+                  {
+                    className: "servicedesk-dashboard-container"
+                  },
+                  React.createElement(Breadcrumbs_1.Breadcrumbs, {
+                    breadcrumbs: this.breadCrumbs,
+                    pageTitle: "TICKETING TOOL"
+                  }),
+                  React.createElement(
+                    "div",
+                    {
+                      className: "servicedesk-page-container"
+                    },
+                    React.createElement(
+                      "div",
+                      {
+                        className: "common-container"
+                      },
+                      React.createElement(
+                        "div",
+                        {
+                          className: "row"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-8 col-md-8 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "page-heading"
+                            },
+                            React.createElement("h1", null, "Reports")
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-lg-4 col-md-4 col-sm-12 text-right"
+                          },
+                          React.createElement(
+                            "a",
+                            {
+                              href: "#",
+                              onClick: this.onClickOpenSubLink,
+                              className:
+                                "blue-button m-r-0 min-width-inherit width-auto create-btn"
+                            },
+                            "Create"
+                          ),
+                          openCreateMenu == true &&
+                            React.createElement(
+                              "div",
+                              {
+                                className: "text-center open-create-menu"
+                              },
+                              React.createElement(
+                                "a",
+                                {
+                                  onClick: this.onClickOpenNewTicket
+                                },
+                                "Ticket"
+                              ),
+                              React.createElement(
+                                "a",
+                                {
+                                  onClick: this.onClickOpenNewEmail
+                                },
+                                "Email"
+                              ),
+                              React.createElement(
+                                "a",
+                                {
+                                  onClick: this.onClickOpenNewContact
+                                },
+                                "Contact"
+                              ),
+                              React.createElement(
+                                "a",
+                                {
+                                  onClick: this.onClickOpenNewCompany
+                                },
+                                "Company"
+                              )
+                            )
+                        )
+                      )
+                    ),
+                    React.createElement(
+                      "div",
+                      {
+                        className:
+                          "common-container border-bottom-0 filter-container"
+                      },
+                      React.createElement(
+                        "div",
+                        {
+                          className: "row"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-xl-2 col-lg-3 col-md-4 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group filter-control-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "selecttimeperiod"
+                              },
+                              "Select Time Period"
+                            ),
+                            React.createElement("input", {
+                              type: "text",
+                              className: "form-control",
+                              placeholder: "1 Sept 2020 - 31 Sept 2020"
+                            })
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-xl-2 col-lg-3 col-md-4 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group filter-control-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "agents"
+                              },
+                              "Agents"
+                            ),
+                            React.createElement(
+                              "select",
+                              {
+                                className: "form-control"
+                              },
+                              React.createElement(
+                                "option",
+                                null,
+                                "Select Agents"
+                              ),
+                              React.createElement(
+                                "option",
+                                null,
+                                "Jeremy Griffin"
+                              ),
+                              React.createElement(
+                                "option",
+                                null,
+                                "Timothy Dean"
+                              ),
+                              React.createElement(
+                                "option",
+                                null,
+                                "Andreea Baker"
+                              ),
+                              React.createElement("option", null, "Kevin Reyes")
+                            )
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-xl-2 col-lg-3 col-md-4 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group filter-control-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "groups"
+                              },
+                              "Groups"
+                            ),
+                            React.createElement(
+                              "select",
+                              {
+                                className: "form-control"
+                              },
+                              React.createElement(
+                                "option",
+                                null,
+                                "Select Groups"
+                              ),
+                              React.createElement("option", null, "Billings"),
+                              React.createElement(
+                                "option",
+                                null,
+                                "Escalations"
+                              ),
+                              React.createElement(
+                                "option",
+                                null,
+                                "Product Management"
+                              ),
+                              React.createElement("option", null, "QA"),
+                              React.createElement(
+                                "option",
+                                null,
+                                "Replacements"
+                              ),
+                              React.createElement("option", null, "Sales"),
+                              React.createElement("option", null, "Unassigned")
+                            )
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-xl-2 col-lg-3 col-md-4 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group filter-control-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "customer"
+                              },
+                              "Customer"
+                            ),
+                            React.createElement(
+                              "select",
+                              {
+                                className: "form-control"
+                              },
+                              React.createElement(
+                                "option",
+                                null,
+                                "Select Due by"
+                              ),
+                              React.createElement("option", null, "Customer 1"),
+                              React.createElement("option", null, "Customer 2"),
+                              React.createElement("option", null, "Customer 3")
+                            )
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-xl-2 col-lg-3 col-md-4 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group filter-control-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "type"
+                              },
+                              "Type"
+                            ),
+                            React.createElement(
+                              "select",
+                              {
+                                className: "form-control"
+                              },
+                              React.createElement(
+                                "option",
+                                null,
+                                "Select Type"
+                              ),
+                              React.createElement("option", null, "None"),
+                              React.createElement("option", null, "Question"),
+                              React.createElement("option", null, "Problem")
+                            )
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-xl-2 col-lg-3 col-md-4 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group filter-control-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "source"
+                              },
+                              "Source"
+                            ),
+                            React.createElement(
+                              "select",
+                              {
+                                className: "form-control"
+                              },
+                              React.createElement(
+                                "option",
+                                null,
+                                "Select Source"
+                              ),
+                              React.createElement("option", null, "Email"),
+                              React.createElement("option", null, "Portal"),
+                              React.createElement("option", null, "Forum")
+                            )
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-xl-2 col-lg-3 col-md-4 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "form-group filter-control-group"
+                            },
+                            React.createElement(
+                              "label",
+                              {
+                                htmlFor: "priority"
+                              },
+                              "Priority"
+                            ),
+                            React.createElement(
+                              "select",
+                              {
+                                className: "form-control"
+                              },
+                              React.createElement(
+                                "option",
+                                null,
+                                "Select Priority"
+                              ),
+                              React.createElement("option", null, "Low"),
+                              React.createElement("option", null, "Medium"),
+                              React.createElement("option", null, "High"),
+                              React.createElement("option", null, "Urgent")
+                            )
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "col-xl-2 col-lg-3 col-md-4 col-sm-12"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "p-t-20 form-group"
+                            },
+                            React.createElement(
+                              "a",
+                              {
+                                href: "#",
+                                className:
+                                  "blue-button m-r-0 m-b-0 apply-filters-button"
+                              },
+                              "Apply Filters"
+                            )
+                          )
+                        )
+                      )
+                    ),
+                    React.createElement(
+                      "div",
+                      {
+                        className:
+                          "common-container border-bottom-0 desk-depth-container"
+                      },
+                      React.createElement(
+                        "div",
+                        {
+                          className: "d-block p-b-20"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "row"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "col-xl-6 col-lg-6 col-md-6 col-sm-12"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block p-b-10 heading"
+                              },
+                              React.createElement(
+                                "h2",
+                                {
+                                  className: "d-block m-b-0"
+                                },
+                                "Help Desk In-Depth"
+                              ),
+                              React.createElement(
+                                "span",
+                                {
+                                  className: "d-block"
+                                },
+                                "Last update 30 mins ago"
+                              )
+                            )
+                          ),
+                          React.createElement(
+                            "div",
+                            {
+                              className: "col-xl-6 col-lg-6 col-md-6 col-sm-12"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block text-right filters-buttons"
+                              },
+                              React.createElement(
+                                "button",
+                                {
+                                  className:
+                                    "blue-button min-width-inherit width-auto"
+                                },
+                                "Hide Filters"
+                              ),
+                              React.createElement(
+                                "button",
+                                {
+                                  className:
+                                    "white-button min-width-inherit width-auto",
+                                  onClick: this.onClickOpenNewScheduleReports
+                                },
+                                React.createElement("i", {
+                                  className: "fa fa-file"
+                                })
+                              ),
+                              React.createElement(
+                                "button",
+                                {
+                                  className:
+                                    "white-button min-width-inherit width-auto m-r-0"
+                                },
+                                React.createElement("i", {
+                                  className: "fa fa-calendar"
+                                })
+                              )
+                            )
+                          )
+                        )
+                      ),
+                      React.createElement(
+                        "div",
+                        {
+                          className: "d-block"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "row"
+                          },
+                          this.displayTicketData()
+                        )
+                      )
+                    )
+                  ),
+                  React.createElement(
+                    OpenNewContactPopup_1.OpenNewContactPopup,
+                    {
+                      ref: this.openNewContactRef
+                    }
+                  ),
+                  React.createElement(
+                    OpenNewCompanyPopup_1.OpenNewCompanyPopup,
+                    {
+                      ref: this.openNewCompanyRef
+                    }
+                  ),
+                  React.createElement(OpenNewEmailPopup_1.OpenNewEmailPopup, {
+                    ref: this.openNewEmailRef
+                  }),
+                  React.createElement(OpenNewTicketPopup_1.OpenNewTicketPopup, {
+                    ref: this.openNewTicketRef
+                  }),
+                  React.createElement(
+                    OpenNewScheduleReports_1.OpenNewScheduleReports,
+                    {
+                      ref: this.openNewScheduleReportsRef
+                    }
+                  )
+                );
+              };
+
+              return ReportHelpdesh;
+            })(React.Component);
+
+          exports.ReportHelpdesh = ReportHelpdesh;
+
+          /***/
+        },
+
+      /***/ "./domain/ReportHelpdeshApp.tsx":
+        /*!**************************************!*\
+  !*** ./domain/ReportHelpdeshApp.tsx ***!
+  \**************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+
+          var React = __webpack_require__(/*! react */ "react");
+
+          var ReactDOM = __webpack_require__(/*! react-dom */ "react-dom");
+
+          var react_router_dom_1 = __webpack_require__(
+            /*! react-router-dom */ "../node_modules/react-router-dom/esm/react-router-dom.js"
+          );
+
+          var ReportHelpdesh_1 = __webpack_require__(
+            /*! ./ReportHelpdesh */ "./domain/ReportHelpdesh/index.tsx"
+          );
+
+          var config_1 = __webpack_require__(/*! ../config */ "./config.ts");
+
+          function init() {
+            setTimeout(function() {
+              ReactDOM.render(
+                React.createElement(
+                  react_router_dom_1.BrowserRouter,
+                  null,
+                  React.createElement(
+                    react_router_dom_1.Switch,
+                    null,
+                    React.createElement(react_router_dom_1.Route, {
+                      path: config_1.config.basePath + "/reporthelpdesh",
+                      component: ReportHelpdesh_1.ReportHelpdesh
+                    })
+                  )
+                ),
+                document.getElementById("servicedesk-main-container")
+              );
+            }, 100);
+          }
+
+          exports.default = init;
+
+          /***/
+        },
+
+      /***/ "./domain/Reports/index.tsx":
+        /*!**********************************!*\
+  !*** ./domain/Reports/index.tsx ***!
+  \**********************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var __extends =
+            (undefined && undefined.__extends) ||
+            (function() {
+              var extendStatics =
+                Object.setPrototypeOf ||
+                ({
+                  __proto__: []
+                } instanceof Array &&
+                  function(d, b) {
+                    d.__proto__ = b;
+                  }) ||
+                function(d, b) {
+                  for (var p in b) {
+                    if (b.hasOwnProperty(p)) d[p] = b[p];
+                  }
+                };
+
+              return function(d, b) {
+                extendStatics(d, b);
+
+                function __() {
+                  this.constructor = d;
+                }
+
+                d.prototype =
+                  b === null
+                    ? Object.create(b)
+                    : ((__.prototype = b.prototype), new __());
+              };
+            })();
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+
+          var React = __webpack_require__(/*! react */ "react");
+
+          var Breadcrumbs_1 = __webpack_require__(
+            /*! ../../components/Breadcrumbs */ "./components/Breadcrumbs.tsx"
+          );
+
+          var react_router_dom_1 = __webpack_require__(
+            /*! react-router-dom */ "../node_modules/react-router-dom/esm/react-router-dom.js"
+          );
+
+          var config_1 = __webpack_require__(/*! ../../config */ "./config.ts");
+
+          var helpdesk_icon_png_1 = __webpack_require__(
+            /*! ../../img/helpdesk-icon.png */ "./img/helpdesk-icon.png"
+          );
+
+          var ticket_icon_png_1 = __webpack_require__(
+            /*! ../../img/ticket-icon.png */ "./img/ticket-icon.png"
+          );
+
+          var phone_summary_icon_png_1 = __webpack_require__(
+            /*! ../../img/phone-summary-icon.png */ "./img/phone-summary-icon.png"
+          );
+
+          var chat_summary_icon_png_1 = __webpack_require__(
+            /*! ../../img/chat-summary-icon.png */ "./img/chat-summary-icon.png"
+          );
+
+          var agent_icon_png_1 = __webpack_require__(
+            /*! ../../img/agent-icon.png */ "./img/agent-icon.png"
+          );
+
+          var group_icon_png_1 = __webpack_require__(
+            /*! ../../img/group-icon.png */ "./img/group-icon.png"
+          );
+
+          var prformance_icon_png_1 = __webpack_require__(
+            /*! ../../img/prformance-icon.png */ "./img/prformance-icon.png"
+          );
+
+          var time_sheet_icon_png_1 = __webpack_require__(
+            /*! ../../img/time-sheet-icon.png */ "./img/time-sheet-icon.png"
+          );
+
+          var lifecycle_icon_png_1 = __webpack_require__(
+            /*! ../../img/lifecycle-icon.png */ "./img/lifecycle-icon.png"
+          );
+
+          var analysis_icon_png_1 = __webpack_require__(
+            /*! ../../img/analysis-icon.png */ "./img/analysis-icon.png"
+          );
+
+          var satisfaction_icon_png_1 = __webpack_require__(
+            /*! ../../img/satisfaction-icon.png */ "./img/satisfaction-icon.png"
+          );
+
+          var Reports =
+            /** @class */
+            (function(_super) {
+              __extends(Reports, _super);
+
+              function Reports(props) {
+                var _this = _super.call(this, props) || this;
+
+                _this.displayTodayInsights = function() {
+                  var retData = [];
+                  var InsightsData = _this.state.InsightsData;
+
+                  for (var i = 0; i < InsightsData.length; i++) {
+                    var row = InsightsData[i];
+                    retData.push(
+                      React.createElement(
+                        "div",
+                        {
+                          className: "d-block insight-box"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "row"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "col-lg-9 col-sm-12 p-r-0"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className:
+                                  "d-block text-left p-t-5 insight-heading"
+                              },
+                              React.createElement(
+                                "strong",
+                                null,
+                                row.NoOfTickets
+                              ),
+                              " Received Tickets"
+                            )
+                          ),
+                          React.createElement(
+                            "div",
+                            {
+                              className: "col-lg-3 col-sm-12 p-l-0"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className:
+                                  "d-block text-right insight-heading-right-text"
+                              },
+                              row.TicketsPersentage
+                            )
+                          )
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className: "d-block p-t-10 insight-text"
+                          },
+                          row.description
+                        )
+                      )
+                    );
+                  }
+
+                  return retData;
+                };
+
+                _this.state = {
+                  InsightsData: [
+                    {
+                      NoOfTickets: "365",
+                      TicketsPersentage: "35%",
+                      description:
+                        "Many modern alternatives often incorporate humor or other content that actually purpose of filler."
+                    },
+                    {
+                      NoOfTickets: "120",
+                      TicketsPersentage: "27%",
+                      description:
+                        "All Tickets and no break? Consider staffing up to resolve more issue high fives, team i ssuper resonsive todays!"
+                    },
+                    {
+                      NoOfTickets: "2h 15m",
+                      TicketsPersentage: "20%",
+                      description:
+                        "Surprisingly, there is a very vocal faction of the design community that wants to see filler text banished to the original sources."
+                    },
+                    {
+                      NoOfTickets: "15h 25m",
+                      TicketsPersentage: "32%",
+                      description: "Your team is on fire today"
+                    },
+                    {
+                      NoOfTickets: "30m 14s",
+                      TicketsPersentage: "26%",
+                      description:
+                        "Those opposed to using filler text of any sort counter by saying: The ultimate purpose of any digital product."
+                    }
+                  ]
+                };
+                _this.breadCrumbs = [
+                  {
+                    label: "Home",
+                    route: "/"
+                  },
+                  {
+                    label: "Monitor | Alerts",
+                    isCurrentPage: true
+                  }
+                ];
+                return _this;
+              }
+
+              Reports.prototype.render = function() {
+                return React.createElement(
+                  "div",
+                  {
+                    className: "servicedesk-dashboard-container"
+                  },
+                  React.createElement(Breadcrumbs_1.Breadcrumbs, {
+                    breadcrumbs: this.breadCrumbs,
+                    pageTitle: "TICKETING TOOL"
+                  }),
+                  React.createElement(
+                    "div",
+                    {
+                      className:
+                        "servicedesk-page-container reports-page-container"
+                    },
+                    React.createElement(
+                      "div",
+                      {
+                        className: "row"
+                      },
+                      React.createElement(
+                        "div",
+                        {
+                          className: "col-xl-8 col-lg-12 col-md-12 col-sm-12"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "reports-left"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "d-block p-b-15 heading"
+                            },
+                            "Reports"
+                          ),
+                          React.createElement(
+                            "div",
+                            {
+                              className: "d-block ask-question"
+                            },
+                            "Ask me a question about your Helpdesk"
+                          ),
+                          React.createElement(
+                            "div",
+                            {
+                              className: "d-block helpdesk-box"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block helpdesk-heading"
+                              },
+                              "Helpdesk Analysic"
+                            ),
+                            React.createElement(
+                              "ul",
+                              {
+                                className: "d-block"
+                              },
+                              React.createElement(
+                                "li",
+                                {
+                                  className: "d-inline-block"
+                                },
+                                React.createElement(
+                                  react_router_dom_1.Link,
+                                  {
+                                    to:
+                                      config_1.config.basePath +
+                                      "/reporthelpdesh",
+                                    className: "d-block text-center"
+                                  },
+                                  React.createElement(
+                                    "span",
+                                    {
+                                      className: "d-inline-block"
+                                    },
+                                    React.createElement("img", {
+                                      src: helpdesk_icon_png_1.default,
+                                      alt: ""
+                                    })
+                                  ),
+                                  React.createElement(
+                                    "strong",
+                                    {
+                                      className: "d-block"
+                                    },
+                                    "HELPDESK IN-DEPTH"
+                                  )
+                                )
+                              ),
+                              React.createElement(
+                                "li",
+                                {
+                                  className: "d-inline-block"
+                                },
+                                React.createElement(
+                                  "a",
+                                  {
+                                    href: "#",
+                                    className: "d-block text-center"
+                                  },
+                                  React.createElement(
+                                    "span",
+                                    {
+                                      className: "d-inline-block"
+                                    },
+                                    React.createElement("img", {
+                                      src: ticket_icon_png_1.default,
+                                      alt: ""
+                                    })
+                                  ),
+                                  React.createElement(
+                                    "strong",
+                                    {
+                                      className: "d-block"
+                                    },
+                                    "TICKET VOLUME TRENDS"
+                                  )
+                                )
+                              ),
+                              React.createElement(
+                                "li",
+                                {
+                                  className: "d-inline-block"
+                                },
+                                React.createElement(
+                                  "a",
+                                  {
+                                    href: "#",
+                                    className: "d-block text-center"
+                                  },
+                                  React.createElement(
+                                    "span",
+                                    {
+                                      className: "d-inline-block"
+                                    },
+                                    React.createElement("img", {
+                                      src: phone_summary_icon_png_1.default,
+                                      alt: ""
+                                    })
+                                  ),
+                                  React.createElement(
+                                    "strong",
+                                    {
+                                      className: "d-block"
+                                    },
+                                    "PHONE SUMMARY"
+                                  )
+                                )
+                              ),
+                              React.createElement(
+                                "li",
+                                {
+                                  className: "d-inline-block"
+                                },
+                                React.createElement(
+                                  "a",
+                                  {
+                                    href: "#",
+                                    className: "d-block text-center"
+                                  },
+                                  React.createElement(
+                                    "span",
+                                    {
+                                      className: "d-inline-block"
+                                    },
+                                    React.createElement("img", {
+                                      src: chat_summary_icon_png_1.default,
+                                      alt: ""
+                                    })
+                                  ),
+                                  React.createElement(
+                                    "strong",
+                                    {
+                                      className: "d-block"
+                                    },
+                                    "CHAT SUMMARY"
+                                  )
+                                )
+                              )
+                            )
+                          ),
+                          React.createElement(
+                            "div",
+                            {
+                              className: "d-block helpdesk-box productivity"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block helpdesk-heading"
+                              },
+                              "Productivity"
+                            ),
+                            React.createElement(
+                              "ul",
+                              {
+                                className: "d-block"
+                              },
+                              React.createElement(
+                                "li",
+                                {
+                                  className: "d-inline-block"
+                                },
+                                React.createElement(
+                                  "a",
+                                  {
+                                    href: "#",
+                                    className: "d-block text-center"
+                                  },
+                                  React.createElement(
+                                    "span",
+                                    {
+                                      className: "d-inline-block"
+                                    },
+                                    React.createElement("img", {
+                                      src: agent_icon_png_1.default,
+                                      alt: ""
+                                    })
+                                  ),
+                                  React.createElement(
+                                    "strong",
+                                    {
+                                      className: "d-block"
+                                    },
+                                    "AGENT PERFORMANCE"
+                                  )
+                                )
+                              ),
+                              React.createElement(
+                                "li",
+                                {
+                                  className: "d-inline-block"
+                                },
+                                React.createElement(
+                                  "a",
+                                  {
+                                    href: "#",
+                                    className: "d-block text-center"
+                                  },
+                                  React.createElement(
+                                    "span",
+                                    {
+                                      className: "d-inline-block"
+                                    },
+                                    React.createElement("img", {
+                                      src: group_icon_png_1.default,
+                                      alt: ""
+                                    })
+                                  ),
+                                  React.createElement(
+                                    "strong",
+                                    {
+                                      className: "d-block"
+                                    },
+                                    "GROUP PERFORMANCE"
+                                  )
+                                )
+                              ),
+                              React.createElement(
+                                "li",
+                                {
+                                  className: "d-inline-block"
+                                },
+                                React.createElement(
+                                  "a",
+                                  {
+                                    href: "#",
+                                    className: "d-block text-center"
+                                  },
+                                  React.createElement(
+                                    "span",
+                                    {
+                                      className: "d-inline-block"
+                                    },
+                                    React.createElement("img", {
+                                      src: prformance_icon_png_1.default,
+                                      alt: ""
+                                    })
+                                  ),
+                                  React.createElement(
+                                    "strong",
+                                    {
+                                      className: "d-block"
+                                    },
+                                    "PERFORMANCE DISTRIBUTION"
+                                  )
+                                )
+                              ),
+                              React.createElement(
+                                "li",
+                                {
+                                  className: "d-inline-block"
+                                },
+                                React.createElement(
+                                  "a",
+                                  {
+                                    href: "#",
+                                    className: "d-block text-center"
+                                  },
+                                  React.createElement(
+                                    "span",
+                                    {
+                                      className: "d-inline-block"
+                                    },
+                                    React.createElement("img", {
+                                      src: time_sheet_icon_png_1.default,
+                                      alt: ""
+                                    })
+                                  ),
+                                  React.createElement(
+                                    "strong",
+                                    {
+                                      className: "d-block"
+                                    },
+                                    "TIME SHEET SUMMARY"
+                                  )
+                                )
+                              ),
+                              React.createElement(
+                                "li",
+                                {
+                                  className: "d-inline-block"
+                                },
+                                React.createElement(
+                                  "a",
+                                  {
+                                    href: "#",
+                                    className: "d-block text-center"
+                                  },
+                                  React.createElement(
+                                    "span",
+                                    {
+                                      className: "d-inline-block"
+                                    },
+                                    React.createElement("img", {
+                                      src: lifecycle_icon_png_1.default,
+                                      alt: ""
+                                    })
+                                  ),
+                                  React.createElement(
+                                    "strong",
+                                    {
+                                      className: "d-block"
+                                    },
+                                    "TICKET LIFECYCLE"
+                                  )
+                                )
+                              )
+                            )
+                          ),
+                          React.createElement(
+                            "div",
+                            {
+                              className: "d-block helpdesk-box happiness"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "d-block helpdesk-heading"
+                              },
+                              "Customer Happiness"
+                            ),
+                            React.createElement(
+                              "ul",
+                              {
+                                className: "d-block"
+                              },
+                              React.createElement(
+                                "li",
+                                {
+                                  className: "d-inline-block"
+                                },
+                                React.createElement(
+                                  "a",
+                                  {
+                                    href: "#",
+                                    className: "d-block text-center"
+                                  },
+                                  React.createElement(
+                                    "span",
+                                    {
+                                      className: "d-inline-block"
+                                    },
+                                    React.createElement("img", {
+                                      src: analysis_icon_png_1.default,
+                                      alt: ""
+                                    })
+                                  ),
+                                  React.createElement(
+                                    "strong",
+                                    {
+                                      className: "d-block"
+                                    },
+                                    "TOP CUSTOMER ANALYSIS"
+                                  )
+                                )
+                              ),
+                              React.createElement(
+                                "li",
+                                {
+                                  className: "d-inline-block"
+                                },
+                                React.createElement(
+                                  "a",
+                                  {
+                                    href: "#",
+                                    className: "d-block text-center"
+                                  },
+                                  React.createElement(
+                                    "span",
+                                    {
+                                      className: "d-inline-block"
+                                    },
+                                    React.createElement("img", {
+                                      src: satisfaction_icon_png_1.default,
+                                      alt: ""
+                                    })
+                                  ),
+                                  React.createElement(
+                                    "strong",
+                                    {
+                                      className: "d-block"
+                                    },
+                                    "SATISFACTION SURVEY"
+                                  )
+                                )
+                              )
+                            )
+                          ),
+                          React.createElement(
+                            "div",
+                            {
+                              className: "d-block build-reports-text"
+                            },
+                            React.createElement(
+                              "p",
+                              {
+                                className: "d-block"
+                              },
+                              "Want to build custom reports?"
+                            ),
+                            React.createElement(
+                              "strong",
+                              {
+                                className: "d-block"
+                              },
+                              React.createElement(
+                                "a",
+                                {
+                                  href: "#"
+                                },
+                                "Schedule an export"
+                              )
+                            )
+                          )
+                        )
+                      ),
+                      React.createElement(
+                        "div",
+                        {
+                          className: "col-xl-4 col-lg-12 col-md-12 col-sm-12"
+                        },
+                        React.createElement(
+                          "div",
+                          {
+                            className: "reports-right"
+                          },
+                          React.createElement(
+                            "div",
+                            {
+                              className: "row p-b-20"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "col-lg-8 col-md-6 col-sm-6"
+                              },
+                              React.createElement(
+                                "div",
+                                {
+                                  className: "heading"
+                                },
+                                React.createElement(
+                                  "h3",
+                                  {
+                                    className: "d-block m-b-0"
+                                  },
+                                  "Today\u2019s Insights"
+                                ),
+                                React.createElement(
+                                  "p",
+                                  {
+                                    className: "d-block m-b-0"
+                                  },
+                                  "Last Updated 37 Minutes ago"
+                                )
+                              )
+                            ),
+                            React.createElement(
+                              "div",
+                              {
+                                className: "col-lg-4 col-md-6 col-sm-6"
+                              },
+                              React.createElement(
+                                "div",
+                                {
+                                  className: "d-block text-right customize-link"
+                                },
+                                React.createElement(
+                                  "a",
+                                  {
+                                    href: "#"
+                                  },
+                                  "Customize"
+                                )
+                              )
+                            )
+                          ),
+                          React.createElement(
+                            "div",
+                            {
+                              className: "row p-t-10"
+                            },
+                            React.createElement(
+                              "div",
+                              {
+                                className: "col-sm-12"
+                              },
+                              this.displayTodayInsights()
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                );
+              };
+
+              return Reports;
+            })(React.Component);
+
+          exports.Reports = Reports;
+
+          /***/
+        },
+
+      /***/ "./domain/ReportsApp.tsx":
+        /*!*******************************!*\
+  !*** ./domain/ReportsApp.tsx ***!
+  \*******************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+
+          var React = __webpack_require__(/*! react */ "react");
+
+          var ReactDOM = __webpack_require__(/*! react-dom */ "react-dom");
+
+          var react_router_dom_1 = __webpack_require__(
+            /*! react-router-dom */ "../node_modules/react-router-dom/esm/react-router-dom.js"
+          );
+
+          var Reports_1 = __webpack_require__(
+            /*! ./Reports */ "./domain/Reports/index.tsx"
+          );
+
+          var config_1 = __webpack_require__(/*! ../config */ "./config.ts");
+
+          function init() {
+            setTimeout(function() {
+              ReactDOM.render(
+                React.createElement(
+                  react_router_dom_1.BrowserRouter,
+                  null,
+                  React.createElement(
+                    react_router_dom_1.Switch,
+                    null,
+                    React.createElement(react_router_dom_1.Route, {
+                      path: config_1.config.basePath + "/reports",
+                      component: Reports_1.Reports
                     })
                   )
                 ),
@@ -65367,19 +71160,42 @@ object-assign
                   columns: [
                     {
                       label: "ID",
-                      key: "id"
+                      key: "index"
                     },
                     {
                       label: "Requester Name",
-                      key: "requestername"
+                      key: "requesterName"
                     },
                     {
                       label: "Subjects",
-                      key: "subjects"
+                      key: "subject"
                     },
                     {
                       label: "Status",
-                      key: "status"
+                      key: "status",
+                      renderCallback: function renderCallback(value) {
+                        var strClass = "";
+
+                        if (value === "Open") {
+                          strClass = "yellow-green";
+                        } else if (value === "Closed") {
+                          strClass = "red";
+                        } else if (value === "Pending") {
+                          strClass = "orange";
+                        }
+
+                        return React.createElement(
+                          "td",
+                          null,
+                          React.createElement(
+                            "span",
+                            {
+                              className: strClass
+                            },
+                            value
+                          )
+                        );
+                      }
                     },
                     {
                       label: "Priority",
@@ -65402,17 +71218,18 @@ object-assign
                       key: "groups"
                     }
                   ],
-                  TicketsData: [
+                  data: [
                     {
                       index: "#27",
                       requesterName: "Rodney Artichoke",
                       subject: "I need help with aading a New Contact....",
                       status: "Open",
                       priority: "Low",
-                      Assignee: "Fergus Douchebag",
+                      assignee: "Fergus Douchebag",
                       createDate: "10 July 2020",
                       agents: "Jacob Jones",
-                      groups: "Billings"
+                      groups: "Billings",
+                      checkStatus: false
                     },
                     {
                       index: "#39",
@@ -65421,10 +71238,11 @@ object-assign
                         "I need help with aading a New Contact data to be pre...",
                       status: "Closed",
                       priority: "Medium",
-                      Assignee: "Bodrum Salvador",
+                      assignee: "Bodrum Salvador",
                       createDate: "12 July 2020",
                       agents: "Jacob Jones",
-                      groups: "Billings"
+                      groups: "Billings",
+                      checkStatus: false
                     },
                     {
                       index: "#47",
@@ -65432,10 +71250,11 @@ object-assign
                       subject: "Mobile Campaign",
                       status: "Pending",
                       priority: "Low",
-                      Assignee: "Inverness McKenzie",
+                      assignee: "Inverness McKenzie",
                       createDate: "15 July 2020",
                       agents: "Jacob Jones",
-                      groups: "Billings"
+                      groups: "Billings",
+                      checkStatus: false
                     },
                     {
                       index: "#52",
@@ -65443,10 +71262,11 @@ object-assign
                       subject: "Service related announcements",
                       status: "Open",
                       priority: "Hign",
-                      Assignee: "Abraham Pigeon",
+                      assignee: "Abraham Pigeon",
                       createDate: "16 July 2020",
                       agents: "Jacob Jones",
-                      groups: "Billings"
+                      groups: "Billings",
+                      checkStatus: false
                     },
                     {
                       index: "#87",
@@ -65454,10 +71274,11 @@ object-assign
                       subject: "I need help with aading a New Contact....",
                       status: "Closed",
                       priority: "Low",
-                      Assignee: "Fergus Douchebag",
+                      assignee: "Fergus Douchebag",
                       createDate: "19 July 2020",
                       agents: "Jacob Jones",
-                      groups: "Billings"
+                      groups: "Billings",
+                      checkStatus: false
                     },
                     {
                       index: "#92",
@@ -65465,10 +71286,11 @@ object-assign
                       subject: "Adding a payment methods",
                       status: "Pending",
                       priority: "Low",
-                      Assignee: "Jarvis Pepperspray",
+                      assignee: "Jarvis Pepperspray",
                       createDate: "22 July 2020",
                       agents: "Jacob Jones",
-                      groups: "Billings"
+                      groups: "Billings",
+                      checkStatus: false
                     },
                     {
                       index: "#27",
@@ -65476,10 +71298,11 @@ object-assign
                       subject: "I need help with aading a New Contact....",
                       status: "Open",
                       priority: "Low",
-                      Assignee: "Fergus Douchebag",
+                      assignee: "Fergus Douchebag",
                       createDate: "10 July 2020",
                       agents: "Jacob Jones",
-                      groups: "Billings"
+                      groups: "Billings",
+                      checkStatus: false
                     },
                     {
                       index: "#27",
@@ -65487,14 +71310,16 @@ object-assign
                       subject: "I need help with aading a New Contact....",
                       status: "Open",
                       priority: "Low",
-                      Assignee: "Fergus Douchebag",
+                      assignee: "Fergus Douchebag",
                       createDate: "10 July 2020",
                       agents: "Jacob Jones",
-                      groups: "Billings"
+                      groups: "Billings",
+                      checkStatus: false
                     }
                   ]
                 };
                 (_this.perPageLimit = 3),
+                  (_this.checkboxValue = false),
                   (_this.state = {
                     openCreateMenu: false
                   });
@@ -66521,14 +72346,15 @@ object-assign
                         React.createElement(table_1.default, {
                           valueFromData: this.tableValue,
                           perPageLimit: this.perPageLimit,
+                          visiblecheckboxStatus: this.checkboxValue,
                           tableClasses: {
-                            ticketTable: "ticket-tabel",
-                            ticketsTable: "d-block p-t-5 tickets-tabel",
-                            allSupport: "all-support-ticket-tabel",
-                            statusClassOpen: "yellow-green",
-                            statusClassClose: "red",
-                            statusClassPendding: "orange"
-                          }
+                            table: "ticket-tabel",
+                            tableParent: "d-block p-t-5 tickets-tabel",
+                            parentClass: "all-support-ticket-tabel"
+                          },
+                          searchKey: "subject",
+                          showingLine:
+                            "Latest Tickets (Showing %start% to %end% of %total% Tickets)"
                         })
                       )
                     )
@@ -67692,6 +73518,134 @@ object-assign
           /***/
         },
 
+      /***/ "./domain/_service/RestService.ts":
+        /*!****************************************!*\
+  !*** ./domain/_service/RestService.ts ***!
+  \****************************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          var __assign =
+            (undefined && undefined.__assign) ||
+            Object.assign ||
+            function(t) {
+              for (var s, i = 1, n = arguments.length; i < n; i++) {
+                s = arguments[i];
+
+                for (var p in s) {
+                  if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+                }
+              }
+
+              return t;
+            };
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+          exports.RestService = {
+            getData: getData,
+            add: add,
+            getDashboardList: getDashboardList,
+            deleteObject: deleteObject
+          };
+
+          function add(url, data) {
+            var requestOptions = getRequestOptions(
+              "POST",
+              {
+                "Content-Type": "application/json;charset=UTF-8"
+              },
+              JSON.stringify(data)
+            );
+            return fetch(url, requestOptions).then(function(response) {
+              return response.json();
+            });
+          }
+
+          function getData(url, extraHeaders, data) {
+            var requestOptions = getRequestOptions("GET", extraHeaders, data);
+            return fetch(url, requestOptions).then(function(response) {
+              return response.json();
+            });
+          }
+
+          function getRequestOptions(type, extraHeaders, body) {
+            var requestOptions = {};
+            requestOptions = {
+              method: type,
+              headers: __assign({}, extraHeaders)
+            };
+
+            if (body) {
+              requestOptions["body"] = body;
+            }
+
+            return requestOptions;
+          }
+
+          function deleteObject(url) {
+            return fetch(url, {
+              method: "DELETE",
+              redirect: "follow"
+            }).then(function(response) {
+              return response.text();
+            });
+          }
+
+          function getDashboardList(url) {
+            var requestOptions = getRequestOptions("GET", {}, null);
+            return fetch(url, requestOptions).then(function(response) {
+              return response.json();
+            });
+          }
+
+          /***/
+        },
+
+      /***/ "./img/agent-icon.png":
+        /*!****************************!*\
+  !*** ./img/agent-icon.png ***!
+  \****************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjIzODNEQzE4RjRFMTExRUE5QzMyQkQwRkJDMUYyQzlEIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjIzODNEQzE5RjRFMTExRUE5QzMyQkQwRkJDMUYyQzlEIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MjM4M0RDMTZGNEUxMTFFQTlDMzJCRDBGQkMxRjJDOUQiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MjM4M0RDMTdGNEUxMTFFQTlDMzJCRDBGQkMxRjJDOUQiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz6jdLJZAAAHQElEQVR42uxaC0yTVxQ+969YhziU5xhiO0WYrhvCUDJBmEbNVNCi85EtmmwajDPbzF7ZnIbpDFvGzBY3M+Nc1GiMkz06HzjUMF8TGDLEIQyRtzy1gpE5EPvfnQOt+ymFllLbGnuThvbe+9///+459zvfOT+Mcw4PUxPgIWsuwC7ALsAuwC7ALsAuwI5rg6y5qLKxvT/T1ToR3GqaIaThJgtuvg1+HToYMsIdGjwfgesKb16If6/p52osWVDpL7cvYEuBFtez506XsiUXr7JR7Xd7nxjkxWGSkqfHhfBh7oPhlqXArWnMGi1txsLqSi08tS9HSC6/ztz6sy6ChVkqMX3meL5LJkDa/bCwrQGrMy6xV3/8U0gQB5CTjPbhHauniqv1rq6xJWBbkpZ6f67wYVrewMBSI8/YdES2/ea/4EvrOiNLd1r2RDGLtNWDIblB6jFh++07MMzpANfcgHHkxrYmGGR1QK9ZZ0sr2wKweneW8LF4n+oI58pYSEkDm+Q0gIvqWUyllslMjXl7AKydJW5cECGmu8msv8fRQpZkKysPNA6rT11mS0zuJANYOUWXPNoXLuInf0KQLhMJ7T2MyX79vUlhHfO+3gqBPh6OBwwoLgJN9SeGi+kE1hBWAjwB3pgmlpVfY+EZRWx5fjUL7M8xKGlkUT4efKsjAavPlLKFyKI92kQlr56l4t+aiKGa0b5csyqO57e2w/CscjbvQjWbUdrEhpoDT6otegxXD1SFWSs81EQkm48LHxg/KIFdESO+05dSMt649g5wRy6YjPE3HFWaquYGe7TVhLZZMlHUTB/Hd6Pw0Ngd8IbDws/4YN36p4bygpejxI8MDyRVZAZ1ZC7xMMzbdebOgb3ZwkLpmAcObV6oWzQmQJ5mLWCrWLq2hYUYgyWSejFC/EzqcigeVuVVsR2omJJ6ATYPx1bied6Gc1+TSsYpwTxNbnTgyOpVWqay+xkmoWHcF+DJQe4Gtw1WrG2B91PSZZ+gawM++PK1s9vfDX9CPpZAGayMzPtlylGZ8q4OAFNIWDenfSiSWyqN4XUdfsM41DR331hia7vHYYypbcZ9fsOgXvobrTaHwKYu0J1OihWhoIYF9wg3tUy5Kk7snENz0RvipeMYhuqdouKB4KpN5LTFUncO8oIYTPTJ/WPRI2CUV891qI/GqptZLM1VekOslNH1axp5EpTZHTA9iJ+RpFc9Dmelv8NG8gOvRIvwexmjDYJpqsGsRxroyzfRWHY5g+UxIsRHDGbSc2y8Js01tQl2icMrYnTJWzJlGwzhI7uCJSCAfLKM/qEXK/1hsRlGXo9z1sdHmA5XuFnzpQxN93SUltaQikpJ1C3DM7iNNPPJEhauJ7NeNe/+rDs7DQxtrmpS2gSRKGxUtDbdg+4lVW6OrHiokaCmbz0pUIUCJgTxQrI0MuyyEe6wGoWJDMkp7shfwnwMQeimXLtmuujTF1hK/Dce7iwAwFszxM3jA/hZKVBHF/E04aM4zBzPI48VsajcSqbykHPtlUahiCqUt9rBG2OnNIOqNweWEn8COzdMzDQG6/DkwQAaU0A3bavwRR4mBfiJw0ThTSSZABzLaW2D4W13Yag+1NT2BpaOxNcnhRRtK4PJY/jluWH8K1tXMG1axEPxsHB3lrCJknZSSWihQ6h995CI6OPB1VSnPlHMlh4sEGZTeEJvyVkUKX7a2zXOVLW8x67f5wpLKZPCcwxxIeJxDFO/YWwulmxOZ3E+r0qYjRs0mVyYmPilKPG7SUp+uC/LOhvgTtCU/v1yQVhz9goLI6tRI6t7DOm6X/M/DAyZFvVPGcvPo0dssaQQ74yA7wGnqiNKxheoFFTXAqMM+TMV3RXecDnUn+dEKviveh1+31+12AqwAl1UXnGdxVTfgEi0rm+XUuIUr4llq/qIz12ppBbmXrzaVS5C124KHA7ng/14Jp5/0u03nAmwAqVh0sECtrbpVnf1GDicw4a5olIPuK/mlZohlJc0Mk9pJ8X1hDBx8/MhPEUK2mFxGK0asvOc8AMCftrUuPEGmMmxPY37iMj2ZgtvlzTw2StixOlo7TpHlmkVmgvs897AUiOyqr8Jz0i6VuH8n1AyHqLv9xL7NvBv7YMWUMyM2/eHcIA8wWGAUUUpMy6Zf9tQ19J9Q/ZkC4n46Zb3YnoYbW6dU5dZdG0LDPhVjtUujfp5sSVlViSxic8q/v+NCmw7Wl7efVNggoX3XIq8cMwhgA1MbLYc1Ewv2LhCT1zfhD7WY5e8KrXmLaznhCdxLYedYYta+TU2UppGHzjP/t6TzSro+z3W11pmYYeVePrpCd2IK7tCCM2tFJRSwqK3hPZqg+xxE4yvMwM8OTEzJMfr1lKObBgramCJYMdmF8CXalkCiofX8esOEhNGlcsHA3CoPxxDsW/RXDdZV73aVEPWzcO8t9Si4uEIyHFIPvwgN9e/HroAuwC7ALsAuwC7ALsA2639J8AAIBMmrVBVoEUAAAAASUVORK5CYII=";
+
+          /***/
+        },
+
+      /***/ "./img/analysis-icon.png":
+        /*!*******************************!*\
+  !*** ./img/analysis-icon.png ***!
+  \*******************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkQ3NzZBMkQ5RjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkQ3NzZBMkRBRjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6RDc3NkEyRDdGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6RDc3NkEyRDhGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4RIc9oAAAHOElEQVR42uxaa0xURxSe+xClK6zLQ7AuD7fKihRbLTHgIxYQEB+EmraxsVkSKUk1+qNp0jS1qdGkTfqj8UdN/dHShE1MG9NWa20tFSFEqmiMb6rgo7CsdZEiilKE3EfPmbtsd9m9+4Rr1Z1kedyZOWe+e2bOd86ZZWRZJk9TY8lT1qKAo4CjgKOAH6vGBxowcKt3PPRYghhjjVRJ/IzkyAGPS5Mknt/3TS1z0+7VJc80EmH9hqonakszd/qe8wWW9sFz5u9e8xMG+E5GJP2anuEQz6fVZ38gC2J/ltmiOn8cz3mkgC3s+bPrueamcilrrl0sWqEjMTGDLsvdvm1mOtpL2Uvn8/xuswvn8ogkb5WzzGZ5+vR2V8fIiI5rbPiA7bhiFJcXHpZeWBAxaCZQ8uDHS1vYM6eruKajRS4HFK8n4pqKz4ggTOZO/L6F6baFvCA5LZ2IBUt2E54f5g4dfJcZuOfqEwuLG6WFeXVqoIPx0uEC9gKrVfMHeqJoSdnGIYCVdToip2c66HadEtsv6/V25t49I3k4ZKDb3taZygwOBiWL6uW44XC3d1hnGM9sUECNaURclP+lnJHZSlhWcF+gnObmlICnma7OfO5Uaw1j7w6s/1hzOQD+VjOnJWWZHWzbpVR/FhVXlFnl2XOOBuFdrfAyiDzLJAizTC3MtavFXEO9xZ/FQb9dSy9tFYtKdEx39xfuDsUFNiWVCK+8+g7R6e6EuOXoWHhJRJjx7Fl+/3e7mB6Ht/xpBiK+XPxJuN46vMADqId6Y19gX39jcxhgPYHDfJSD8ryc1uqKT92pT7tIC6hn7DamllUWE2mAYEU5KA/lerThh/GPJLREnvV483BmI7SsT0tTuZ56N2keaVEqcQsq0Bs7HZQ/sNVkaCiO7byxjPT3ZxCDoUvKNB0jsbH3oa9WDTSeaZBvGfXeNNkA/UBxmgG2YLjoYV2gngBzqoG7X+OaGsuIKIw+e4nj+HViYVG9k1NrVYMNkM/bu2tc27L98lpRCUEnhIcVnoSMBtM8DPTdY2MaVCDPqiuvZtsuVnANv5V5IxEIfQ7nVcrOUQNtBfk86KkZpSqm7WIuy3FbSVJyqZyQeF1OSOgay/MRWVgteaeAIYJyKlNL/jn2WHOFX0fS3LROMmfXIx/7HsAKsjG9l2m/TGNHBA5nGV96XqhFhKCclhpYqizA1gIuzQ4UNmI/jvPnwOTU1D/CWd/4FwAgNg6FvsIeF0iPVoAxEfA7IC4uuCqgXu+ISI9WgGnW42+h0ww2pK1ASQbk0jcj0aPdloYUL2AOW1a+0ytick80Vq7ePh56xg2wPHOm+pt3OOYRtbqzJFGqQSsLG6rel3Ked5BJk5Q++I3/43PYrjcpJSnjfXO/oifk9YVFS8L6N6uwlEqri8DF7Lkz+S5OtNuSkad9UEol9/PBr8jUuB6xsHgbnOU+sOSH8CFkcNAAYeOoE+rD+ZBjt5EH91PEtZVvwbMDY14cT/W47QrpxYWtxMnBclJy+3gCVtK2pGT6odbEmtXJEwtclGLrzJczTe7EX8mePrWZ7WhPhL8TmVt/7YeUcjtQywXaq9NhgFHp3CHzucYjO2CMAgbmSXmLiBtoC8p3pzY5J/eilL94j1YVD6ucNddMnIBpQH/qZI2QaWpxjRga0nOtx0tc2x7A8HvrdmD8K6fMuCFPnfoe8+BBCtNzywRxsWdSAvOk3Pl7yeQpxF2+h8HN2T+Fm6SElTxgsIGe1RXQQyKBlQoM9HEh7J83SsjwsK+kAz8m+NOkKhzmsdevl0jzcuqodUGuR6ICUZVHKVcrLy0uXrrbwzIN9RY4mwm4SGlu9gGwQk9Y5SOYh/Pp0QF5VK673oIlex4NLfH88NjwEMsyWDwHB/aMuKbibTi3h1xeOVCDcTge5+F8lMN/v2+XV1gaE/NPRHFDWHXpkZFNfN3XwdS0BsBKiZAaVrOX2wqYu3d9BCbTCGRKJyBFrIU5ffAoHi1Lwfbe9h4frydC1cbNANzL0hNViLdwv/7yMaR8xhCqlgP0J4CHFDPLNS4hscMJkq6XLiiYqmVOrl1cuWrbWMc1YffDeNcTKPvhf/zBIqelW2hdOj1DqUsDHfmIuJR829al1KWDuJ6hd00rV2lX4sGLLUjcAxbjcfF8t60Gk3fMZ4GHN5LY2H7YlnY4DkagLwNGUBhUBHvzMKpf2zP8lN0tUa4FpQodqd0eHm/ZEsy1iXdcbFSoB7xxqLeHE2nh/yyNF2t41zN7jgNoZaf3/fCVcvbShQX+tiyti2G4CBGU9/3wkY/Ya1dTxWXLDzvvk1TBTuR1qafTGRN3e72U4y1bnTUo39u0YMlpafHSz0mE3wDQ6ls81oD9ScmlowU3n03Jdqxhyte4ABDMucQyagT9jyFgyFtVknR8Hko+G2nT5otpEHRgEYH8DxoT/UZ8FHAUcBRwFHAUcBRwFHAU8AS1fwUYAOO7gHB8msW6AAAAAElFTkSuQmCC";
+
+          /***/
+        },
+
+      /***/ "./img/chat-summary-icon.png":
+        /*!***********************************!*\
+  !*** ./img/chat-summary-icon.png ***!
+  \***********************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkQ3NzZBMkQ1RjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkQ3NzZBMkQ2RjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6RDc3NkEyRDNGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6RDc3NkEyRDRGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz5fjS1wAAAHtElEQVR42uyaC0xTZxTHL4WWVqC8W0AEmQxlog6GILB1jNghdzoZBnHMxxgkxs3p1MRsUdnmZHNEl+mmGNHJfCuR4ND6GJqNyQSHG0Y3lKAV5FWgUEptoaVl52u49YK0tPRC2LyHkNxH7+X7fed85/zPV2z6+vqwZ8kY2DNmNDANTAPTwDQwDUwD08BjZnbGbjzsaLTmvfgw90WjCTXZ1cdyYEvh6ntqg6uVVdG13eKQVo0kQN4rYyq0CqxH163/kDvTA7NnsDFPJr/Bi+VT8/yE4PJATlAFXHs82hNANhtjzYMZHsYBzK9EdmVZhbwsWtbbbvEfZ9owsRDH0Loo7iv5MxxDr1LlfVMeHgkw3qxuDCxsPbXxluLmRKpm3sfeF4t3W5AbwY0ptBaaMmBdnzZRJD37/uX2IqGmT/PUfT7LGwvkTL0Dg6+G0BWjcGXYMLS6Pp0tPMuU9rb5wmRNEatqwiD02b1DvOMFh5nSVH7aJ+5Mz4aRglMBjCu1Sm5u466cu8q/Xcg3uHbOWKyL8FK4U1ShJ4tfZ2ZY4rC2HSoVN4W/wZK4r6pmD35nuvfqrUGwzkcCbTUwDC55R90XpyExGa5xGBOwRM+U4y87x+YzbGzVVoQhXqO6F17QcmKzuLuGSVxECe5D342fToHEZum7rQXGdz366hjZs9MmTJelea9ax7VzaaEww+IXpIVrzrUVxOswnQF6k3/WKoicfVQBDyc88KsdF9PJsKFOs+tg5tMANo/iciJKcE/cne6zeg+jf1iopB1qytmNcseYKC20bmHGk4hzCK/uDO/VayGEC0epTIrCnCJEi3ipBcQFFOaw1ueOCXBF1/UFKp2y/4MMbIXXynWjCGuAjnOddxCEiZy4gKKMrN6ONh+ohGyfAYcCKoFxqLPxxAnMvJiUhUfbREJXPJc4QVkcRZsh8nRK5+21mbnXO0tSLYU26WGYRXfiGBRR8VhKwGkOIdcYpOEh6WoQKSzfKrS+DzfvXwneX2UJtEkt3a5pMxy72rk1jWVXA7JT7cJ0M4xBrpXxDPcYTBVxnN9ydAlkc0WMcyw6LbHKw6jWEgbKij3WrZxKqySNxcGwpjU6DYf8uePNP2TUdj8ItTqkQd4ZjkEOhprR9lFmrWqJH5Ew9erL1rnFMBG6J+tZL3nh55TkcLY5oW0SuF/a6e2GvFQI9ZA1Rrz4dXlJMgkWm8T2r+o/FYA3wwY/AOWLdVd5J9YaYFEEN/qsYcY1EuxKx8UVY+BlHHm3uF0UR1wI584pJ8lch7puMWeoB8s7S5OH87JJD/uzn7s1y/GlBuIcWsJEaPIjRxMaAe1v3J1DdGP2DHvUNu7rrxCCiq6ypKE6NWR1PeIQa/e0RMm8pZ8TyQutlb0NOzNvK/6KGwVovKO3Pf2bR1knyE1KoseSk/2aHbWnzEvSogxjL5CSqsqIN/FQXwr6NpusbwF6A5SDTNRFUQSOV8jLFnz5cNMBCFdbQyg7zRHHugqPEN4tkV1djpaWMdPo1NbVYcLL0x1mYgDtcLDx+w+ITgYKfiRIz9OJHil5Uc6CkWzN6CcK1JwQ3vUeLJUBmRfBQke2noCValon/dSWv9zcqmLtJh4S9ZirX2YTrK9txP6VvLcTqZ13G9X1QYs8U/VqyN6G/XiQBBWRAaG2cqtVVZEAGPVn143IwXthKJKga/p5vkfSt8SzaF3vrd95lFymhs45AfepAtYPPIATiH0WkL0YxPvXkDwCnvTHIdcAfAdo22Bi0DyWF9q5kJOTUYtaYmtq0H7sAG0qP20LSpaEZ9Fz39Vnn4FJHXaAkGDPDae2LN2mFYGMwyFLssgeyWvK2ajQdg0QAqDD0S/XnJeitnOuG77/RcfwS6SIEEAS8wHPDkhixsPZAzU4RVR6WB+WKEOTdysRHBnWHEOlJoAdKEPCJoIbc2aIDTsBhPvCUy0/rkfLxhxL5i3bDq2rhkpgvSCA0N0wdLpnYHFu836PdRHmwSB5LRqJPyojcm2nu6Otkwzua1F54TH5YvBGs5F9MAFk4cn5kiPZtx9X8s0d2KsuwjII5wvmNA9mA8t7Zbw9DTtyhvImEieJninZ6BsFBIGyJVrvZpo+xdd2i2cWt5//CDw7hagE5lio0+yHi3lLN5sDaxHwccmhbRL1kw7Rk8mHPxbxq8Al7tgI9pAFyPs1qurZoH9fgxr8uqn6aszmuuIlb3mmbIVouUJJPzyoLhZBTxzube9bHciZ+gfabDe1B40iAWBQK6ffceyFRAdJaCKooUkSdWNQY0+9rTGJOJy52LlhkM2zZjiGXjbXs5Zs01rT4mHnpAX/QKcVTKUGTXBfePlNj+QsY7BUf7dkqenLS1lnyTvl8tL55GUxUkPafkvA9rch4k6OR+AByQnBQ4KaVQc9bYem3QeyOB/CngUhz7GzYaqYDKYaMvl9EC1tpZ2/zDfWEEBJ61zr+/GiodbveAG2eIJgjaPuaENxx/mEHl3PUx+IcY69tdQrY83g0P6vAhvAoSTyoVNKA48nDNbeb7gnXQDdjZsLbIeNfysBwYIBlAR3X7jzQXdN2B1FZXyN6l40ZHoOTIDPuMnSo+158qRYHdL/V6P/T4sGpoFpYBqYBqaBaWAamAamyP4VYAAMkr5gjntwBAAAAABJRU5ErkJggg==";
+
+          /***/
+        },
+
       /***/ "./img/company-icon.png":
         /*!******************************!*\
   !*** ./img/company-icon.png ***!
@@ -67706,6 +73660,90 @@ object-assign
           /***/
         },
 
+      /***/ "./img/group-icon.png":
+        /*!****************************!*\
+  !*** ./img/group-icon.png ***!
+  \****************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjIzODNEQzFDRjRFMTExRUE5QzMyQkQwRkJDMUYyQzlEIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjIzODNEQzFERjRFMTExRUE5QzMyQkQwRkJDMUYyQzlEIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MjM4M0RDMUFGNEUxMTFFQTlDMzJCRDBGQkMxRjJDOUQiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MjM4M0RDMUJGNEUxMTFFQTlDMzJCRDBGQkMxRjJDOUQiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4qWqc+AAAG/ElEQVR42uxaC0zVVRg/51x5XB5djJd4JdAEB5IPfEwrFfwTyNLltEYzt2oje6BWS5pzpVtzZUNbpWYms7U5J5mFluMhpOg0J6JSKCOUUCSeIgRcBLr/0/cBN/9c/pd74f4vD/2fjXHPd875zvc733e+x7mXcs7Jw9QYeciaClgFrAJWAauAVcAq4OFrY/obLK9pV3q/VZLPB5VkHOzvYj9gJYEWV9G5GUX0lZpmovP3JE3xEXxuWAC/oDRwa432l0srpOFVl2/R6D15LFGUbMUoIW8uElNnPsZPKgHaVg0PyR0+XNAbLDbsI/2Bc1ot94hXbbP8GNJx/IECrHUmrU4a+TGk4/ioBtxpJMuPFdLs3SdZJXSXaBjpnDeRl8jNRTqO47wvf2XVuA7XjxrA7Z1k5Wcn2MFjheyZyxV0fPkd8gSQG16cI26fNoHXSediH+k4XlZHZvx+m/rjOlzvSNBKeukl3xfQzdlX2XwTQe/FyaZ48XkXJ3IEvXVlI518t5X4e3vwqgAdKUPvjIf0cQb7Acb+ZxQfIeatjOTb4GPmiPbS567fB4sNQewAjdW3EPTGDXAAH0XoeRKA3Yp9pOO4FCy2M6Vs0bBkWgNpTW3Ev0XGIMrqqfOHRzX7ZgTy8vAAnufnyW/WNtOga1V00ZUKGgzm29ezt3fz02lHMGAQ3KmfMZJfToPxTwl+avEwHBqWa5N8eMeahWKStXnfnGa70fRHPWBILDp9PEiqDfM+h39DAtihJg3hqGWw8zSUGEc0YNDkbT/P3rQQv67yz2ozn4d8xrqTqhGv4aRo47uT/XjbWDdOoqeIF2PD+T5b1uE8nI/rcP26xcb1o6keXiL5nDkE64b0xUMoq6NzKhtJaLA3Lwx8lBQNRlgZkEJFA4kov0On673In5N8eT7QcofTSwtQy048lM+2YtJvesFYGy2mQFFgt2AFN+myvafZ26ZHA+BZA4XGB3C3/7IX+EBNWjB0EF1GEV2XU8yizNPCKf68JTlO9LQX8LZMZrheS7XmtXNMmHgqPoLvdHMmTebAHWHSAmgz7rvfWDLkuZbiaZsSZuc6pitMac3T04wiFnXuBol6eX6XJZHBaNtWLy0UVdKYXSctg3WBo3t2Gv9CCcCgxV0uYywWKQTlQHlQLoeFpYMX2EbRgvXjHduyzPgaxNPzSgCeMo6fRX7IV24c5UB5HBaHwVtGWnqIAw/asX6x+BI4lFSlPCnyQX7IF/nLTUB5UC6HAG7vJBYrUwhLzoM1L1t8BvIfjFx2AX5Ey+vRAz/5OC+eFcQrxrr1NXejqGzyj/wg7CVLabgv7o9yoDwo11BkWl2avHiTLk/LZ2vvGrqJL8wSf4ybyr9SyKyFrKv0rcMFbIUJaMIccdfsIJ5uMvmhyLQSpB3cPMTPeD4lmx2obqLk+B9sxVOTjYc8XOxHC554HPLDz+N0nCTHiqt1WlKNNYqZLGmOyLQSSqrp7PQrdC04CVdM8BeE8CxI+A+AEFWJT4vvbT2u2QEJCTlyiW2GGNlgp5aF9Ctso6HHVSF/BAsmHpB9ja4+U0rj7hooPi60Lp8pRob4kUsDAW71DpfW0sgdJ9gG+O+Kwb+2mSKwuLSLbAOeeLA3KYwY3/3mfPY6jbgFObCZ+Qv9OLQ+47ge+ZjCHfLHfXA/3Bf3RzlKaqh7SpbmfZRPSaeVkH6ZJsnF31MldDqYni9q05Q/4zy41/gEK9S3kFf3n2U730nT5HyayX6ubiKvS4AJ2Ec6juM8nI90cICfmPaDg8RvFnPBT/jjfnLxGOUzv252mXRZPXW3FPzh7gbptJz05LZdDU7eY08e+xZCSqAp1wYtaPeeYV9vWSrGmOZhv6Kh+z363A0all+u2Q8HVyHNoU18a/+hgZaSHkvyDdqk8c72E64auuLhv73jIVQ7geaFhQmcpT7Ox3W94mwPXw/X+wdq3rzdB/ZbUauAY6fyn+ToYG4NPV+XCKDBeVbTRYib/fUt+A/kK+i9eCnuJzcnJlxevsECTosK5WkrI8UsaTIPwf/vxAXiJhyHu/cYaCa0PyZhAbxpzULxDYn3zsU+0q3UxaFwf/W4D+6H+0qLFZQL5RuIl7Y18UiANM6tvpXoda6kDkysETeBUEG2ZzNDqVntKn2Mg4QhZfoEnmUhVAmFkD6Co0u2lKtDQdK2IVZ003SrJgG/QG+6R3x93EmlixMxmMAqnXikAXOil/mu3teTlJfWkjApDZwNfgN4NCaMp/bUyJbici4cBgkPMJ7OKaaJUO8+Z+joy18qBxw23ulhfcQTKhtJGHjlmHudxMPHg9wC0/tF7lXCGh98TQEzXorXxNWJtIDXzoFDLraFj60apuov4lXAKmAVsApYBawCVgGrgB3U/hNgACv9LoFpZHBVAAAAAElFTkSuQmCC";
+
+          /***/
+        },
+
+      /***/ "./img/helpdesk-icon.png":
+        /*!*******************************!*\
+  !*** ./img/helpdesk-icon.png ***!
+  \*******************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkQ2RjIzQzQ5RjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkQ2RjIzQzRBRjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6RDZGMjNDNDdGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6RDZGMjNDNDhGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz5tIkjdAAAGP0lEQVR42uxZfUxTVxR/bWmhpS0tCJiKOmYnWuZWFYUOUTsGLrh/dBoz4x/q5uI0Uzdd5qJzM8aMbHN+RzHbXAxxS8x0U1FERJERRHSoWAREkIEoX22hn1AKO6cpW1Pea4vjman3kKav95778bvnnN8958Hp7++nnifhUs+ZEMAEMAFMABPABDABTAATwGxJEF3jfUMzW+tpaNpK2FjoBbkicMBsAO3q7Yw8b8j5uMqim2Xrs1BCbig1ITS+ME0+9ztpUFgbW8C9hUNXLQ2zhTX3bDWa/U3f7rD1WQd1CrkianXMhvXjhONLhhM0k4VZj+HuPrv4UPNuWrAo2I79qPdMkNY105UF4M4+dbAf9Z4JwDXWOzOGU48VlvYj6W09LWNrbdVJ+CNKMLIO4q8MHvPo4tfg0I8KZFK3noYhjjPgQBI7HG1jeByeY5wwriyCP+IBtJ9hFXBfv/OtX1qPbC0yXpji2Q6A7e8r1qyQBsmyvcd09LaFBTK3sVcfRu/uxqUHH+w6VG+v5f/rltwVs+XppQujllBDBT0Ul04vMJxb7g0WBVg4JPvR9ztQx7tPHhRuC2RyWVA4XaBnHH54YKcnWNfBw1+BITfxkiFvKeqwFsMXDLnzmPoqLDeiwOVivJMKMU/SFsjc4iCJ3tudH/U0K6usOhnTmOLOwoWskZbVaZWC2/nUaez+S+XdNjYk9kYg84Pede+2pu6Gib7GQD/l6HcIWAEM2ZHUr47TIvdue1U89WQg808KVecOJjLDSH/jIMYj/1fXkiJ4dGWCJKnWlw72o553u4gnMvkFwOH1sQIYGLiV60c9gh/ZQFccvBO9/MMxIbFOujGxIcqeJSPfW0V3HYXyJB0+rxgOH0nxISvXEp/D74kVKu3IyEyLQxxW0PWBpXI/HfNlamlX8SIgtzfNvaZwJCl092mSpBNgpUK6cUq43/GQkZUZ+o1s3sN5M2WpPwHglXSdidLkimBuiMWH6xVqwmbix5PYKn0yN09iTJBqaq52FY+n658lTzvC5j1MTZcmn0gOmz3IiuiukAR8QZNtqW6ar2/KaT9+HJ/xc7L9WOaWuvW6Y63Z+wbaznb8dgz13L895QzMu1UhiBm0l9flc0rV4oRzT6I8TIe0ctpd653k7r5uIYCtUIun5oEFT3sCvWerTvm19ec9kDQIwPLUN8oDkzEs1t19VwfjqGBuMLXrpR/i8Vr5pPaDcqiWMCSc8yMXrx0vmnjRw/oZkOEJykxXMlp6msfBHI4JopeLILzKfVl3OF4AqKCqiYZivUkpjMsDd4NryErBwq4+SDoygLTuG3r1o4+3Ht0N1U+cR4lIVVluz5kknnwqSTqzqNB4PgW8pdSVpVmrtdiP0mCv5+1s3L4PWLt6ftTitUBIjTAvkmHNi0Klk0NRyeH8EfWwZhYcgtrsNGthPy3+QmOogFVmpynibMfvmENr14zeuBIAV26r3+gik1Wj1lPxoa8IMhu25CiCY4yN9gYZXe0LLrsAAc+QzT6IgCE0stzl42KakjJOZ7mVC/NZW3oeisA74r+6//lJnBfD57Ox27Lq7LWJexozD6bIUi/OjZi/GYjRGAhwrp9iQQ056waIucvwrQX3o26armPdqkLLupmZqrXVJMOhYIknYyr0AXACumaFudyVnlZabrlyYPidwPRiAAhShPNCCKVowlLQzak0eUYmrl9uKluE+8F9ba5bVwzGWIX7fWzA4GaJe5u+zgdyWeYJAjb+Bn5PkUz/EWLtEdzPSExv+1sIN45WGSj0SzqLFiCQLmenXxdDcNEChdt6HPc+rmk9D+doy+HV+x/syIVDUD8W4HP6U5sgcY/wbm9ztGAOqwaQ8yAuo9Hd/zRd1QYSP8DW25u7m/6ZB38HMg68QAv84WKhq6Y/luH6HY72QXrgNdH5+pxNjwNYpXO7HJ1cNhasRvfFGD4Nm/ZXVAyI9wHSHSid4OFUWW/PwWed+ZbikuH8R0y67n2rhmxhsByPsSwzXnxt4BkJ6Em8msF4HqiFSzovJzC+OenVi4a9eGBK9Z6U/Jf1yf+WCOBnTBgzLbhn86GMG/G0AYKys33IxQNxaQKYACaACWACmAAmgAlgApgAJoAJYAKYACaAn2r5W4ABAAhc7VbeTvJFAAAAAElFTkSuQmCC";
+
+          /***/
+        },
+
+      /***/ "./img/lifecycle-icon.png":
+        /*!********************************!*\
+  !*** ./img/lifecycle-icon.png ***!
+  \********************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjAxQzNBOUJDRjRFMjExRUE5NjI2OUFFN0Y5RjE5N0I0IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjAxQzNBOUJERjRFMjExRUE5NjI2OUFFN0Y5RjE5N0I0Ij4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MDFDM0E5QkFGNEUyMTFFQTk2MjY5QUU3RjlGMTk3QjQiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MDFDM0E5QkJGNEUyMTFFQTk2MjY5QUU3RjlGMTk3QjQiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7smiXvAAAIv0lEQVR42uxaDXBU1RW+5777dvNjBcUWbYei2FhthaooKm06IbsGGAfKMGjVotPaOmMntWhIdoGOuNgWspsQlAG1FO20HX/TTv1B+Uk2QVIhQWkt/rTVjgpiS+W/mr99973Tc1/exuzb3Zgf8qLj3snuu/fd++7e755zz/nOeQFEZJ+lwtlnrOQA5wDnAOcA5wDnAOcA5wB7VsRQHgKAAY8tieGZGjPagMHniMRm5bFg/zFmIc5qCvt2D3T+wVJjMeIqJJjGJExAB1DWhX+0mf5PtUr7BTuMnJUgsAA1X8sy7AhBnaPGgCX2juR6YCjR0mBUum8JRI3nSc7fztB1IB7SJwxlzsGuf/gSRoRAVG4srTF+1t+wqb9CncDmZztagV/i+P43Sy4IxIwnS2rxjFGTcCSCvKXA/DWhvtnZ7ZvJ4PymL8gxJ+QMYHgjPTWVbhVlsRsW9e+nGV6muet1v7Zp80/hf8nO0mpjOnDW4ghol8nF3O2VcNhbCZNk+4KlLagXQm/sXWRMXjP2hGyl+1updyHduqAfI0nrwLPpOo8APJzoMvYGYolFcyJYYO+GX7xOl1pn7JWaJZ8OrMRxnkn40g1MH3vCfCAJlkzs2nhYX9QDtOtcYNoaqs45CTZmDxm8iqZKfYdqBGOJHyOD+xw/tpMlxPzGZey/Iy5hUtNoL1gG65Ngg9XGTAK7YwBgE/Rpp0/Xx4ybChbbqoCqRmPIdz9pVrmzydNBl7/zxi0hPkbfB0ldn45XabfZYGvkDSSNp6j6xSwAm0ifbiUAxUwzJyMXXzdNc7IFeAWdjpvUkaAxxzM8m6ekGowav1CNeNh3H4H9OVU7yJg86JnRuirWVWRJ/9H4MjiiJEtgn6EuPZ1B4aNEn1Y1LvG/8nHzlq3GCaYplbYoiRZkmKuCpLzmmgj6jucbUxrCvpcGu/5h++HSWpwIlmyl6pmuYe8zhPJ4WPyhd2w0MY2eLeHI9jSE9XiwunsyapwMFWsbd7aI118Lpho3oyZxOUfYQNUprjklSbeMjlDz6Phh0kUCe086WNwHlhVMgi2tlbPJhzYT2F3UjNISL7GtL+dnEYC7lSU/+o58KViTuOXKOsxvrvK1+aQIUt+ODFT4gdlr8dRRoZalq81ZypW4bh+nSecpFS6JYB6xq3vBwudUHJH8PaKQxWSIbqPKgj7PXUT7t6HAlHepxuZlcIiZYn4aHQV2XqJTlntOPHpIh1QSm+bqvS4eEo+TFPxGl3yCZp87YIVh7AULxXXbw3Cgl2HVdE9hyHdStbAv9+42RdGfl8Ixz1T6+VOMi+lymev2FgXWNsudcuVgwFJp0QUxKAJbVtt9fiAm1ynjFK/y7yWprnONHefjxnc9VWnNtNkTpAgIWV3SOFHP7YMBSxL7ztYKOBpY1TXJNDm5Nyw/UmDcZC/SEmt7IqoUNVvgKWA6h1e41PG14k4Rd1Q+NIC5/00fQ6mxAqvUs6ym8xzUtGfVObUXBzysjkZDGNTYHa6EwYUla3CsJ4CD1TiGLuekGgNoi0TAUhkOas7q5/Fn0GLfNDvEVzWwLgHpgCU1NlFsJiDn93E5X0l0yWmOD97kmme8lpAXe5LisbhBfBm+kCpxq9VWdZAXkrgLs+Rxdha3i3lqY5w7r6ovRWJMC7ZQdWKGZ2YrlSfy8iKJ3EoREsdJ9N088irN+XjmTtlweENdfIb4m6KL1Ls4wzlYq8AqYqH8cmlU3thzn5PGwESXJ1jXQztNhz76TtBXZ6pWsVM9kTDts5bu35jR6z8ZO0QxrAbcPcbaZ2sBwgxUfpnjUWr+3pL6u0yX7SmuB63Xm0O+to82gEm04+aUDRSeAEbADsA0Jzom6TcR+fdJ/JMybJU6262yQ6zTCo1DDJz4WbfPYkHqdHB9acwoItuwUzE2E7rzKRLTXTvY5QlgweTbJhNKvfL7WM1LlR9GC/JIGndksezlV8WMhoYQvEDNB5NcnFmylqVnNYvpRjFya3/P/JqKwvJS5+OHPAE8pj3vvWOF5nvKiva5bZOQTl1/pUCa7zgZDHc5wwK2JRCVRE6svxCMcwmsIhBfyho3g/4nx+2VuXbE0JhJRk8bebdUH4EEWvimyw9frtIuuyqgk1R+Yz/88RRSxR/SoVxPYqvoB6wqW5sqYZ+jQWWuvrcS7b5/eBc8AD7r9ouoG7bV9RuCQjt8d5jpHQM0vKtH7Q2V2p2aasVx9/YISM8Am0z/I237hy5LfcfMOjxdWWqL8VuZ26oOKvJkdzYu9v3V8Qp3sjTdhYc8pZbbQ3CQrMZvXYv4spTGvarWHBLPkRi+lyVv1W9OizZuRVNYj/ZYfUOpfdBFK9tOmyhaPI+HNTBW0+UD13IXBmPGEjv/VCVU7kudvT2u814Hlvga0UVXXIv7aRMXNob1iJ35iMq5NDiaIYm9PJkd8RTwtqr8t2nxd2eIa1cRk1pugw7pLad3iOkUSt1CzQaHLR1pXAL7Lc7/40h7N0ltqQb6ZeRzH3aSgtdywEfcnoTmeaQppG8b6pqH/fbQ6hD3aAUykCFgWEGgL2KmWVm/FN6itrLcG1X4p+f5bYqYMLRWnXdPaQ7n/TP50LdW4Wl5XC4nl5cpvHzTL/Xbh7Pek/IybfZK/HxClw20/d9I5/7sGBGOjfQ7j43r0F9VLi1TbixQ110EJr+aVrPIzaudcpisdlnSkA01iXfS3h7OXINnSUM+mZ7y6avp7F/02UtPv0xNMlrgJxW9gK6KWqoYONu74QPEu+fHK30vpu/VKAFWRQXk3DDWU+h4AztZRb1S4eYP4ovz3sjsvkYRcG82M5b4EYFewTK/hRgo0A9VyqhDiGrF3rL7608A4N5zLeRPqHo963lNOtBykH7hKabJumxS/UQCTpayGiy0LHMmLa2YAofJoKSObCxJ0G/TR4AP6BwfpCjr7xysVg76pm1V8P7AGZkHgD/NJfePaTnAOcA5wDnAOcA5wDnAOcAjVf4vwAC88baf/fiHYwAAAABJRU5ErkJggg==";
+
+          /***/
+        },
+
+      /***/ "./img/phone-summary-icon.png":
+        /*!************************************!*\
+  !*** ./img/phone-summary-icon.png ***!
+  \************************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkQ3NzZBMkQxRjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkQ3NzZBMkQyRjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6RDZGMjNDNEZGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6RDZGMjNDNTBGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7wNCW4AAAF6klEQVR42mL8//8/w0gCTAwjDIx6eNTDox4e9fCoh0c9PIgAC6kaHrx/Rm03eIGI73+/8X3795WXj0XgNSsj6y+o3DZ8GhUEpWjvYWp58vf/32ynPh0Nuvj5rMuNb1ckgXy4JB8zP4Muj+EVE14LGw1unSOEPE4KYCS1aUmFGPY68+m474Y3KzPe/n5DULEal+anULGYJhl2+evoHicnhunq4X///wasf7OydM+7bVak6GNn4mCIk0ibasRrtg3Z0+R4mJ6FltfqV0uq8XmWnYkdq/jPfz8Y5j6bkn35y3knWJ4f7KW01/GPh0IPfNhtgkuBk6D7yT6VWYEtSv1pwqwimKkDCOc+n1r89vdr6UHvYWAMcQPzbAI+NU6CHnOZGJk3CLOKPjXhtTyIK6bXvl5WQ0ks08XDRz8eiPj05yNeNfe/3zECeQSYz9lufbuOM9mf/3xa7tnPx2p0q4fJSc7nPp8iGCPzn0/POPP5hO/r3y+ln/18glftxS9nPaTYZScMSg+D6tu7329x4JI347O+5ScS0oOknrPnUfPEr38/4zTzzvdbJtBkvY2uHgYmv/AXv57LAwuZZ8Cq4ytQaD26mg+/30ngMwPY+FB78evZ9Er5Zj+oBwimBqB6YbonaWABEjPjaf/kG9+uCvAw8zJkSBe2KHOCsxaKp7/8/SxMOOD+MSOpF8AXuyDw599v+pbSIM9OftI1G+RZqCMZgPwaYNIFFTyByGr5WPhfETJPlkPuOoz95OdDHWIaInTzMDCPhYM8i54vQVUGNk+DOgMsjKx4zZRkk7kJy4/AAkudkBsk2KSe083DwComBFchBPM0MJY0YGKgno8ip8onAh64C2M//HGfYAyrcmmeJLdDQbKHH36/p0sguTOsfbWsDElomyWf7ToCHr6DVCAp43cwE4MRr+k2uuZhQgBYiH1A5pvzWW8UYBEiSq8ln93qBMnM2aKs4tjl+e2ugFpjdPOwGJv4Y3zywEKKIUgsqgvFEkbmX/GSae249ICai8A2ciqoStLg1j5+7esle2ADBKvZAaLh7ZT0j0muloD55wSQcsEmJ84mCaqeSgVZhF6gSW3T4NIBNzJA9S6WlpM0EM/C61BgwZchVViDnnpoHsMqnOrnsPVmQCBRMqsWWgChN0C83v95JwmMObLawKCYLZKtrgEWfucpHf0gKw/bC7huwSZ+5tNxH2zioC7dxMftc75AGxRSbDIMMuxyRDiOicGCz/Z6hXxzCjU8S25La701vyPf9rcbfb7/+4YicfDDbnNgoaIqxS4TiBzLG16vrGRmZGbQ5zF+CsS7QYUYKF+DOvSgjsWjn/c1YR0GbmCrDZiC/upyG+4DlcbATsKtwTCmFbj73dakda+XY8SoDLs8Q4lcbSywNbQEOUkj52f05I7DKoKepOuYFqjj0P6wbgWwkYGhBhg7LzKkCwqAsbiSlj0xuo5pQauaKiYsRlz+el5izvOp3aBAwaE9EA3TDVDS8FgPTL43QsVi12AfmTglO/Vp7zRQRwPNU4HA5mlowe2UdTX3Ctbd/37HgJ6eZm5oaCBJw4cfKF23Gwqcyn8+/Hmn+/jnA1F0tcDGA+fZzyeDFDiUbwqyCgkChTT3vd8Rv+LlgpC///8wgAq9M59P2KtyadwWYhUG9bxukOIWAU5e+uVh9IGAOc+ndJ//fFoWV/Vizm99E9i8fAEs3e2xdfdyZcpA/elz2AYRBkWhRaqnienj5stUNAHr2wvEenpAB+JBJXKKZE4psFFyjsxBBYa5z6fUDeZCC6unI8TjW+Ik0pbgmkXA7+mfDEPKw7DSG9jaWler0JELzJM/SNEI7Aktp7WHaT2ZFghsOroDm5bp2Lp7yCBULGajk6DHwiFTaOHzNGg24eSnoz7YhodAJXi4ePxKOwHnlaR4djB7GMXzn/58FL73447+u9+vZYEl8zcNLu1j0BGM9aQaRhcPD3Uwuopn1MOjHh718KiHRz086uFRD496eNTDox4e9fCoh0c9DAQAAQYAGnSMNrggLFYAAAAASUVORK5CYII=";
+
+          /***/
+        },
+
+      /***/ "./img/prformance-icon.png":
+        /*!*********************************!*\
+  !*** ./img/prformance-icon.png ***!
+  \*********************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjIzQUIyMTlDRjRFMTExRUE5QzMyQkQwRkJDMUYyQzlEIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjIzQUIyMTlERjRFMTExRUE5QzMyQkQwRkJDMUYyQzlEIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MjM4M0RDMUVGNEUxMTFFQTlDMzJCRDBGQkMxRjJDOUQiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MjM4M0RDMUZGNEUxMTFFQTlDMzJCRDBGQkMxRjJDOUQiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz5v/wxgAAAE+0lEQVR42uyaf2wTZRjH3/edo4obLMhPpYPUSencMivZMjUBnUtwUhaNkiMXYDNxGoUYNcACf2jgDwxqojHOReAPhnFSkWB0YdHgdDPg3JyTODeGWwXmRDYkk06k1L2vz9Ndl67p1vbau5ZxT7L1cn3vfe+ze7/v833eHRVCkBspGLnBwgA2gA1gA9gANoANYANYt7gp0oZnLnjiMZ7cP0Sy8OCODNIDH7Wxdrh4nkkb4HiEx0um72liO/B4ewmvMKVO7Sktf9jCKvuHKMGfgz+wzXhuqgLLx3vp6hO9NMt/4ttfqbXlDH1Eb2g9gH26rf2erQ3+ouYEWz/gJgv1hGZ66dbzX4jv4Fx1I9vtHSE3TxVg+eM29jJqdqLouwR6btVPz1oCy6jRxtPUFq4httFLz5oBozZRo5G2D9Dz9Qk8wsk0e6b4jdEIbgLaLFskevAarYFppJt4Kp2WfHGY3H6si8kwbe2wOI2L1BRCViwR7cU2Xjs7jfyhxnlF67S0AHbAk0pNYcQLx3V+8CvXSPqxLip/c5otxxMPLuFNxTZRO30acQeAhro2qa2lAxafUsi5FUVL+VdFS0VGmokMIRCAkdI84S7JGalRnu7VQNBhD8loOEXLYTY8vK6Q7y1Y7HsQdck8pR2w6GTu+Dylyp9zlSnbCvD756aTcyEAfNc0nGLlMOXz/VPeBI/h1dUjGye4JjmmNNzsk7vq2SHMqxMsSmcfzeHvmWeRztH8S7KPdrDn287SRTzELZhnCSww1sAf7ZNkBHZ80Mx2wVPKDdePbYG4jJ9d5+mMcG1hdvy8vpBvn+wpJ0LDPt1GAhspaIAhybXOp6Xx1HOsedinQTANFVrlTewbx8CxEg6MKQTMf1WowiBuxcdogVGFYyUcGPPlU/fzynvM4rxWwNg3jqHk5qRJSw7XIMk7/CPb1n2B3hqPG7POE/9I+Xxn5uiqHrdFSy2whJZRsYMYTj9495+08LOT9EW14AgKBuVt63zRHAAq4a+AMZ16AkuwiJjBYLwxd4ZA9/S+3Sy+jhV8MtD2PvoQ9PXswGWKhmQLGJI+/1iaA4PBKAODsT/QYKBJUAseCWjwWGBIysGQ1OgBLIHBeAXyY3aoNtGARwsaZEg6wZDsxP61BJbAYJTsaWJl4dqGA/cBqwANjGeW8xowJPUA7NQEuKXHsxl1G03OnQScqAX1h1JgbCnIMr2pCfDGA95htStvELgfWlIDGqz/qg2paZoAd/Z5nj7Szl5Af8tVvumk6LYaj4/8RDf1DFBV27NYfWFh8bidv5NtNu3TdNHqHyJ3HWxlW6EISCcJCKi23HIBf23BTOLSetEap72Tv9MVzlb23IBbH1DIvQScV3XeQtGot/EYg0ZD/2UnXVffwVZeuaYNKG4NrcrlR4tt4iPFTzsTvQEg/f0vmfNpO9t0vJdaeZzeZESdPnCn6H7Mzt+deQsZDLHCJ3zXUjp3iVhhmm+NtYBQCofXoXDongg0GYDHwNGgQOVU9tdwdKC3QYJ54t5RQxEONJmAfdD4H8EvfqEbQN9F4cwKmoiSHN6w8m5xQNm+jdg9JQvwOH0famMvNbuoJVSDQotwrVnG35pMp9cT8Bi4a5DkQP6udF2kvq0ay2zhXZvPd1vmkA41oMkOPAb+nYv6NuPus4i6WEA1B54qYbyJZwAbwAawAWwAG8AGsG7xvwADANLL1UtRhi56AAAAAElFTkSuQmCC";
+
+          /***/
+        },
+
+      /***/ "./img/satisfaction-icon.png":
+        /*!***********************************!*\
+  !*** ./img/satisfaction-icon.png ***!
+  \***********************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkQ4MTNENDEwRjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkQ4MTNENDExRjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6RDc3NkEyREJGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6RDgxM0Q0MEZGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7nVWgpAAAEkElEQVR42uyaX0gUQRjAZ2dPyjalLioNKh+SLCvTQqI6RAp6KBR6CFro4SDIeqnnoKeg53oII4og4YKgwOgPhSEiSURZaZZmD/2jrOiKrkvF25nmm+7qytqd3Z3d22rnRb1zZr7fft9+/2YUSin6nwZG/9kIgUPgEDgEDoGDPCJmX356/U7GHrrF9wm3G5SWz5YD7AZQef1qhfLi+VrlzUi1knwfRaOjSEmn+T9QTUOouBjR6KwknVvWQucv6KHl8/pkPQCzoZhlWjY1rKN0Oorv9u7AD/vrlVTKliC0pASRpctvkdq6NqRpSTvgdjQsA1hH42Olas+Nvfj+vSpkZNypQI0gUrNy0Fi77giaMvWTCLifwLryZHijeu1KXGEmK3OA2RsbN52iiyo7rKD9ASZkh9rVuR/33q7y8p0jdasHjYbGQwjjtsI5LYC9dOEwfjwU9TxuwgP9nDpsbG5CZtDexWEfYb8LyfaCPWFvv4F1bsY+wv4EzfYWiOvSgLmD8vqdtTJvkMENtDgwhB7mjQudGqodV+Mgi9fAOsRZ2aHHUabEsjWQxamWxYAhg4KkIigVD8jCZJJePOS0C+miZQaFMTJiDZ1kxcoz/M++e9vV7q5G5lnlz2OygExkfcxWCiochyE3tvofLvTq+hM5AdjvvFJgnrXRi3kgEwOWb9K86hEoBLIayn/aiZzWvJgHMoFs8oFZiec8ISaql/OcyGYFrCsjI9VCC7F37xfPqeP+vm1ezePA32TTpb7DvHgXiY/gaMBEl9doHKT//vbcZ17M47J9/GDbU1s7LdHYy7wqOBorZyNtHoyxUQ+c1pc0Cuqw21VxVi395cMSmE7TAis8nV7igYaLi4OrLgeyWWs4OisZWA3PmGlbNisvnaBlZS1oeOjPOVxREZrYtWd3tsMob7ASsKj1aKtZDs9kG5CeS0OTnP34M/DEBFQvOqlfcwzJa6LrsKZVwUIXVHTLN+nyeX3QJDdNHm7djKFUarbb9ksOFtZSb/aYVgYgU1bD8sMSWbqs19z8xlHk8kVosqmucdkafC1mOa5kcgGcILWrTiHVnEV5+RzldRZ1R5rNdkRhLXOTUhGXycErJJZ4aFqS1NQOWi72eCgaOXf2NEtHS21C6zAH5op0RLks386f7GdnwicP42MtkZPHW0X6WpTFRxJraCdLqttRJDJuogkdZTJT8KOBZtzd1Sy0tqahTHwnRIVjuc+8OmrhbdpI+3nhziUIRysXPyELK7rpnDkDaFpWK1/SUeXt22r87GlMGR5alDtGFRmZ5q2Tzpu8PFvS1c7rBwrVm+bnTI0bDv5qMXaA7RYPCTjYIpWLfc++YE9+qOYy1tuvljBuM7Y07fMTmsOyPQtzmJYPzUzMFzOWBOvkHZ7c84ID8Y6rcTuOR9ThBetAPD+0fL/ycLcKGYY7UkgqWJwN6pWHn8H5pZY7cfzwQZ2zSy3LenkGFfBLLZPBUd61pZHstSWWbyufUz86FXBtidWzUAC4vbZUaODfPgCzUOd2A2nA/+IIu5YhcAgcAofAIXAIHAL7Nr4KMABNjmPkw4Wc+gAAAABJRU5ErkJggg==";
+
+          /***/
+        },
+
       /***/ "./img/ticket-icon-img1.png":
         /*!**********************************!*\
   !*** ./img/ticket-icon-img1.png ***!
@@ -67716,6 +73754,34 @@ object-assign
           __webpack_require__.r(__webpack_exports__);
           /* harmony default export */ __webpack_exports__["default"] =
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADMAAAA2CAYAAABqbKGZAAAABHNCSVQICAgIfAhkiAAABv9JREFUaEPVmn1MU1cUwM95QClFPtUBYgF1RmmzDEc0W/aHoCZzW4BO3WZiFPxnRubmXFSczq9lTrdlCSpzbEvEEtwfI5stLGFZnMCWqVFUcNJuQT6k4BcQoQIthfYut/hI27Tv3dcWZO8vknvPx+/ee8495xaEp/Q1J2syIITUAgGd2qTfHAw3MBhKpOrgQRAglsoSAmeCATTlMG4gDnKcIGQh4vPBAJpSGDcQQrQqU1VBe6wmdjjKUccDKR7jjnn9un6pu03nTxkMddoSTW4AQBo8AeEddgUCAnUqkz572sI4nY0mtQiQ4QnCO21M1KQRGWknhDSpTVUZ0xKGBYQ6bpyrySIcqQUHOa7qqvpg2sG4ghBC9GpTlcaXkxMwHkdQCtSkxYwHSJPiMZclFNgTxwygUd2pXyIFgp87aTDNKXk3aIzQGBAD4Z1pVuY20qyGDsxO79LVSQWaFJhmZV4ZIhSMO+PYoeqsLmZxzKjMKSDIlRGARoUZs6Wm6KDDuIDcAYBUCqHq1DPbaVbm6hAxzx8gZiMsK8uD8EfLEmXPcsKYqnUs8nSO2yUK0M8BKQYbp02/r+sYjytHHrFz9epuXaOnzqDBuOzIANowgxp3NUZXnAOiSzdVn2EBM8zNLQYOt3ubSyikA9/wjKugwLiCEDtmea7ak9ufwsUgcWxmBRrfCbsGCLqm9A5AzHeWLx66AobhgxYABryBTGSqZE0GhhBnhlJ16p3Vsr+fi003oIBgWEFcSxZHCMR6O+9SwbwB+Q0jFcTTWUNKXgchUBtIH9OcknsIAQ/yGdMvGNdVIXZc4s9K8xekv32MZ19E6znJML7Oq9Rj4pKC06TGEE0MDhmhFUasaxUuCWaiGPSSSaTC8HeKVQ6xnmlcSJdQFc4M47qtUtIrK6QhJa+fALQLlTFi7QQTzGSDUGCDMrcOEJfTMsZb1SwG4rx3xFZuKkD4I2eJcugAkcZQmqtfrH2RIIy3Bwgx+GCNU9uKIXCWRHzLLdZO+ISZDBBabxEO8zkbLhELekNKHqE1GBJoBIQsMRCfx4zlfErdAddLNsKMaWK9ikGZe4avwVhAnDDUCCA6+47xD+UESAECJgIhTYBwTqrjnvMRMYMQ0BAgIwBYhkDui+kkgBpnpwrkAQKWARArlZGbueO+FgLpdoopnk7jBMhhdWfVIW8+jcOEhRrivnzf4egdWABjYxEYFjbIPRPXGiiEY2g4nvQPKoFDOxcf14rhoRaq09bcOmOw9OcF8uzM+4o1Kx642nH0mZXEao33lLGcv9xp0f+ZIwqDEeHXkhq0mYE6zyo/arwDPeuKIGbPJojc+BqTmOWXv359VHRytTiMXNaddK08mUnrU5rEDhMha0lqKF/4lPxkMssMA+Ey45zr5elMWoMwadTYAT3r9kD8iQ9BvnIZk8bBipoL5qPaFWLHjP58EBO6OBVmntgJIcmzmZQHMsl2xQC9mz+BqMK1EPXum6KqhipqYOCodvziEHhDQNobQHzE92RweBUFml12EDBaIWogkAlSYCy6Oni0rxRQLrOBxbpF6DFkopy5vX5/q+3izfmRG1ZDzN4nj5GBeCwgSwaGYOBzrTOThaW71ZRuUvbuHni4tgjAQYgiL/vt1GNbKoVcmoC5++nZVPMP1e0EERN/K5n03WFZJ/PXlTB46icIX7X0woLTH68Uk3ErNNvW72+zXrw5b1bZAZAtU4nJ+j1Od2aoqh4ic5cDxkT61EN3ZeyfOxD/3ob5ibveahcz6AZj2nmi/PGPv2+cUbgWohkCU0y5r3HWmLmrXg8h8+eMLKr7Rs5iyw2m+7OKAwOllYenE0yYep55YU1xjGSYti3HKq01l9ZNFUxM0UaI3PS6Tz/pznAJM8cWXz0dJhmmJWdn12hTS7JnzFjO1cGQ/g8WfW5z6J0Vd2SrVzl6cQplMirUm38YbA1GUKzOykz7bsd1MQcmjlnXR6Uvmc/WXAxJmgUJ50vc5Pr3noJhP2C4KAUkXj4t5oPPcf6Okb2w6Nazui+eE1PkhOnZdnLOo1vG22Nt3RFSKlkx5b7G7V090Lf9K4guXCNYzhDzMDxcsxvs93pB8erLX6d9u3ub4D1jUOZoQCYrgdGx5PDsTJhZsstfH5nlWLMZVcjPpX/Tp1yh/+CY6DSFbn7zUS0MVtQwOctyR0mB4YH6th6zEatNJvQbqROGiwi/ktig9Vm+0gQwrKtngok9Ugghc4WLVXrM+vedgug9+aJJgDfK3AKIwTBRTPKkaQ1ju2qAsEVpzDXgtIXhY0ZK5mSGgbDQ7uh3NFP2BjDa1QMWfT3IlqpAzljQjlz/t2Xk0t8LxTrN/9W7mWA2o2/KsoS4BNkrL07ZG4BfueJeX9/w+Ssm+SA0+nrR/A8zfUdzNO0FfAAAAABJRU5ErkJggg==";
+
+          /***/
+        },
+
+      /***/ "./img/ticket-icon.png":
+        /*!*****************************!*\
+  !*** ./img/ticket-icon.png ***!
+  \*****************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkQ2RjIzQzRERjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkQ2RjIzQzRFRjRFMDExRUFCQkJFOTIxRTczQTA5QzcwIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6RDZGMjNDNEJGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6RDZGMjNDNENGNEUwMTFFQUJCQkU5MjFFNzNBMDlDNzAiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz6ZoVrlAAAGSklEQVR42uxaC0xTVxi+fdGWTtqqPIQCghVhiNOwEQ3BkRoYyyaDkOh0RLZpYDizxc05X9kj0ZgwzZJtPqJbmMTolOC0DtThOp0hIgNhEoJDlPGwULEFSi0tLe3+g61pLwX6uPcC8f7JyQ3n0N7z/Y/vfP8BhtVqxZ4nY2LPmdGAacA0YBrwjDK2O7/0X5/S6WeLdSRDNzIoDmCLVLYpxVQDmS8OJQ4w3v4erF79c/eRzS+wZmFRfKlSwo1oiuRFN0Twou6I2bOV08UJhAFmYcwRJlQDRBlr1NWHogHTaWhtujuB4Y7Swqc0mOyWtioHRdmdl1DhBHdT2lvAo3X8YUveJW83SLQTSK1hFOFOY3s8fnIBP2bIYrWw2gytfpN9wVSVg8cRho3m1Gqrs65oLub2mzXP5rlMLvaN9OjrZquJ98m9/F+JqrkJnKCgJMLlj89tv9ZfmYSfl3AjhzgMznCPUbmQSJJxlQlRPOnw9sivuJQID/B2LdPFx5D3kdc7jG3LyGbaOZy5XZQdS0kByWUGi0FwWlWc5zgPqVaPnl2GsbXtqa0NyjuJnmcench1nA/2m4e9N69wGzi3nkppqYjzX3wdPxnOjWxCZPbA0JroC1g+0x9LFacVrxCmnMWvrQ9+f48NrIJKwLLbuppMxwlEWKFcyV04qvy6jV0sXwBH8qL60NPVKQDvMfjK1h4BbtE37/5J+cNxeW9pFp6wnm6yI9ZkNfmUzhLeaKYoOgxjueB875ndRothNWWA4YVf1A5WR1swi0vCajc8WOpr/QID16Isaje0LcGv3dU3iUsfndxLGeAUkayEzeCMmbcTFqRznM+A+dK6UfIztse6SGkkbmooax5WCFeeVpseS8rV5zLIICwBiAwkKiBtBUpjF97Z9W8H5e1iMljDVHZLikC/4ByyCCuaJ1WOR1g5geu/BLCXqWwPZQhU9cBf65xrgoWhiKCa852wIuyEVYBfM1qMfC6TR1k/LJM/Lt1Ro61Kg5R2Whiy6LE9D7bKAbTPm4l4Sn4uCau4+/DRjaFbRkBbl1FCWlc1FWPAOupdX6NrO4PvjEdYiKGrBq7lUpbSH4Xv2HlP35wC3k+AEe7YKRFhExEW0u4x/nF9CYJllaAF9oJDXkwWppZCij+BZTnZNx4yW1TFbUOtL8PLlxDhBAQqb17B4Z5h5cJL6gtpjmtbJJ/tixe8ZNCaBx4eenjgONQ4yyZBr6WK0ksC2EI1tIdysgDbLRMALw3xC73PZ/lH2ZzQTKQTkInYs7H9C75b9YvqRNH1/soxxx60pNhmyadFGWHpn5N54zFq33cVfY1IK5ATjIXzIjvm86QN8GwCr58iygno+1GavxKwvLxeV5MIUXbODAYTC/WTtJCV0pm2+yxOhfpCIQiQVeN9xtEJQEaNMJqg5hZ44wR0dfRB2NYfG3X1wpKeYxvQ3KuitLrswLUHbXWMuZvSHkUYNir6tnPfiT6TZtTzE1mvSYVGxO3Bmgi7o0CgoEajBYEH/d0oE2ecdMcJ94da+LD2BI4ks72FXBOUux+ESBlpLG1v7vEM6omhz8KIgfM8Bn7MdtcJj0yq6FjB4pFL6vPLnqax94LO45RWGjsXVmoqNsGmY/FdE1GGd4KILe6BKCeeUhVvtAucrLlry1+bs/pNTy/xvGXpTK25P/CK5mL+zYEbSZOlNxkW6x/f/3H4TjFVgJ8B14/oZ90Y+GOdou/yG3gGJcOSApJbAGy1lL+oBhqZQ1QDfgYcpCUH0jz7ivriO4iwyDBQV025IZt2uVJXZP/lAW9yJABgQyYYZxt0tem/q3/LbzO0cogEDMdTnadSkqwIu4w66N4kSPV3/9HVhREBOEGwtHezZNsmXyJMJmBSmH2LZPvBeMGSbdMZMCHMji7hoZvqRxGG8imbCYCdmL1q4M81V/sqMt1h9g0h+SUrhCvtIF3W8HQG7MTstdqbmRD1Darh7nH75APSI29NRlZUs7TXzA6RM6HoIWa/qqnYCIrK6eLKbDWNdktE3GdNdYRdRr116N9EBNyR2ZcLU+7mhRTEzfQIu4w6KCi5NGxRXe+wKhxSvfCWtirebDHxiHrBdIuwS2aHdNbDOE1EhBn0/0vTgGnANGAaMA2YBkwDpgHTgGnAXtn/AgwAodipDqAjBNoAAAAASUVORK5CYII=";
+
+          /***/
+        },
+
+      /***/ "./img/time-sheet-icon.png":
+        /*!*********************************!*\
+  !*** ./img/time-sheet-icon.png ***!
+  \*********************************/
+        /*! exports provided: default */
+        /***/ function(module, __webpack_exports__, __webpack_require__) {
+          "use strict";
+          __webpack_require__.r(__webpack_exports__);
+          /* harmony default export */ __webpack_exports__["default"] =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjQ2MkI1RDc4RjRFMjExRUFCRTVFOTVFNTQ0NDdENjExIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjQ2MkI1RDc5RjRFMjExRUFCRTVFOTVFNTQ0NDdENjExIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6NDYyQjVENzZGNEUyMTFFQUJFNUU5NUU1NDQ0N0Q2MTEiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6NDYyQjVENzdGNEUyMTFFQUJFNUU5NUU1NDQ0N0Q2MTEiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz5dmWM9AAAJH0lEQVR42uxaC3BU1Rk+r5tNNjAJSUdMLQPDy+JUW6wMFYRQYwUqWK2U0toZESxtpw98oI2dIjjDlOHRQa0PqKJ22oJIpWp11AIVFdCKraYtFMXaWOwgCAshZrPZe879+/13N5NN2ERYYDcd9zB/7rn3nnM53//+/0QSkfg4DSU+ZqMIuAi4CLgIuAi4CLgIuHDD5LLpkmX2eJc+CRp7XCtl8EX8/NuJnGPTvJL8AD6B8UlQ1fEBlpFuXzkSNiDhaVUYCeMIx7vwFRKUSOERFP7r+IREGi878AZNWb9g+YiusCp9AuMHHVISglQmy2Qn/Nm1XAnqDTY8Lq473f8FVHqOELHG7JJQQXiZCFoEorSK/F1JOSvoplob1xwRW8v93uG0elJ0Pn/c0yLq47BShfiClGRrINUL2tcCaGkHQ4wgzSqAL2Bxgk6f4p1mlSaAgeKqUCNaocSHcXcUnCgDtA/CFbJdfQFaOnG6hxF5GClMtE5J81TFQJH48P3U/5tstSfg//5/AJ8LGslXR/YzscYwTLURyd3A+ibmr6fdQFM3+6eBdoL+2ZsBl4GuBc0kpUaJVGh6A9d3IdH90HSNMDUIz6ZKEmeSsjHY9xrc3wfalZEFzkbw+iWWv4P4xE7v7d4I+IqodSsQWAfAXtcByE0ubnboqE2k3ZqgMCillF0JOywQ+koiuhHG/j08vBs0H9QSkLwxbQ6DtTbPwqNNSzGud+TSOpSQpN/jYNu0NMiy5NWBoriJ2nl49zLo1ZKIx2sXp9PIh0iac+LG/ALzMwFsLq7fLhX2te19ksMj1ozH/V/TDnCIk2ICSLRTISUcjTXadZxmQ3rTIb/1sNdJuK9XgazNiLRspxEpqQYuGbZN5yKMzYxa+z4z60iFt7iiRTyurH3MkdphjV+bdN4lEe12IN6tgULc0RuqJdUatWsZbBDQFwBiPearQc9ACLVd1vZJJmwDwF7R5TmkK26vbMI76/e/KG7G4H4bGPdi1CTPElaPxv1tBXNa26IdGVAg5SIY5eUUiLGJEu+tMmu3AHRtD2p/dg+fHgGQW1+KuulS0SRy8jVH+g9VSd5zapTxZL/yOYC9Fer2ffjd7QC7KYtUc/Dw9CiXlU6YKVrYt2NldpmkYO6xS/NWHqY8BlLkFWFFJIN7IbwFeFrXw6Y92Pe8FMFuqHQFCok6MOvz6RB2DGhyakNzhRheeZRuwr6VWPsA59+FtGEu7CdAlXEgMQTxdH72MlcidsqpoOFxo6+35K0nB68ciHGKzFAEqTXdpKWDYNM/bbPeKji9D5CeXm8jJSKT8ga41Rkk//JaBlOdMNuVMPPS9tlVERq01qPJaM6mVsEb/0dLu1eY0Cu/4KQbC5u9WorszMK4AdQPh7wLDPgW5pWFknA/xNvJSBaeYEOClGZkWXPQGDPZ9/2h0lrOsuaEByZxKRixGTRepmx1OTizCPO1Wb7Rt1T7V2rPsNcv0b6bCBLtlDfAJcaODNs3itbFovbibJyH1O68sEnshxZswO0nQpOX9F3o+EbSZjbU9B/ppWwSV1nl/ShbPo1ii1PKfem0dHzoPqTIuejICbAkGsrXhPN2h4fI0pixyqxEAT8b87PSz7ak4/P92vdrAPy2jiKSFkNNDuJbG7P4gDowjpPRNznbSvUP2ilfKi0lA7aJSpFASGrE/Ck8fCdjxb9ZpVERTe3Ep0BygwAXuQpMuz/j3TDQGXB8DZlMA8rnsOOPfE5sOwCM1SeJN1cbluWsbX33iUhV3HsYxcHXcLhnM9Q5poOwldsf59oMKX0dc27D/tgofQPybNaKhpTd0ndCdNTWF6CaM32jdGaOjXuzFi4I4cEkhFcQlYaYDnIMb64RbbFyuxCV0Ht4NqtDRcWndKqRtQ9loHUkPmSPrqS4GDn2fgr8EYGknxCpuJAggAm8yCFoTv/MNFQo+4aOul0TbucIIKvwYVsYCUu5h/eecSj0ukcwr+Y+Xpd+9Kfx7h7QRCXoaUivBYXFRCQdM1sD719AcB6UfDYY9WusfVH5/hGsvbCTCXA0SHXELCLCBjDtZZBop7wBpiB4i6++58YAyKbsvXNZj+vGtLNiiXwWP1di8rsyZc+Hfa9ot9UgCLidez7ooizMfcSUOwaIUjL4IVfTSmmR69+m5AQ4UuY1cFgB8BnVgzzUq7LxWK7Ib+Dnl0pKzVdw/VP6Idvrz6HO7K3ZDzSRlNOVUjsB6MFOqa4UW/Fjhkgxjr+BOluMKlTi0Qa3+QTYPjmVYdF92cI1Dv1YW5vl1mwdgH0Vwnkaz6YDyGHOroxnRpS36Oe4lExrQBjtZCAmceqJSmkbhzJI83HupKA0Y21ZChqQV8DJljaotWOJVMTe9WfC696D+f5smRIMkQHdQYHdtfkWMxVAB4BGamPu9X03IR513PmYlLGn6XA/w3vuRBoK0+lwhtxoAGNuds7ynlvyXTwg7spVULmlzRpeluScHiqyuUrq3XXLLHcpGcwr1tq9MiwcOJk4phTj8DOqm0pKpDI7eXbeAGsTSZHUnC155dZfjYL9SRxyyUdsHQbbvxQ0OpRWNy6iXbU/okBNFqIBcADO5jo4TO5n7YTt1XMyhcPUn8Q3dw3uJ4JDTUKdjh79qeibPAq7GoLD/UyEXKdbkUzsRNa/FGKo6bKWW7WPIKaMwbvhWZL0X1W1eHNie4SDUvd4Nsox1zpVbdrFkHI9RMse9LclEb1ekhmBI0HlaW9m8RM26KXcmvGsJe29x3BSEitzHM4443q1Z5Wm9wrdl16CTOqbyIG+nEzY/wrlX1XVYpZsvtkbGCi6AMxYiPerHf+qVQbbAfIurJ0mrBmI00+hgLjAfR5Sfpi0HWK04cTkaHddFHJuTaEB81irtTlPhKmkXI1a+UDdcne3dmogvNwD1XHNnZE+JRHvNyVlZn5YARnLycjrAPFnTlERry+vHmx4zpoxJaNubh9bSNnLUlGicI34zMEHvUYGwXJSCpkSXQPpXid9eyhWLg5oEq3JBCxUSG4aoC6GmgfiBZRCC45W6mcqjrrM34K/5BlTa62/AgycDKN9qCpu5sf6umSuh5PFv5cuAi4CLgIuAi4CLgIuAi4CLgIuAs5p/E+AAQAPu436hksgUgAAAABJRU5ErkJggg==";
 
           /***/
         },
@@ -67740,6 +73806,9 @@ object-assign
           exports.OpenTickets = ui_1.OpenTickets;
           exports.AllCompanies = ui_1.AllCompanies;
           exports.TicketsDetails = ui_1.TicketsDetails;
+          exports.Reports = ui_1.Reports;
+          exports.ReportHelpdesh = ui_1.ReportHelpdesh;
+          exports.Charts = ui_1.Charts;
 
           var ConfigCtrl_1 = __webpack_require__(
             /*! ./ConfigCtrl */ "./ConfigCtrl.ts"
@@ -67829,6 +73898,38 @@ object-assign
           /***/
         },
 
+      /***/ "./ui/Charts.ts":
+        /*!**********************!*\
+  !*** ./ui/Charts.ts ***!
+  \**********************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+
+          var ChartsApp_1 = __webpack_require__(
+            /*! ../domain/ChartsApp */ "./domain/ChartsApp.tsx"
+          );
+
+          var Charts =
+            /** @class */
+            (function() {
+              function Charts() {
+                ChartsApp_1.default();
+              }
+
+              Charts.templateUrl = "/partials/service.html";
+              return Charts;
+            })();
+
+          exports.Charts = Charts;
+
+          /***/
+        },
+
       /***/ "./ui/Dashboard.ts":
         /*!*************************!*\
   !*** ./ui/Dashboard.ts ***!
@@ -67889,6 +73990,70 @@ object-assign
             })();
 
           exports.OpenTickets = OpenTickets;
+
+          /***/
+        },
+
+      /***/ "./ui/ReportHelpdesh.ts":
+        /*!******************************!*\
+  !*** ./ui/ReportHelpdesh.ts ***!
+  \******************************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+
+          var ReportHelpdeshApp_1 = __webpack_require__(
+            /*! ../domain/ReportHelpdeshApp */ "./domain/ReportHelpdeshApp.tsx"
+          );
+
+          var ReportHelpdesh =
+            /** @class */
+            (function() {
+              function ReportHelpdesh() {
+                ReportHelpdeshApp_1.default();
+              }
+
+              ReportHelpdesh.templateUrl = "/partials/service.html";
+              return ReportHelpdesh;
+            })();
+
+          exports.ReportHelpdesh = ReportHelpdesh;
+
+          /***/
+        },
+
+      /***/ "./ui/Reports.ts":
+        /*!***********************!*\
+  !*** ./ui/Reports.ts ***!
+  \***********************/
+        /*! no static exports found */
+        /***/ function(module, exports, __webpack_require__) {
+          "use strict";
+
+          Object.defineProperty(exports, "__esModule", {
+            value: true
+          });
+
+          var ReportsApp_1 = __webpack_require__(
+            /*! ../domain/ReportsApp */ "./domain/ReportsApp.tsx"
+          );
+
+          var Reports =
+            /** @class */
+            (function() {
+              function Reports() {
+                ReportsApp_1.default();
+              }
+
+              Reports.templateUrl = "/partials/service.html";
+              return Reports;
+            })();
+
+          exports.Reports = Reports;
 
           /***/
         },
@@ -67996,6 +74161,16 @@ object-assign
               /*! ./TicketsDetails */ "./ui/TicketsDetails.ts"
             )
           );
+
+          __export(__webpack_require__(/*! ./Reports */ "./ui/Reports.ts"));
+
+          __export(
+            __webpack_require__(
+              /*! ./ReportHelpdesh */ "./ui/ReportHelpdesh.ts"
+            )
+          );
+
+          __export(__webpack_require__(/*! ./Charts */ "./ui/Charts.ts"));
 
           /***/
         },

@@ -58,6 +58,27 @@
       "addToNav": false,
       "defaultNav": false,
       "component": "TicketsDetails"
+    },
+    {
+      "type": "page",
+      "name": "Reports",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "Reports"
+    },
+    {
+      "type": "page",
+      "name": "ReportHelpdesh",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "ReportHelpdesh"
+    },
+    {
+      "type": "page",
+      "name": "Charts",
+      "addToNav": false,
+      "defaultNav": false,
+      "component": "Charts"
     }
   ],
   "dependencies": {

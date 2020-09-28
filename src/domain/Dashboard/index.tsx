@@ -20,17 +20,28 @@ export class Dashboard extends React.Component<any, any> {
     openNewEmailRef: any;
     openNewTicketRef: any;
     checkboxValue: any;
+    ticketData:any;
     constructor(props: any) {
         super(props);
+        const res= async()=>{
+            const res =await  fetch(config.SERVICEDESK_API_URL + "/api/tickets", {
+                method: 'get',
+            }) .then((response) => response.json());
+            return res;
+        }
+
+        
+           
+            console.log("data in constructor",res())
         this.tableValue = {
             columns: [
                 {
                     label: 'ID',
-                    key: 'index'
+                    key: 'id'
                 },
                 {
                     label: 'Requester Name',
-                    key: 'requesterName'
+                    key: 'contact'
                 },
                 {
                     label: 'Subjects',
@@ -291,6 +302,7 @@ export class Dashboard extends React.Component<any, any> {
         this.checkboxValue = false,
         this.state = {
             openCreateMenu: false,
+            ticketData2:[],
             ticketingData: [
                 {
                     ticketingImage: '',
@@ -390,7 +402,18 @@ export class Dashboard extends React.Component<any, any> {
         }
         return retData;
     }
-
+        async componentDidMount() {
+            const res = await fetch(config.SERVICEDESK_API_URL + "/api/tickets", {
+                method: 'get',
+            })
+                .then((response) => response.json());
+            this.ticketData=res;
+            this.setState({
+                ticketData2:eval(res),
+            });
+            console.log("tickte=",res);
+            console.log("table data in state variable 2="+this.state.ticketData2);
+    }
     onClickOpenSubLink = () => {
         let menu = !this.state.openCreateMenu;
         this.setState({
