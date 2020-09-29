@@ -8,6 +8,7 @@ import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
 import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import Table from './../../components/table';
+import { RestService } from '../_service/RestService';
 
 export class AllCompanies extends React.Component<any, any> {
     breadCrumbs: any;
@@ -15,255 +16,10 @@ export class AllCompanies extends React.Component<any, any> {
     openNewCompanyRef: any;
     openNewEmailRef: any;
     openNewTicketRef: any;
-    tableValue: any;
     perPageLimit: any;
     checkboxValue: any;
     constructor(props: any) {
         super(props);
-        this.tableValue = {
-            columns: [
-                {
-                    label: 'Company',
-                    key: 'company',
-                    renderCallback: (value: any) => {
-                        let strClass = "image";
-                        return <td><span className={strClass}><img src={companyIcon} alt="" /></span>{value}</td>
-                    }
-                },
-                {
-                    label: 'Contacts',
-                    key: 'contacts',
-                    renderCallback: (value: any) => {
-                        let strClass1 = "float-right";
-                        let strClass2 = "fa fa-ellipsis-v";
-                        return <td>{value} <a href="#" className={strClass1}><i className={strClass2}></i></a></td>
-
-                    }
-                },
-            ],
-            data: [
-                {
-                    company: 'Rodney Artichoke',
-                    contacts: '02',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK Founder & Co',
-                    contacts: '01',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Ram Fabrication',
-                    contacts: '08',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK+',
-                    contacts: '05',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Digital Media',
-                    contacts: '07',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RT Groups',
-                    contacts: '04',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RNKV Steels',
-                    contacts: '12',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Studiogreen',
-                    contacts: '09',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK+',
-                    contacts: '05',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Digital Media',
-                    contacts: '07',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RT Groups',
-                    contacts: '04',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RNKV Steels',
-                    contacts: '12',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Studiogreen',
-                    contacts: '09',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Rodney Artichoke',
-                    contacts: '02',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK Founder & Co',
-                    contacts: '01',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Ram Fabrication',
-                    contacts: '08',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK+',
-                    contacts: '05',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Digital Media',
-                    contacts: '07',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RT Groups',
-                    contacts: '04',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RNKV Steels',
-                    contacts: '12',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Studiogreen',
-                    contacts: '09',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK+',
-                    contacts: '05',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Rodney Artichoke',
-                    contacts: '02',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK Founder & Co',
-                    contacts: '01',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Ram Fabrication',
-                    contacts: '08',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK+',
-                    contacts: '05',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Digital Media',
-                    contacts: '07',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RT Groups',
-                    contacts: '04',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RNKV Steels',
-                    contacts: '12',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Studiogreen',
-                    contacts: '09',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK+',
-                    contacts: '05',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Digital Media',
-                    contacts: '07',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RT Groups',
-                    contacts: '04',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RNKV Steels',
-                    contacts: '12',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Studiogreen',
-                    contacts: '09',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Rodney Artichoke',
-                    contacts: '02',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK Founder & Co',
-                    contacts: '01',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Ram Fabrication',
-                    contacts: '08',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK+',
-                    contacts: '05',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Digital Media',
-                    contacts: '07',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RT Groups',
-                    contacts: '04',
-                    checkStatus: false,
-                },
-                {
-                    company: 'RNKV Steels',
-                    contacts: '12',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Studiogreen',
-                    contacts: '09',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK+',
-                    contacts: '05',
-                    checkStatus: false,
-                },
-            ],
-        };
         this.perPageLimit = 10,
             this.checkboxValue = true,
             this.state = {
@@ -273,6 +29,27 @@ export class AllCompanies extends React.Component<any, any> {
                 perPageLimit: 10,
                 openCreateMenu: false,
                 selectAll: false,
+                tableData:[],
+                columns: [
+                    {
+                        label: 'Company',
+                        key: 'company',
+                        renderCallback: (value: any) => {
+                            let strClass = "image";
+                            return <td><span className={strClass}><img src={companyIcon} alt="" /></span>{value}</td>
+                        }
+                    },
+                    {
+                        label: 'Contacts',
+                        key: 'contacts',
+                        renderCallback: (value: any) => {
+                            let strClass1 = "float-right";
+                            let strClass2 = "fa fa-ellipsis-v";
+                            return <td>{value} <a href="#" className={strClass1}><i className={strClass2}></i></a></td>
+    
+                        }
+                    },
+                ],
             };
         this.breadCrumbs = [
             {
@@ -288,6 +65,20 @@ export class AllCompanies extends React.Component<any, any> {
         this.openNewCompanyRef = React.createRef();
         this.openNewEmailRef = React.createRef();
         this.openNewTicketRef = React.createRef();
+    }
+    async componentDidMount() {
+        try {
+            await RestService.getData(config.SERVICEDESK_API_URL + "/api/companyConatctList2", null, null).then(
+                (response: any) => {
+                    this.setState({
+                        tableData: response,
+                    });
+                    console.log("company Data : ",this.state.companyData)
+                })
+        } catch (err) {
+            console.log("Loading company data failed. Error: ", err);
+        }
+        console.log("companyNameList  : ", this.state.companyList);
     }
 
     onClickOpenNewContact = (e: any) => {
@@ -314,7 +105,7 @@ export class AllCompanies extends React.Component<any, any> {
     }
 
     render() {
-        const { openCreateMenu } = this.state;
+        const { openCreateMenu,columns,tableData } = this.state;
         return (
             <div className="servicedesk-dashboard-container" >
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -350,7 +141,7 @@ export class AllCompanies extends React.Component<any, any> {
                     </div>
                     <div className="common-container border-bottom-0 p-t-0">
                         <div className="d-block p-t-20 all-companies-tabel">
-                            <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
+                            <Table valueFromData={{ columns: columns, data: tableData }} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
                                 tableClasses={{ table: "companies-tabel", tableParent: "d-block  p-t-5 companies-main-tabel", parentClass: "d-block p-t-20 all-companies-tabel" }} searchKey="company" showingLine="Showing %start% to %end% of %total% Companies" />
                         </div>
                     </div>

@@ -791,12 +791,6 @@ a:hover {
 .dashboard-all-ticket-tabel
   .all-support-ticket-tabel
   .tickets-tabel
-  .ticket-tabel {
-  width: 1200px;
-}
-.dashboard-all-ticket-tabel
-  .all-support-ticket-tabel
-  .tickets-tabel
   .ticket-tabel
   thead
   tr
@@ -1008,9 +1002,6 @@ a:hover {
 .all-support-ticket-tabel .tickets-tabel {
   overflow-x: scroll;
 }
-.all-support-ticket-tabel .tickets-tabel .ticket-tabel {
-  width: 1500px;
-}
 .all-support-ticket-tabel .tickets-tabel .ticket-tabel thead tr th {
   color: #a9b9c6;
   font-size: 12px;
@@ -1156,9 +1147,6 @@ a:hover {
 }
 .all-contacts-tabel .contacts-tabel {
   overflow-x: scroll;
-}
-.all-contacts-tabel .contacts-tabel .contact-tabel {
-  width: 1200px;
 }
 .all-contacts-tabel .contacts-tabel .contact-tabel thead tr th {
   color: #a9b9c6;
@@ -1362,9 +1350,6 @@ a:hover {
 }
 .all-open-ticket-tabel .open-tickets-tabel {
   overflow-x: scroll;
-}
-.all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel {
-  width: 1500px;
 }
 .all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel thead tr th {
   color: #a9b9c6;

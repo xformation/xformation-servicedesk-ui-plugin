@@ -1,6 +1,10 @@
 import * as React from 'react';
-import { Modal, ModalBody } from 'reactstrap';
+import { CustomInput, Modal, ModalBody } from 'reactstrap';
 import { CustomTextbox } from './CustomTextbox';
+import axios from 'axios'
+import { config } from "../config";
+import AlertMessage from './AlertMessage';
+import { colors } from '@material-ui/core';
 
 export class OpenNewCompanyPopup extends React.Component<any, any> {
     steps: any;
@@ -8,6 +12,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
         super(props);
         this.state = {
             modal: false,
+            companyLogo: null,
             companyName: '',
             description: '',
             notes: '',
@@ -16,7 +21,10 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
             accountTier: '',
             renewalDate: '',
             industry: '',
-            isSubmitted: false
+            isSubmitted: false,
+            isAlertOpen: false,
+            message: null,
+            severity: null,
         };
     }
 
@@ -31,15 +39,16 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
         });
     }
 
-    handleSubmit = (event: any) => {
+    handleSubmit = async (event: any) => {
         event.preventDefault();
         this.setState({
             isSubmitted: true
         });
         const errorData = this.validate(true);
-        if (errorData.companyName.isValid && errorData.description.isValid && errorData.notes.isValid && errorData.healthCare.isValid && errorData.company.isValid && errorData.accountTier.isValid && errorData.renewalDate.isValid && errorData.industry.isValid) {
-            const { companyName, description, notes, company, healthCare, accountTier, renewalDate, industry } = this.state;
+        if (errorData.companyLogo.isValid && errorData.companyName.isValid && errorData.description.isValid && errorData.notes.isValid && errorData.healthCare.isValid && errorData.company.isValid && errorData.accountTier.isValid && errorData.renewalDate.isValid && errorData.industry.isValid) {
+            const { companyLogo, companyName, description, notes, company, healthCare, accountTier, renewalDate, industry } = this.state;
             const sendData = {
+                companyLogo,
                 companyName,
                 description,
                 notes,
@@ -50,6 +59,46 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                 industry,
             };
             console.log(sendData);
+            let formData = new FormData();
+            formData.append("logo", companyLogo);
+            formData.append("companyName", companyName);
+            formData.append("description", description);
+            formData.append("notes", notes);
+            formData.append("domain", company);
+            formData.append("healthScore", healthCare);
+            formData.append("accountTier", accountTier);
+            formData.append("renewalDate", renewalDate);
+            formData.append("industry", industry);
+            const data = {
+                "companyName": companyName,
+                "description": description,
+                "notes": notes,
+                "domain": company,
+                "healthScore": healthCare,
+                "accountTier": accountTier,
+                "renewalDate": renewalDate,
+                "industry": industry,
+            }
+            axios.post(config.SERVICEDESK_API_URL + "/api/company", formData, {
+                headers: {
+                    'content-type': 'multipart/form-data'
+                }
+            }).then(response => {
+                if(response.data!=null){
+                    this.setState({
+                        severity : config.SEVERITY_SUCCESS,
+                        message: config.COMPANY_ADDED_SUCCESS,
+                        isAlertOpen: true,
+                    });
+                }else{
+                    this.setState({
+                        severity : config.SEVERITY_ERROR,
+                        message: config.COMPANY_ADDED_ERROR,
+                        isAlertOpen: true,
+                    });
+                }
+                console.log("response data",response.data);
+            }).catch(err => console.log(err))
         }
     };
 
@@ -67,9 +116,16 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
             accountTier: validObj,
             renewalDate: validObj,
             industry: validObj,
+            companyLogo:  validObj,
         };
         if (isSubmitted) {
-            const { companyName, description, notes, company, healthCare, accountTier, renewalDate, industry } = this.state;
+            const { companyName,companyLogo, description, notes, company, healthCare, accountTier, renewalDate, industry } = this.state;
+            if (!companyLogo) {
+                retData.companyLogo = {
+                    isValid: false,
+                    message: "Company Logo is required"
+                };
+            }
             if (!companyName) {
                 retData.companyName = {
                     isValid: false,
@@ -128,12 +184,25 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
             [name]: value
         });
     };
+    handleImageChange = (e: any) => {
+        console.log("file=", e.target.files[0])
+        this.setState({
+            companyLogo: e.target.files[0]
+        })
+    };
+    handleCloseAlert = (e: any) =>{
+        this.setState({
+          isAlertOpen: false
+        })
+    }
 
     render() {
-        const { modal, companyName, description, notes, company, healthCare, accountTier, renewalDate, industry, isSubmitted } = this.state;
+        const { modal, companyLogo, companyName, description, notes, company, healthCare, accountTier, renewalDate, industry, isSubmitted } = this.state;
         const errorData = this.validate(isSubmitted);
+        const state = this.state;
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
+                <AlertMessage handleCloseAlert={this.handleCloseAlert} open={state.isAlertOpen} severity={state.severity} msg={state.message}></AlertMessage>
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
                     <div className="d-block width-100 contact-popup-container">
                         <div className="d-block width-100 p-b-20 heading">
@@ -146,7 +215,9 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                             </div>
                             <div className="d-inline-block v-a-top">
                                 <strong className="d-block">Upload Logo</strong>
+                                <input type="file" id="companyLogo" name="companyLogo" onChange={this.handleImageChange} />
                                 <p className="d-block">An image of the person, it's best if it has the same length and height</p>
+                                <span style={{color: "red"}}>{errorData.companyLogo.message}</span>
                             </div>
                         </div>
                         <div className="row">
@@ -172,7 +243,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label htmlFor="company">Company</label>
+                                    <label htmlFor="company">Domains of Company</label>
                                     <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="company" id="company" placeholder="eg: My company1.com, mycompany2.com" name="company" value={company} onChange={this.handleStateChange} isValid={errorData.company.isValid} message={errorData.company.message} />
                                 </div>
                             </div>
