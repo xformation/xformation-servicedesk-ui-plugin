@@ -47,21 +47,7 @@ export class AllCompanies extends React.Component<any, any> {
                     contacts: '02',
                     checkStatus: false,
                 },
-                {
-                    company: 'AK Founder & Co',
-                    contacts: '01',
-                    checkStatus: false,
-                },
-                {
-                    company: 'Ram Fabrication',
-                    contacts: '08',
-                    checkStatus: false,
-                },
-                {
-                    company: 'AK+',
-                    contacts: '05',
-                    checkStatus: false,
-                },
+                
                 {
                     company: 'Digital Media',
                     contacts: '07',

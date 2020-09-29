@@ -53,10 +53,10 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             (response: any) => {
                 console.log("contact list : ", response);
                 let obj = null;
-                for(respone){
-                    obj = MyObj(re.id, re.compy);
-                    conatctFullNameList.push(obj);
-                }
+                // for(respone){
+                //     obj = MyObj(re.id, re.compy);
+                //     conatctFullNameList.push(obj);
+                // }
                 this.setState({
                     conatctFullNameList: obj,
                 });
