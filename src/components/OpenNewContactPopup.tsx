@@ -5,7 +5,7 @@ import { Customselectbox } from './Customselectbox';
 import { config } from "../config";
 import { RestService } from '../domain/_service/RestService';
 
-export class OpenNewContactPopup extends React.Component<any, any> {
+export class OpenNewContactPopup extends React.Component<any, any> { 
     steps: any;
     constructor(props: any) {
         super(props);
