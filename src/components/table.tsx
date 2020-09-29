@@ -22,7 +22,9 @@ export class Table extends React.Component<any, any> {
             sortKey: '',
             isAllChecked: false,
             visibleCheckbox: this.props.visiblecheckboxStatus,
-            showSelect: false
+            showSelect: false,
+            start_index: 1,
+            ending_index: 10,
         }
     };
 
@@ -164,11 +166,13 @@ export class Table extends React.Component<any, any> {
     }
 
     peginationOfTable() {
-        const { currentPage, totalPages, displayData, perPageLimit } = this.state;
+        const { currentPage, totalPages, displayData, start_index, ending_index } = this.state;
         let rows = [];
         if (displayData.length > 0) {
             for (let i = 0; i < totalPages; i++) {
-                rows.push(<li className="page-item" key={i}><a className={currentPage === i ? 'page-link active' : 'page-link deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
+                if (i >= start_index && i < ending_index) {
+                    rows.push(<li className="page-item" key={i}><a className={currentPage === i ? 'page-link active' : 'page-link deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
+                }
             }
             return (
                 <ul>
@@ -185,11 +189,17 @@ export class Table extends React.Component<any, any> {
     }
 
     navigatePage(target: any, e: any, i: any = null) {
-        const { totalPages, currentPage } = this.state;
+        const { totalPages, currentPage, ending_index, start_index } = this.state;
         e.preventDefault();
         switch (target) {
             case 'pre':
-                if (currentPage !== 0) {
+                if (currentPage !== 0 && start_index != 0) {
+                    this.setState({
+                        currentPage: currentPage - 1,
+                        start_index: start_index - 10,
+                        ending_index: ending_index - 10
+                    });
+                } else {
                     this.setState({
                         currentPage: currentPage - 1,
                     });
@@ -200,12 +210,23 @@ export class Table extends React.Component<any, any> {
                     this.setState({
                         currentPage: currentPage + 1,
                     });
+                } else if (currentPage == ending_index) {
+                    this.setState({
+                        start_index: ending_index,
+                        ending_index: ending_index + 10,
+                    });
                 }
                 break;
             case 'btn-click':
-                this.setState({
-                    currentPage: i
-                });
+                if (i != ending_index - 1) {
+                    this.setState({
+                        currentPage: i
+                    });
+                } else if (totalPages > ending_index) {
+                    this.setState({
+                        currentPage: i + 1,
+                    });
+                }
                 break;
         }
     }

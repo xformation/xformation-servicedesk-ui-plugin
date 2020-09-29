@@ -287,7 +287,7 @@ export class Dashboard extends React.Component<any, any> {
                 },
             ],
         };
-        this.perPageLimit = 6,
+        this.perPageLimit = 2,
         this.checkboxValue = false,
         this.state = {
             openCreateMenu: false,
