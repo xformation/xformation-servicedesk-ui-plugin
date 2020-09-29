@@ -13,7 +13,7 @@ export class Customselectbox extends React.Component<any, any> {
         let retData: any = [];
         Object.keys(optionData).map((key, index) => {
             retData.push(
-                <option value={JSON.stringify(optionData[index])}>{optionData[index].companyName}</option>
+                <option value={optionData[index].id}>{optionData[index].name}</option>
             )
         });
         return retData;

@@ -5,6 +5,16 @@ import { Customselectbox } from './Customselectbox';
 import { CustomTextareabox } from './CustomTextareabox';
 import { config } from "../config";
 import axios from 'axios'
+import { RestService } from '../domain/_service/RestService';
+
+class MyObj {
+    id: any;
+    name: any;
+    constructor(id: any, name: any) {
+      this.id = id;
+      this.name = name;
+    }
+}
 
 export class OpenNewTicketPopup extends React.Component<any, any> {
     steps: any;
@@ -29,28 +39,53 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             totalContact: 1,
         };
     }
-    async componentDidMount() {
-        const res = await fetch(config.SERVICEDESK_API_URL + "/api/contacts", {
-            method: 'get',
-        })
-            .then((response) => response.json());
-        let conatctFullNameList = [];
-        let conatctFullNameJson={};
-        let contactIndexsList = []
-        let i;
-      
-        for (i in res) {
-           let id=res[i].id
-           let fullName=res[i].fullName
-            conatctFullNameList.push(res[i].fullName);
-            contactIndexsList.push(res[i].id);
+    
+    componentDidMount() {
+        try {
+            this.fetchData();
+        } catch (err) {
+            console.log("OpenNewTicketPopup page. Loading contact data failed. Error: ", err);
         }
-        // console.log(conatctFullNameJson);
-        this.setState({
-            conatctFullNameList: conatctFullNameList,
-            contactIndexsList: contactIndexsList,
-        });
     }
+
+    fetchData = () => {
+        RestService.getData(config.SERVICEDESK_API_URL + "/api/contacts", null, null).then(
+            (response: any) => {
+                console.log("contact list : ", response);
+                let obj = null;
+                for(respone){
+                    obj = MyObj(re.id, re.compy);
+                    conatctFullNameList.push(obj);
+                }
+                this.setState({
+                    conatctFullNameList: obj,
+                });
+            }
+        );
+    }
+
+    // async componentDidMount() {
+        // await fetch(config.SERVICEDESK_API_URL + "/api/contacts", {
+        //     method: 'get',
+        // })
+        //     .then((response) => response.json());
+        // let conatctFullNameList = [];
+        // let conatctFullNameJson={};
+        // let contactIndexsList = []
+        // let i;
+      
+        // for (i in res) {
+        //    let id=res[i].id
+        //    let fullName=res[i].fullName
+        //     conatctFullNameList.push(res[i].fullName);
+        //     contactIndexsList.push(res[i].id);
+        // }
+        // console.log(conatctFullNameJson);
+        // this.setState({
+        //     conatctFullNameList: conatctFullNameList,
+        //     contactIndexsList: contactIndexsList,
+        // });
+    // }
    
     toggle = () => {
         this.setState({
@@ -259,7 +294,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="contact">Contact*</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="contact" id="contact" name="contact" value={contact} arrayData={conatctFullNameList} onChange={this.handleStateChange} isValid={errorData.contact.isValid} message={errorData.contact.message} />
+                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="contact" id="contact" name="contact" value={contact} arrayData={conatctFullNameList} onChange={this.handleStateChange}  />
                                     <div className="d-block text-right p-t-5">
                                         <button className="add-conatct">Add a Conatct</button>
                                     </div>

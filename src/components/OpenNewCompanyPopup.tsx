@@ -78,10 +78,9 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                 headers: {
                   'content-type': 'multipart/form-data'
                 }
-              })
-                  .then(res => {
-                    console.log(res.data);
-                  }).catch(err => console.log(err))
+            }).then(res => {
+                console.log(res.data);
+            }).catch(err => console.log(err))
         }
     };
 
@@ -211,7 +210,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label htmlFor="company">Company</label>
+                                    <label htmlFor="company">Domains of Company</label>
                                     <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="company" id="company" placeholder="eg: My company1.com, mycompany2.com" name="company" value={company} onChange={this.handleStateChange} isValid={errorData.company.isValid} message={errorData.company.message} />
                                 </div>
                             </div>
