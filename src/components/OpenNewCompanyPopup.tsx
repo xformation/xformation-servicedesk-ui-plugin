@@ -79,7 +79,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                 "renewalDate": renewalDate,
                 "industry": industry,
             }
-            axios.post(config.SERVICEDESK_API_URL + "/api/company", formData, {
+            axios.post(config.ADD_COMPANY_URL, formData, {
                 headers: {
                     'content-type': 'multipart/form-data'
                 }
