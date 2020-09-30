@@ -8,7 +8,7 @@ import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
 import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import Table from './../../components/table';
-import {RestService} from '../_service/RestService';
+import { RestService } from '../_service/RestService';
 
 export class AllCompanies extends React.Component<any, any> {
     breadCrumbs: any;
@@ -17,11 +17,10 @@ export class AllCompanies extends React.Component<any, any> {
     openNewEmailRef: any;
     openNewTicketRef: any;
     tableValue: any;
-    perPageLimit: any;
-    checkboxValue: any;
     constructor(props: any) {
         super(props);
-        this.tableValue = {
+        this.state = {
+            openCreateMenu: false,
             columns: [
                 {
                     label: 'Company',
@@ -42,24 +41,8 @@ export class AllCompanies extends React.Component<any, any> {
                     }
                 },
             ],
-            data: [
-                {
-                    company: 'Rodney Artichoke',
-                    contacts: '02',
-                    checkStatus: false,
-                }
-            ],
+            companyData: []
         };
-        this.perPageLimit = 10,
-            this.checkboxValue = true,
-            this.state = {
-                searchKey: '',
-                totalPages: '',
-                currentPage: 0,
-                perPageLimit: 10,
-                openCreateMenu: false,
-                selectAll: false,
-            };
         this.breadCrumbs = [
             {
                 label: "Home",
@@ -99,14 +82,14 @@ export class AllCompanies extends React.Component<any, any> {
         });
     }
 
-    async componentDidMount() { 
+    async componentDidMount() {
         try {
             await RestService.getData(config.GET_COMPANIES_CONTACT_LIST_URL, null, null).then(
                 (response: any) => {
-                    // this.setState({
-                    //     companyContactList: response,
-                    // });
-                    console.log("company Data : ",response)
+                    this.setState({
+                        companyData: response,
+                    });
+                    console.log("company Data : ", response)
                 })
         } catch (err) {
             console.log("Loading company data failed. Error: ", err);
@@ -115,7 +98,7 @@ export class AllCompanies extends React.Component<any, any> {
     }
 
     render() {
-        const { openCreateMenu } = this.state;
+        const { openCreateMenu, companyData, columns } = this.state;
         return (
             <div className="servicedesk-dashboard-container" >
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -151,7 +134,7 @@ export class AllCompanies extends React.Component<any, any> {
                     </div>
                     <div className="common-container border-bottom-0 p-t-0">
                         <div className="d-block p-t-20 all-companies-tabel">
-                            <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
+                            <Table valueFromData={{ columns: columns, data: companyData }} perPageLimit={10} visiblecheckboxStatus={true}
                                 tableClasses={{ table: "companies-tabel", tableParent: "d-block  p-t-5 companies-main-tabel", parentClass: "d-block p-t-20 all-companies-tabel" }} searchKey="company" showingLine="Showing %start% to %end% of %total% Companies" />
                         </div>
                     </div>
