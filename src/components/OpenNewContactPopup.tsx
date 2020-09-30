@@ -5,6 +5,14 @@ import { Customselectbox } from './Customselectbox';
 import { config } from "../config";
 import { RestService } from '../domain/_service/RestService';
 
+class MySelectObj {
+    id: any;
+    name: any;
+    constructor(id: any, name: any){
+        this.id = id;
+        this.name = name;
+    }
+}
 export class OpenNewContactPopup extends React.Component<any, any> { 
     steps: any;
     constructor(props: any) {
@@ -40,10 +48,16 @@ export class OpenNewContactPopup extends React.Component<any, any> {
     }
     async componentDidMount() {
         try {
-            await RestService.getData(config.SERVICEDESK_API_URL + "/api/companies", null, null).then(
+            await RestService.getData(config.GET_ALL_COMPANIES_URL, null, null).then(
                 (response: any) => {
+                    let ary = [];
+                    for (let i = 0; i < response.length; i++) {
+                        let obj = new MySelectObj(response[i].id, response[i].companyName);
+                        ary.push(obj);
+                    }
+                    
                     this.setState({
-                        companyList: response,
+                        companyList: ary,
                     });
                 })
         } catch (err) {
