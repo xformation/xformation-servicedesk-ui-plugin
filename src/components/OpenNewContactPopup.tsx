@@ -51,11 +51,12 @@ export class OpenNewContactPopup extends React.Component<any, any> {
             await RestService.getData(config.GET_ALL_COMPANIES_URL, null, null).then(
                 (response: any) => {
                     let ary = [];
+                    let obj = new MySelectObj("", "Select Company");
+                    ary.push(obj);
                     for (let i = 0; i < response.length; i++) {
-                        let obj = new MySelectObj(response[i].id, response[i].companyName);
+                        obj = new MySelectObj(response[i].id, response[i].companyName);
                         ary.push(obj);
                     }
-                    
                     this.setState({
                         companyList: ary,
                     });
