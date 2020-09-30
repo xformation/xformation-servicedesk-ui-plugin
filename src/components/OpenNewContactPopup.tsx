@@ -44,12 +44,14 @@ export class OpenNewContactPopup extends React.Component<any, any> {
             accountTier: '',
             renewalDate: '',
             industry: '',
+            orgCompanyList: [],
         };
     }
     async componentDidMount() {
         try {
             await RestService.getData(config.GET_ALL_COMPANIES_URL, null, null).then(
                 (response: any) => {
+
                     let ary = [];
                     let obj = new MySelectObj("", "Select Company");
                     ary.push(obj);
@@ -59,6 +61,7 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                     }
                     this.setState({
                         companyList: ary,
+                        orgCompanyList: response
                     });
                 })
         } catch (err) {
@@ -291,27 +294,44 @@ export class OpenNewContactPopup extends React.Component<any, any> {
         });
     }
     handleSelectBox = (e: any) => {
+        const {orgCompanyList} = this.state;
         const { name, value } = e.target;
         this.setState({
             [name]: value,
         });
-        console.log("company : ",this.state.company);
-        this.setState({
-            companyName:this.state.company.companyName,
-            description: this.state.company.description,
-            notes: this.state.company.notes,
-            healthScore: this.state.company.healthScore,
-            accountTier: this.state.company.accountTier,
-            renewalDate: this.state.company.renewalDate,
-            industry: this.state.company.industry,
-        });
-        console.log("Company Name=",this.state.companyName);
-        console.log("Company description=",this.state.description);
-        console.log("Company notes=",this.state.notes);
-        console.log("Company healthScore=",this.state.healthScore);
-        console.log("Company accountTier=",this.state.accountTier);
-        console.log("Company renewalDate=",this.state.renewalDate);
-        console.log("Company industry=",this.state.industry);
+        
+        for(let i=0; i<orgCompanyList.length; i++){
+            let obj = orgCompanyList[i];
+            if(parseInt(value) === obj.id) {
+                this.setState({
+                    companyName: obj.companyName,
+                    description: obj.description,
+                    notes: obj.notes,
+                    healthScore: obj.healthScore,
+                    accountTier: obj.accountTier,
+                    renewalDate: obj.renewalDate,
+                    industry: obj.industry,
+                });
+                break;        
+            }
+        }
+        // console.log("company : ",this.state.company);
+        // this.setState({
+        //     companyName:this.state.company.companyName,
+        //     description: this.state.company.description,
+        //     notes: this.state.company.notes,
+        //     healthScore: this.state.company.healthScore,
+        //     accountTier: this.state.company.accountTier,
+        //     renewalDate: this.state.company.renewalDate,
+        //     industry: this.state.company.industry,
+        // });
+        // console.log("Company Name=",this.state.companyName);
+        // console.log("Company description=",this.state.description);
+        // console.log("Company notes=",this.state.notes);
+        // console.log("Company healthScore=",this.state.healthScore);
+        // console.log("Company accountTier=",this.state.accountTier);
+        // console.log("Company renewalDate=",this.state.renewalDate);
+        // console.log("Company industry=",this.state.industry);
         
     }
 
