@@ -37,11 +37,11 @@ export class Dashboard extends React.Component<any, any> {
             columns: [
                 {
                     label: 'ID',
-                    key: 'id'
+                    key: 'index'
                 },
                 {
                     label: 'Requester Name',
-                    key: 'contact'
+                    key: 'requesterName'
                 },
                 {
                     label: 'Subjects',
@@ -296,6 +296,247 @@ export class Dashboard extends React.Component<any, any> {
                     createDate: '12 July 2020',
                     checkStatus: false
                 },
+                {
+                    index: '#27',
+                    requesterName: 'Rodney Artichoke',
+                    subject: 'I need help with aading a New Contact....',
+                    status: 'Open',
+                    priority: 'Low',
+                    assignee: 'Fergus Douchebag',
+                    createDate: '10 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#39',
+                    requesterName: 'Chaplain Mondover',
+                    subject: 'I need help with aading a New Contact data to be pre...',
+                    status: 'Closed',
+                    priority: 'Medium',
+                    assignee: 'Bodrum Salvador',
+                    createDate: '12 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#47',
+                    requesterName: 'Rodney Artichoke',
+                    subject: 'Mobile Campaign',
+                    status: 'Pending',
+                    priority: 'Low',
+                    assignee: 'Inverness McKenzie',
+                    createDate: '15 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#52',
+                    requesterName: 'Inverness McKenzie',
+                    subject: 'Service related announcements',
+                    status: 'Open',
+                    priority: 'Hign',
+                    assignee: 'Abraham Pigeon',
+                    createDate: '16 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#87',
+                    requesterName: 'Douglas Lyphe',
+                    subject: 'I need help with aading a New Contact....',
+                    status: 'Closed',
+                    priority: 'Low',
+                    assignee: 'Fergus Douchebag',
+                    createDate: '19 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#52',
+                    requesterName: 'Inverness McKenzie',
+                    subject: 'Service related announcements',
+                    status: 'Open',
+                    priority: 'Hign',
+                    assignee: 'Abraham Pigeon',
+                    createDate: '16 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#87',
+                    requesterName: 'Douglas Lyphe',
+                    subject: 'I need help with aading a New Contact....',
+                    status: 'Closed',
+                    priority: 'Low',
+                    assignee: 'Fergus Douchebag',
+                    createDate: '19 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                {
+                    index: '#92',
+                    requesterName: 'Theodore Handle',
+                    subject: 'Adding a payment methods',
+                    status: 'Pending',
+                    priority: 'Medium',
+                    assignee: 'Jarvis Pepperspray',
+                    createDate: '22 July 2020',
+                    checkStatus: false
+                },
+                
             ],
         };
         this.perPageLimit = 2,

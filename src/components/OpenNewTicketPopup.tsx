@@ -4,7 +4,7 @@ import { CustomTextbox } from './CustomTextbox';
 import { Customselectbox } from './Customselectbox';
 import { CustomTextareabox } from './CustomTextareabox';
 import { config } from "../config";
-import axios from 'axios'
+import axios from 'axios';
 import { RestService } from '../domain/_service/RestService';
 
 class MyObj {
@@ -130,9 +130,9 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
 
             
             axios.post(config.SERVICEDESK_API_URL+"/api/tickets", formData,{})
-                  .then(res => {
+                  .then((res:any) => {
                     console.log(res.data);
-                  }).catch(err => console.log(err))
+                  }).catch((err:any) => console.log(err))
                 //   const res= await fetch(config.SERVICEDESK_API_URL+"/api/tickets", {
                 //     method: 'post',
                 //     body: formData,

@@ -23,8 +23,8 @@ export class Table extends React.Component<any, any> {
             isAllChecked: false,
             visibleCheckbox: this.props.visiblecheckboxStatus,
             showSelect: false,
-            start_index: 1,
-            ending_index: 10,
+            start_index: 0,
+            ending_index: 9,
         }
     };
 
@@ -170,7 +170,7 @@ export class Table extends React.Component<any, any> {
         let rows = [];
         if (displayData.length > 0) {
             for (let i = 0; i < totalPages; i++) {
-                if (i >= start_index && i < ending_index) {
+                if (i >= start_index && i <= ending_index) {
                     rows.push(<li className="page-item" key={i}><a className={currentPage === i ? 'page-link active' : 'page-link deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
                 }
             }
@@ -193,40 +193,37 @@ export class Table extends React.Component<any, any> {
         e.preventDefault();
         switch (target) {
             case 'pre':
-                if (currentPage !== 0 && start_index != 0) {
-                    this.setState({
-                        currentPage: currentPage - 1,
-                        start_index: start_index - 10,
-                        ending_index: ending_index - 10
-                    });
-                } else {
-                    this.setState({
-                        currentPage: currentPage - 1,
-                    });
+                if (currentPage !== 0) {
+                    if (currentPage !== start_index) {
+                        this.setState({
+                            currentPage: currentPage - 1,
+                        });
+                    } else {
+                        this.setState({
+                            currentPage: currentPage - 1,
+                            start_index: start_index - 10,
+                            ending_index: ending_index - 10
+                        });
+                    }
                 }
                 break;
             case 'next':
-                if (currentPage !== totalPages - 1) {
+                if (currentPage !== totalPages - 1 && currentPage != ending_index) {
                     this.setState({
                         currentPage: currentPage + 1,
                     });
-                } else if (currentPage == ending_index) {
+                } else {
                     this.setState({
-                        start_index: ending_index,
-                        ending_index: ending_index + 10,
+                        currentPage: currentPage + 1,
+                        start_index: ending_index + 1,
+                        ending_index: ending_index + 10
                     });
                 }
                 break;
             case 'btn-click':
-                if (i != ending_index - 1) {
-                    this.setState({
-                        currentPage: i
-                    });
-                } else if (totalPages > ending_index) {
-                    this.setState({
-                        currentPage: i + 1,
-                    });
-                }
+                this.setState({
+                    currentPage: i
+                });
                 break;
         }
     }
@@ -255,7 +252,6 @@ export class Table extends React.Component<any, any> {
 
     onSearchChange = (e: any) => {
         const { value } = e.target;
-        console.log(value);
         this.setState({
             searchKey: value,
             currentPage: 0,

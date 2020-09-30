@@ -83,7 +83,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                 headers: {
                     'content-type': 'multipart/form-data'
                 }
-            }).then(response => {
+            }).then((response:any) => {
                 if(response.data!=null){
                     this.setState({
                         severity : config.SEVERITY_SUCCESS,
@@ -98,7 +98,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                     });
                 }
                 console.log("response data",response.data);
-            }).catch(err => console.log(err))
+            }).catch((err:any) => console.log(err))
         }
     };
 
