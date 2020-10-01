@@ -29,6 +29,7 @@ export class Multiselect extends React.Component {
     this.searchBox = React.createRef();
     this.onChange = this.onChange.bind(this);
     this.onKeyPress = this.onKeyPress.bind(this);
+    // this.onSetValue = this.onSetValue.bind(this);
     this.renderMultiselectContainer = this.renderMultiselectContainer.bind(this);
     this.renderSelectedList = this.renderSelectedList.bind(this);
     this.onRemoveSelectedItem = this.onRemoveSelectedItem.bind(this);
@@ -158,9 +159,13 @@ export class Multiselect extends React.Component {
   }
 
   onKeyPress(event) {
-    if (this.props.onKeyPress && event.key=='Enter') {
+    if (this.props.onKeyPress && event.key == 'Enter') {
       this.props.onKeyPress(event);
     }
+  }
+
+  onSetValue(value) {
+    this.props.onClick(value);
   }
 
   filterOptionsByInput() {
@@ -238,6 +243,7 @@ export class Multiselect extends React.Component {
       index = selectedValues.indexOf(item);
     }
     selectedValues.splice(index, 1);
+    this.props.onRemove(item);
     onRemove(selectedValues, item);
     this.setState({ selectedValues }, () => {
       if (!showCheckbox) {
@@ -265,6 +271,7 @@ export class Multiselect extends React.Component {
       return;
     }
     selectedValues.push(item);
+    this.onSetValue(item);
     onSelect(selectedValues, item);
     this.setState({ selectedValues }, () => {
       if (!showCheckbox) {
@@ -342,8 +349,7 @@ export class Multiselect extends React.Component {
       <li
         key={`option${i}`}
         style={style['option']}
-        className={`${
-          highlightOption === i ? `highlightOption highlight` : ""
+        className={`${highlightOption === i ? `highlightOption highlight` : ""
           } ${this.fadeOutSelection(option) && 'disableSelection'} option`}
         onClick={() => this.onSelectItem(option)}
       >
@@ -437,7 +443,7 @@ export class Multiselect extends React.Component {
             className="searchBox"
             id={`${id || 'search'}_input`}
             onChange={this.onChange}
-            onKeyPress = {this.onKeyPress}
+            onKeyPress={this.onKeyPress}
             value={inputValue}
             onFocus={this.toggelOptionList}
             onBlur={() => setTimeout(this.toggelOptionList, 200)}
@@ -452,8 +458,7 @@ export class Multiselect extends React.Component {
           />}
         </div>
         <div
-          className={`optionListContainer optionListContainer ${
-            toggleOptionsList ? 'displayBlock' : 'displayNone'
+          className={`optionListContainer optionListContainer ${toggleOptionsList ? 'displayBlock' : 'displayNone'
             }`}
         >
           {this.renderOptionList()}

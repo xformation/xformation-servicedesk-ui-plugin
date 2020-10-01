@@ -15,6 +15,8 @@ class MySelectObj {
 }
 export class OpenNewEmailPopup extends React.Component<any, any> {
     steps: any;
+    fromdata: any;
+    todata: any;
     constructor(props: any) {
         super(props);
         this.state = {
@@ -27,20 +29,22 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
             status: '',
             tags: '',
             isSubmitted: false,
+            fromData: [],
+            toData: [],
             option: [
-                { name: 'abc@a.com', id: 1 },
-                { name: 'xyz@x.com', id: 2 },
-                { name: 'abc@d.com', id: 3 },
-                { name: 'xyz@y.com', id: 4 },
-                { name: 'adc@a.com', id: 5 },
-                { name: 'xpz@x.com', id: 6 },
+                { name: 'abc@a.com', id: 1, value: 'from' },
+                { name: 'xyz@x.com', id: 2, value: 'from' },
+                { name: 'abc@d.com', id: 3, value: 'from' },
+                { name: 'xyz@y.com', id: 4, value: 'from' },
+                { name: 'adc@a.com', id: 5, value: 'from' },
+                { name: 'xpz@x.com', id: 6, value: 'from' },
             ],
             toOptions: [
-                { name: 'dipti@gmail.com', id: 1 },
-                { name: 'shatish@gmail.com', id: 2 },
-                { name: 'jasmin@gmail.com', id: 3 },
-                { name: 'sunil@gmail.com', id: 4 },
-                { name: 'infotech@tech.com', id: 1 },
+                { name: 'dipti@gmail.com', id: 1, value: 'to' },
+                { name: 'shatish@gmail.com', id: 2, value: 'to' },
+                { name: 'jasmin@gmail.com', id: 3, value: 'to' },
+                { name: 'sunil@gmail.com', id: 4, value: 'to' },
+                { name: 'infotech@tech.com', id: 5, value: 'to' },
             ]
         };
     }
@@ -148,7 +152,33 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
 
     onSelect() { }
 
-    onRemove() { }
+    removeEmail = (item: any) => {
+        let fromArray = this.state.fromData;
+        let toArray = this.state.toData;
+        if (item.value == 'from') {
+            for (let i = 0; i < fromArray.length; i++) {
+                let row = fromArray[i];
+                if (row.id == item.id) {
+                    fromArray.splice(item.id, 1);
+                    console.log(fromArray);
+                }
+            }
+            // this.setState({
+            //     fromData: fromArray
+            // })
+        } else if (item.value == 'to') {
+            for (let i = 0; i < toArray.length; i++) {
+                let torow = toArray[i];
+                if (torow.id == item.id) {
+                    toArray.splice(item.id, 1);
+                }
+            }
+            // this.setState({
+            //     toData: toArray,
+            // })
+        }
+
+    }
 
     onChangeEmail = (e: any) => {
         let lastId = 0;
@@ -158,6 +188,8 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                 lastId = this.state.option[i].id;
             }
             newEmail.push({ 'name': e.target.value, id: lastId + 1 })
+            this.setEmail({ name: e.target.value, id: lastId + 1, value: 'from' });
+
         }
         this.setState({
             option: newEmail
@@ -172,10 +204,24 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                 lastToId = this.state.toOptions[i].id;
             }
             newToEmail.push({ 'name': e.target.value, id: lastToId + 1 })
+            this.setEmail({ name: e.target.value, id: lastToId + 1, value: 'to' });
+
         }
         this.setState({
             toOptions: newToEmail
         })
+    }
+
+    setEmail = (item: any) => {
+        if (item.value == 'from') {
+            this.fromdata.push(item)
+        } else if (item.value == 'to') {
+            this.todata.push(item);
+        }
+        this.setState({
+            fromData: this.fromdata,
+            toData: this.todata
+        });
     }
 
     render() {
@@ -202,8 +248,9 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                                         options={this.state.option}
                                         selectedValues={this.state.selectedValue}
                                         onSelect={this.onSelect}
-                                        onRemove={this.onRemove}
+                                        onRemove={this.removeEmail}
                                         onKeyPress={this.onChangeEmail}
+                                        onClick={this.setEmail}
                                         closeIcon="close"
                                         displayValue="name"
                                     />
@@ -218,11 +265,11 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                                         options={this.state.toOptions}
                                         selectedValues={this.state.selectedValue}
                                         onSelect={this.onSelect}
-                                        onRemove={this.onRemove}
+                                        onRemove={this.removeEmail}
                                         onKeyPress={this.onChangeToEmail}
+                                        onClick={this.setEmail}
                                         closeIcon="close"
                                         displayValue="name"
-
                                     />
                                 </div>
                             </div>
