@@ -5,7 +5,14 @@ import { CustomTextbox } from './CustomTextbox';
 import { Customselectbox } from './Customselectbox';
 import { CustomTextareabox } from './CustomTextareabox';
 import { Multiselect } from './Multiselect/multiselects/multiselect.component';
-
+class MySelectObj {
+    id: any;
+    name: any;
+    constructor(id: any, name: any) {
+        this.id = id;
+        this.name = name;
+    }
+}
 export class OpenNewEmailPopup extends React.Component<any, any> {
     steps: any;
     constructor(props: any) {
@@ -215,6 +222,7 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                                         onKeyPress={this.onChangeToEmail}
                                         closeIcon="close"
                                         displayValue="name"
+
                                     />
                                 </div>
                             </div>
@@ -243,13 +251,13 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                             <div className="col-lg-4 col-md-4 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="priority">Priority*</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="priority" id="priority" name="priority" value={priority} arrayData={{ 0: 'Low', 1: 'High', 2: 'Medium' }} onChange={this.handleStateChange} isValid={errorData.priority.isValid} message={errorData.priority.message} />
+                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="priority" id="priority" name="priority" value={priority} arrayData={[{ id: 0, name: "Low" }, { id: 1, name: "Medium" }, { id: 0, name: "High" }]} onChange={this.handleStateChange} isValid={errorData.priority.isValid} message={errorData.priority.message} />
                                 </div>
                             </div>
                             <div className="col-lg-4 col-md-4 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="status">Status*</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="status" id="status" name="status" value={status} arrayData={{ 0: 'Closed', 1: 'Open' }} onChange={this.handleStateChange} isValid={errorData.status.isValid} message={errorData.status.message} />
+                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="status" id="status" name="status" value={status} arrayData={[{ id: 0, name: "Closed" }, { id: 1, name: "open" }]} onChange={this.handleStateChange} isValid={errorData.status.isValid} message={errorData.status.message} />
                                 </div>
                             </div>
                             <div className="col-lg-4 col-md-4 col-sm-12">
@@ -267,7 +275,7 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                                         <label className="form-check-label" htmlFor="CreateAuthor">Create Author</label>
                                     </div>
                                     <button className="cancel" onClick={this.handleClose}>Cancel</button>
-                                    <button className="save create" onClick={this.handleSubmit}>Create</button>
+                                    <button className="save create" onClick={this.handleSubmit}>Send</button>
                                 </div>
                             </div>
                         </div>

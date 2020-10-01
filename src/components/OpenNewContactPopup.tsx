@@ -4,6 +4,8 @@ import { CustomTextbox } from './CustomTextbox';
 import { Customselectbox } from './Customselectbox';
 import { config } from "../config";
 import { RestService } from '../domain/_service/RestService';
+import AlertMessage from './AlertMessage';
+import axios from 'axios'
 
 class MySelectObj {
     id: any;
@@ -26,25 +28,26 @@ export class OpenNewContactPopup extends React.Component<any, any> {
             workPhone: '',
             mobilePhone: '',
             twitter: '',
-            uniqueId: '',
-            company: null,
-            address: '',
-            timeZone: '',
-            language: '',
-            tag: '',
-            about: '',
+            uniqueExternalId: '',
+            companyId: null,
             isSubmitted: false,
             companyList: [],
             companyLogo: null,
             companyName: '',
             description: '',
             notes: '',
-            company2: '',
-            healthCare: '',
+            domain: '',
+            healthScore: '',
             accountTier: '',
             renewalDate: '',
             industry: '',
             orgCompanyList: [],
+            oldCompanyFlag: true,
+            newCompanyFlag : false,
+            contactPhoto:null,
+            isAlertOpen: false,
+            message: null,
+            severity: null,
         };
     }
     async componentDidMount() {
@@ -68,26 +71,6 @@ export class OpenNewContactPopup extends React.Component<any, any> {
             console.log("Loading company data failed. Error: ", err);
         }
         console.log("companyNameList  : ", this.state.companyList);
-
-        // await fetch(config.SERVICEDESK_API_URL + "/api/companies", {
-        //     method: 'get',
-        // }).then((response => response.json())
-
-
-        //     let i;
-        //     var companyNameJson={
-        //        id: null,
-        //        name: null 
-        //     };
-        //     let companyNameList=[];
-        //     for (i in res) {
-        //         let id=res[i].id;
-        //         let name=res[i].companyName;
-        //         // companyNameJson.id=name;
-        //         companyNameList.push(name);
-        //     }
-
-
     }
     toggle = () => {
         this.setState({
@@ -107,15 +90,71 @@ export class OpenNewContactPopup extends React.Component<any, any> {
             isSubmitted: true
         });
         const errorData = this.validate(true);
-        if (errorData.fullName.isValid && errorData.title.isValid && errorData.company.isValid && errorData.address.isValid && errorData.timeZone.isValid && errorData.language.isValid && errorData.tag.isValid && errorData.about.isValid && (errorData.email.isValid || errorData.alternateEmail.isValid ||
-            errorData.workPhone.isValid || errorData.mobilePhone.isValid || errorData.twitter.isValid || errorData.uniqueId.isValid)) {
+        console.log("Error Data : ", errorData)
+        if (errorData.companyLogo.isValid && errorData.contactPhoto.isValid && errorData.fullName.isValid && errorData.title.isValid && errorData.companyId.isValid && errorData.companyLogo.isValid && errorData.companyName.isValid && errorData.description.isValid && errorData.notes.isValid && errorData.healthScore.isValid && errorData.domain.isValid && errorData.accountTier.isValid && errorData.renewalDate.isValid && errorData.industry.isValid && (errorData.email.isValid || errorData.alternateEmail.isValid ||
+            errorData.workPhone.isValid || errorData.mobilePhone.isValid || errorData.twitter.isValid || errorData.uniqueExternalId.isValid)) {
 
-            const { fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueId,
-                company, address, timeZone, language, tag, about } = this.state;
+            const { newCompanyFlag,oldCompanyFlag,contactPhoto , fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId,
+                companyId,companyLogo, companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry } = this.state;
             const sendData = {
-                fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueId, company, address, timeZone, language, tag, about,
+                contactPhoto,fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId, companyId,
+                companyLogo,
+                companyName,
+                description,
+                notes,
+                domain,
+                healthScore,
+                accountTier,
+                renewalDate,
+                industry,
             };
             console.log(sendData);
+            let formData = new FormData();
+            formData.append("contactPhoto", contactPhoto);
+            formData.append("fullName", fullName);
+            formData.append("title", title);
+            formData.append("primaryEmail", email);
+            formData.append("alternateEmail", alternateEmail);
+            formData.append("workPhone", workPhone);
+            formData.append("healthScore", healthScore);
+            formData.append("mobilePhone", mobilePhone);
+            formData.append("twitterHandle", twitter);
+            formData.append("uniqueExternalId", uniqueExternalId);
+            if(oldCompanyFlag){
+            formData.append("companyId", companyId);
+            }
+            if(newCompanyFlag){
+                formData.append("companyId","-1");
+            }
+            formData.append("logo", companyLogo);
+            formData.append("companyName", companyName);
+            formData.append("description", description);
+            formData.append("notes", notes);
+            formData.append("domain", domain);
+            formData.append("healthScore", healthScore);
+            formData.append("accountTier", accountTier);
+            formData.append("renewalDate", renewalDate);
+            formData.append("industry", industry);
+            axios.post(config.ADD_CONTACT_URL, formData, {
+                headers: {
+                    'content-type': 'multipart/form-data'
+                }
+            }).then((response:any) => {
+                if(response.data!=null){
+                    this.setState({
+                        severity : config.SEVERITY_SUCCESS,
+                        message: config.COMPANY_ADDED_SUCCESS,
+                        isAlertOpen: true,
+                    });
+                }else{
+                    this.setState({
+                        severity : config.SEVERITY_ERROR,
+                        message: config.COMPANY_ADDED_ERROR,
+                        isAlertOpen: true,
+                    });
+                }
+                console.log("response data",response.data);
+            }).catch((err:any) => console.log(err))
 
         }
     }
@@ -133,24 +172,27 @@ export class OpenNewContactPopup extends React.Component<any, any> {
             workPhone: validObj,
             mobilePhone: validObj,
             twitter: validObj,
-            uniqueId: validObj,
-            company: validObj,
-            address: validObj,
-            timeZone: validObj,
-            language: validObj,
-            tag: validObj,
-            about: validObj,
+            uniqueExternalId: validObj,
+            companyId: validObj,
             companyName: validObj,
             description: validObj,
             notes: validObj,
-            company2: validObj,
-            healthCare: validObj,
+            domain: validObj,
+            healthScore: validObj,
             accountTier: validObj,
             renewalDate: validObj,
             industry: validObj,
+            companyLogo:  validObj,
+            contactPhoto:validObj,
         };
         if (isSubmitted) {
-            const { fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueId, company, address, timeZone, language, tag, about,companyName, description, notes, company2, healthCare, accountTier, renewalDate, industry } = this.state;
+            const { newCompanyFlag,oldCompanyFlag,contactPhoto,fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId, companyId,companyLogo,companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry, } = this.state;
+            if (!contactPhoto) {
+                retData.contactPhoto = {
+                    isValid: false,
+                    message: "Photo is required"
+                };
+            }
             if (!fullName) {
                 retData.fullName = {
                     isValid: false,
@@ -193,48 +235,30 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                     message: "Atleast one of these fields is mandatory*"
                 };
             }
-            if (!uniqueId) {
-                retData.uniqueId = {
+            if (!uniqueExternalId) {
+                retData.uniqueExternalId = {
                     isValid: false,
                     message: "Atleast one of these fields is mandatory*"
                 };
             }
-            if (!company) {
-                retData.company = {
+            if(oldCompanyFlag){
+            if (!companyId) {
+                retData.companyId = {
                     isValid: false,
-                    message: "Company name is required"
+                    message: "companyId name is required"
                 };
             }
-            if (!address) {
-                retData.address = {
-                    isValid: false,
-                    message: "Address is required"
-                };
+        }
+        
+            if(newCompanyFlag){
+                if (!companyLogo) {
+                    retData.companyLogo = {
+                        isValid: false,
+                        message: "Company Logo is required"
+                    };
+                }
             }
-            if (!timeZone) {
-                retData.timeZone = {
-                    isValid: false,
-                    message: "Time Zone is required"
-                };
-            }
-            if (!language) {
-                retData.language = {
-                    isValid: false,
-                    message: "Language is required"
-                };
-            }
-            if (!tag) {
-                retData.tag = {
-                    isValid: false,
-                    message: "Tag is required"
-                };
-            }
-            if (!about) {
-                retData.about = {
-                    isValid: false,
-                    message: "About detail is required"
-                };
-            }
+            
             if (!companyName) {
                 retData.companyName = {
                     isValid: false,
@@ -253,14 +277,14 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                     message: "Notes is required"
                 };
             }
-            if (!company2) {
-                retData.company2 = {
+            if (!domain) {
+                retData.domain = {
                     isValid: false,
-                    message: "Company is required"
+                    message: "Domain is required"
                 };
             }
-            if (!healthCare) {
-                retData.healthCare = {
+            if (!healthScore) {
+                retData.healthScore = {
                     isValid: false,
                     message: "Health Care is required"
                 };
@@ -299,7 +323,7 @@ export class OpenNewContactPopup extends React.Component<any, any> {
         this.setState({
             [name]: value,
         });
-        
+        console.log("company org list : ", orgCompanyList);
         for(let i=0; i<orgCompanyList.length; i++){
             let obj = orgCompanyList[i];
             if(parseInt(value) === obj.id) {
@@ -311,35 +335,36 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                     accountTier: obj.accountTier,
                     renewalDate: obj.renewalDate,
                     industry: obj.industry,
+                    domain:obj.domain,
                 });
                 break;        
             }
-        }
-        // console.log("company : ",this.state.company);
-        // this.setState({
-        //     companyName:this.state.company.companyName,
-        //     description: this.state.company.description,
-        //     notes: this.state.company.notes,
-        //     healthScore: this.state.company.healthScore,
-        //     accountTier: this.state.company.accountTier,
-        //     renewalDate: this.state.company.renewalDate,
-        //     industry: this.state.company.industry,
-        // });
-        // console.log("Company Name=",this.state.companyName);
-        // console.log("Company description=",this.state.description);
-        // console.log("Company notes=",this.state.notes);
-        // console.log("Company healthScore=",this.state.healthScore);
-        // console.log("Company accountTier=",this.state.accountTier);
-        // console.log("Company renewalDate=",this.state.renewalDate);
-        // console.log("Company industry=",this.state.industry);
-        
+        }        
     }
-
+    addNewCompany= ()=>{
+        this.setState({
+            oldCompanyFlag:false,
+            newCompanyFlag: true,
+        });
+    }
+    handleImageChange = (e: any) => {
+        console.log("file=", e.target.files[0])
+        this.setState({
+            [e.target.name]: e.target.files[0]
+        })
+    };
+    handleCloseAlert = (e: any) =>{
+        this.setState({
+          isAlertOpen: false
+        })
+    }
     render() {
-        const { modal, isSubmitted, companyList, fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueId, company, address, timeZone, language, tag, about,companyName, description, notes, company2, healthCare, accountTier, renewalDate, industry } = this.state;
+        const { modal, isSubmitted, companyList,contactPhoto, fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId, companyId,companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry,oldCompanyFlag,newCompanyFlag } = this.state;
+        const state = this.state;
         const errorData = this.validate(isSubmitted);
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
+                <AlertMessage handleCloseAlert={this.handleCloseAlert} open={state.isAlertOpen} severity={state.severity} msg={state.message}></AlertMessage>
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
                     <div className="d-block width-100 contact-popup-container">
                         <div className="d-block width-100 p-b-20 heading">
@@ -352,7 +377,9 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             </div>
                             <div className="d-inline-block v-a-top">
                                 <strong className="d-block">Upload Photo</strong>
+                                <input type="file" id="contactPhoto" name="contactPhoto" onChange={this.handleImageChange} />
                                 <p className="d-block">An image of the person, it's best if it has the same length and height</p>
+                                <span style={{color: "red"}}>{errorData.contactPhoto.message}</span>
                             </div>
                         </div>
                         <div className="row">
@@ -408,61 +435,103 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-12">
                                     <div className="form-group">
-                                        <label htmlFor="uniqueId">Unique external Id</label>
-                                        <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="uniqueId" id="uniqueId" placeholder="Enter the contact’s unique ID" name="uniqueId" value={uniqueId} onChange={this.handleStateChange} />
+                                        <label htmlFor="uniqueExternalId">Unique external Id</label>
+                                        <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="uniqueExternalId" id="uniqueExternalId" placeholder="Enter the contact’s unique ID" name="uniqueExternalId" value={uniqueExternalId} onChange={this.handleStateChange} />
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="row">
+                        {
+                            oldCompanyFlag ==true &&
+                            <div>
+                            <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="company">Company</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="company" id="company" name="company" value={company} arrayData={companyList} onChange={this.handleSelectBox} isValid={errorData.company.isValid} message={errorData.company.message} />
+                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="company" id="companyId" name="companyId" value={companyId} arrayData={companyList} onChange={this.handleSelectBox} isValid={errorData.companyId.isValid} message={errorData.companyId.message} />
                                     <div className="d-block text-right p-t-5">
-                                        <button className="add-conatct">Add a Company</button>
+                                        <button className="add-conatct" onClick={this.addNewCompany}>Add a Company</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        {/* <div className="row">
-                            <div className="col-lg-12 col-md-12 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="address">Address</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="address" id="address" rows={3} placeholder="Enter the address of this person" name="address" value={address} onChange={this.handleStateChange} isValid={errorData.address.isValid} message={errorData.address.message} />
-                                </div>
+                        <div className="row">
+                        <div className="col-lg-6 col-md-6 col-sm-12">
+                            <div className="form-group">
+                                <label htmlFor="companyName">Company Name*</label>
+                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="companyName" id="companyName" placeholder="" name="companyName" value={companyName} onChange={this.handleStateChange} isValid={errorData.companyName.isValid} message={errorData.companyName.message} />
                             </div>
                         </div>
-                        <div className="row">
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="timeZone">Time Zone</label>
-                                    <CustomTextbox containerClass="form-group-inner" type="date" inputClass="form-control" htmlFor="timeZone" id="timeZone" placeholder="(GMT +05:30) Chennai" name="timeZone" value={timeZone} onChange={this.handleStateChange} isValid={errorData.timeZone.isValid} message={errorData.timeZone.message} />
-                                </div>
-                            </div>
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="language">Language</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="language" id="language" placeholder="English" name="language" value={language} onChange={this.handleStateChange} isValid={errorData.language.isValid} message={errorData.language.message} />
-                                </div>
+                        <div className="col-lg-6 col-md-6 col-sm-12">
+                            <div className="form-group">
+                                <label htmlFor="description">Description</label>
+                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="description" id="description" placeholder="Write something that describe this company" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
                             </div>
                         </div>
-                        <div className="row">
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="tag">Tags</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="tag" id="tag" placeholder="" name="tag" value={tag} onChange={this.handleStateChange} isValid={errorData.tag.isValid} message={errorData.tag.message} />
-                                </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-lg-6 col-md-6 col-sm-12">
+                            <div className="form-group">
+                                <label htmlFor="notes">Notes</label>
+                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="notes" id="notes" placeholder="Add notes about this company - make something about a recent deal, etc." name="notes" value={notes} onChange={this.handleStateChange} isValid={errorData.notes.isValid} message={errorData.notes.message} />
                             </div>
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="about">About</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="about" id="about" placeholder="Enter some text" name="about" value={about} onChange={this.handleStateChange} isValid={errorData.about.isValid} message={errorData.about.message} />
-                                </div>
+                        </div>
+                        <div className="col-lg-6 col-md-6 col-sm-12">
+                            <div className="form-group">
+                                <label htmlFor="company">Domains of Company</label>
+                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="domain" id="domain" placeholder="eg: My company1.com, mycompany2.com" name="company2" value={domain} onChange={this.handleStateChange} isValid={errorData.domain.isValid} message={errorData.domain.message} />
                             </div>
-                        </div> 
-                         */}
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-lg-6 col-md-6 col-sm-12">
+                            <div className="form-group">
+                                <label htmlFor="healthCare">Health Score</label>
+                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="healthCare" id="healthCare" placeholder="Any" name="healthScore" value={healthScore} onChange={this.handleStateChange} isValid={errorData.healthScore.isValid} message={errorData.healthScore.message} />
+                            </div>
+                        </div>
+                        <div className="col-lg-6 col-md-6 col-sm-12">
+                            <div className="form-group">
+                                <label htmlFor="accountTier">Account tier</label>
+                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="accountTier" id="accountTier" placeholder="Any" name="accountTier" value={accountTier} onChange={this.handleStateChange} isValid={errorData.accountTier.isValid} message={errorData.accountTier.message} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-lg-6 col-md-6 col-sm-12">
+                            <div className="form-group">
+                                <label htmlFor="renewalDate">Renewal Date</label>
+                                <CustomTextbox containerClass="form-group-inner" type="date" inputClass="form-control" htmlFor="renewalDate" id="renewalDate" placeholder="Any" name="renewalDate" value={renewalDate} onChange={this.handleStateChange} isValid={errorData.renewalDate.isValid} message={errorData.renewalDate.message} />
+                            </div>
+                        </div>
+                        <div className="col-lg-6 col-md-6 col-sm-12">
+                            <div className="form-group">
+                                <label htmlFor="industry">Industry</label>
+                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="industry" id="industry" placeholder="Any" name="industry" value={industry} onChange={this.handleStateChange} isValid={errorData.industry.isValid} message={errorData.industry.message} />
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                            
+                        }
+                        {
+                            newCompanyFlag==true && 
+                            <div className="d-block width-100 contact-popup-container">
+                        <div className="d-block width-100 p-b-20 heading">
+                            <h4 className="d-block"><i className="fa fa-building"></i> New Company</h4>
+                            <span className="d-block">When someone reaches out to you, they become a contact in your account. You can create companies and associate contacts with them. <a href="#">Learn more.</a></span>
+                        </div>
+                        <div className="d-block width-100 p-t-10 p-b-10 upload-photo">
+                            <div className="d-inline-block upload-icon">
+                                <i className="fa fa-building"></i>
+                            </div>
+                            <div className="d-inline-block v-a-top">
+                                <strong className="d-block">Upload Logo</strong>
+                                <input type="file" id="companyLogo" name="companyLogo" onChange={this.handleImageChange} />
+                                <p className="d-block">An image of the person, it's best if it has the same length and height</p>
+                                <span style={{color: "red"}}>{errorData.companyLogo.message}</span>
+                            </div>
+                        </div>
                         <div className="row">
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
@@ -486,8 +555,8 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
-                                    <label htmlFor="company">Company</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="company2" id="company2" placeholder="eg: My company1.com, mycompany2.com" name="company2" value={company2} onChange={this.handleStateChange} isValid={errorData.company2.isValid} message={errorData.company2.message} />
+                                    <label htmlFor="company">Domains of Company</label>
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="domain" id="domian" placeholder="eg: My company1.com, mycompany2.com" name="domain" value={domain} onChange={this.handleStateChange} isValid={errorData.domain.isValid} message={errorData.domain.message} />
                                 </div>
                             </div>
                         </div>
@@ -495,7 +564,7 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="healthCare">Health Score</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="healthCare" id="healthCare" placeholder="Any" name="healthCare" value={healthCare} onChange={this.handleStateChange} isValid={errorData.healthCare.isValid} message={errorData.healthCare.message} />
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="healthCare" id="healthCare" placeholder="Any" name="healthScore" value={healthScore} onChange={this.handleStateChange} isValid={errorData.healthScore.isValid} message={errorData.healthScore.message} />
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
@@ -519,6 +588,8 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                        }
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="d-block text-center p-t-20 contact-popup-buttons">

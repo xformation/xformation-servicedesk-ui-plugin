@@ -5,6 +5,8 @@ import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
 import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import Table from './../../components/table';
+import { RestService } from '../_service/RestService';
+import { config } from '../../config';
 
 export class AllContacts extends React.Component<any, any> {
     breadCrumbs: any;
@@ -12,12 +14,12 @@ export class AllContacts extends React.Component<any, any> {
     openNewCompanyRef: any;
     openNewEmailRef: any;
     openNewTicketRef: any;
-    tableValue: any;
     perPageLimit: any;
     checkboxValue: any;
     constructor(props: any) {
         super(props);
-        this.tableValue = {
+        this.state = {
+            openCreateMenu: false,
             columns: [
                 {
                     label: 'Contact',
@@ -37,236 +39,22 @@ export class AllContacts extends React.Component<any, any> {
                 },
                 {
                     label: 'Email Address',
-                    key: 'emailAddress'
+                    key: 'primaryEmail'
                 },
                 {
                     label: 'Work Phone',
                     key: 'workPhone'
                 },
                 {
-                    label: 'Facebook',
-                    key: 'facebook'
+                    label: 'External Unique Id',
+                    key: 'uniqueExternalId'
                 },
                 {
                     label: 'Twitter',
-                    key: 'twitter'
+                    key: 'twitterHandle'
                 }
             ],
-            data: [
-                {
-                    contact: 'Rodney Artichoke',
-                    title: 'HR Manager',
-                    company: 'RGK Groups',
-                    emailAddress: 'support@artichoke.com',
-                    workPhone: '(+1) 224 547 8425',
-                    facebook: 'Articho142',
-                    twitter: 'Rodney124',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Jason Response',
-                    title: 'HR Manager',
-                    company: 'RGK Groups',
-                    emailAddress: 'support@artichoke.com',
-                    workPhone: '(+1) 224 547 8425',
-                    facebook: 'Articho142',
-                    twitter: 'Rodney124',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Fig Nelson',
-                    title: 'HR Manager',
-                    company: 'RNKV Steels',
-                    emailAddress: 'contact@rnvksteels.com',
-                    workPhone: '(+3) 954 247 3126',
-                    facebook: 'Nelson126',
-                    twitter: 'nelson236',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Inverness McKenzie',
-                    title: 'Steel Worker',
-                    company: 'Ram Fabrication',
-                    emailAddress: 'ramsteel@gmail.com',
-                    workPhone: '(+1) 387 267 5931',
-                    facebook: 'McKenzie195',
-                    twitter: 'Inverness198',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Fergus Douchebag',
-                    title: 'Graphic Designer',
-                    company: 'AK+',
-                    emailAddress: 'info@fergus.com',
-                    workPhone: '(+1) 174 217 8425',
-                    facebook: 'Fergus Douch',
-                    twitter: 'Douchebag102',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Dominic L. Ement',
-                    title: 'Marketing Manager',
-                    company: 'RT Groups',
-                    emailAddress: 'd.ement@gmail.com',
-                    workPhone: '(+1) 482 268 8410',
-                    facebook: 'L.ement143',
-                    twitter: 'Dominic148',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Niles Peppertrout',
-                    title: 'Art Director',
-                    company: 'StudioGreen',
-                    emailAddress: 'niles1547@gamil.com',
-                    workPhone: '(+1) 247 147 2687',
-                    facebook: 'Niles1124',
-                    twitter: 'Peppertrout12',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Pelican Steve',
-                    title: 'Designer',
-                    company: 'Digital Media',
-                    emailAddress: 'info@digital.com',
-                    workPhone: '(+1) 412 578 2548',
-                    facebook: 'Steve154',
-                    twitter: 'Pelican111',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Inverness McKenzie',
-                    title: 'Steel Worker',
-                    company: 'Ram Fabrication',
-                    emailAddress: 'ramsteel@gmail.com',
-                    workPhone: '(+1) 387 267 5931',
-                    facebook: 'McKenzie195',
-                    twitter: 'Inverness198',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Fergus Douchebag',
-                    title: 'Graphic Designer',
-                    company: 'AK+',
-                    emailAddress: 'info@fergus.com',
-                    workPhone: '(+1) 174 217 8425',
-                    facebook: 'Fergus Douch',
-                    twitter: 'Douchebag102',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Dominic L. Ement',
-                    title: 'Marketing Manager',
-                    company: 'RT Groups',
-                    emailAddress: 'd.ement@gmail.com',
-                    workPhone: '(+1) 482 268 8410',
-                    facebook: 'L.ement143',
-                    twitter: 'Dominic148',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Niles Peppertrout',
-                    title: 'Art Director',
-                    company: 'StudioGreen',
-                    emailAddress: 'niles1547@gamil.com',
-                    workPhone: '(+1) 247 147 2687',
-                    facebook: 'Niles1124',
-                    twitter: 'Peppertrout12',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Pelican Steve',
-                    title: 'Designer',
-                    company: 'Digital Media',
-                    emailAddress: 'info@digital.com',
-                    workPhone: '(+1) 412 578 2548',
-                    facebook: 'Steve154',
-                    twitter: 'Pelican111',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Jason Response',
-                    title: 'HR Manager',
-                    company: 'RGK Groups',
-                    emailAddress: 'support@artichoke.com',
-                    workPhone: '(+1) 224 547 8425',
-                    facebook: 'Articho142',
-                    twitter: 'Rodney124',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Fig Nelson',
-                    title: 'HR Manager',
-                    company: 'RNKV Steels',
-                    emailAddress: 'contact@rnvksteels.com',
-                    workPhone: '(+3) 954 247 3126',
-                    facebook: 'Nelson126',
-                    twitter: 'nelson236',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Inverness McKenzie',
-                    title: 'Steel Worker',
-                    company: 'Ram Fabrication',
-                    emailAddress: 'ramsteel@gmail.com',
-                    workPhone: '(+1) 387 267 5931',
-                    facebook: 'McKenzie195',
-                    twitter: 'Inverness198',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Fergus Douchebag',
-                    title: 'Graphic Designer',
-                    company: 'AK+',
-                    emailAddress: 'info@fergus.com',
-                    workPhone: '(+1) 174 217 8425',
-                    facebook: 'Fergus Douch',
-                    twitter: 'Douchebag102',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Dominic L. Ement',
-                    title: 'Marketing Manager',
-                    company: 'RT Groups',
-                    emailAddress: 'd.ement@gmail.com',
-                    workPhone: '(+1) 482 268 8410',
-                    facebook: 'L.ement143',
-                    twitter: 'Dominic148',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Niles Peppertrout',
-                    title: 'Art Director',
-                    company: 'StudioGreen',
-                    emailAddress: 'niles1547@gamil.com',
-                    workPhone: '(+1) 247 147 2687',
-                    facebook: 'Niles1124',
-                    twitter: 'Peppertrout12',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Pelican Steve',
-                    title: 'Designer',
-                    company: 'Digital Media',
-                    emailAddress: 'info@digital.com',
-                    workPhone: '(+1) 412 578 2548',
-                    facebook: 'Steve154',
-                    twitter: 'Pelican111',
-                    checkStatus: false,
-                },
-                {
-                    contact: 'Inverness McKenzie',
-                    title: 'Steel Worker',
-                    company: 'Ram Fabrication',
-                    emailAddress: 'ramsteel@gmail.com',
-                    workPhone: '(+1) 387 267 5931',
-                    facebook: 'McKenzie195',
-                    twitter: 'Inverness198',
-                    checkStatus: false,
-                },
-            ]
-        }
-        this.state = {
-            openCreateMenu: false,
+            contactData: [],
         };
         this.checkboxValue = false,
         this.perPageLimit = 6,
@@ -285,7 +73,19 @@ export class AllContacts extends React.Component<any, any> {
         this.openNewEmailRef = React.createRef();
         this.openNewTicketRef = React.createRef();
     }
-
+    async componentDidMount() {
+        try {
+            await RestService.getData(config.GET_CONTACT_WITH_COMPANY_NAME, null, null).then(
+                (response: any) => {
+                    this.setState({
+                        contactData: response,
+                    });
+                    console.log("company Data : ", response);
+                })
+        } catch (err) {
+            console.log("Loading company data failed. Error: ", err);
+        }
+    }
     onClickOpenNewContact = (e: any) => {
         this.openNewContactRef.current.toggle();
     };
@@ -310,7 +110,7 @@ export class AllContacts extends React.Component<any, any> {
     }
 
     render() {
-        const { openCreateMenu } = this.state;
+        const { openCreateMenu,columns,contactData } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -346,7 +146,7 @@ export class AllContacts extends React.Component<any, any> {
                     </div>
 
                     <div className="common-container border-bottom-0 p-t-0">
-                        <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue} tableClasses={{ table: "contact-tabel", tableParent: "d-block p-t-5 contacts-tabel", parentClass: "d-block p-t-20 all-contacts-tabel" }} searchKey="contact" showingLine = "Showing %start% to %end% of %total% Contacts"/>
+                        <Table valueFromData={{ columns: columns, data: contactData }} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue} tableClasses={{ table: "contact-tabel", tableParent: "d-block p-t-5 contacts-tabel", parentClass: "d-block p-t-20 all-contacts-tabel" }} searchKey="contact" showingLine = "Showing %start% to %end% of %total% Contacts"/>
                     </div>
                 </div>
                 <OpenNewContactPopup ref={this.openNewContactRef} />

@@ -16,8 +16,8 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
             companyName: '',
             description: '',
             notes: '',
-            company: '',
-            healthCare: '',
+            domain: '',
+            healthScore: '',
             accountTier: '',
             renewalDate: '',
             industry: '',
@@ -45,15 +45,15 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
             isSubmitted: true
         });
         const errorData = this.validate(true);
-        if (errorData.companyLogo.isValid && errorData.companyName.isValid && errorData.description.isValid && errorData.notes.isValid && errorData.healthCare.isValid && errorData.company.isValid && errorData.accountTier.isValid && errorData.renewalDate.isValid && errorData.industry.isValid) {
-            const { companyLogo, companyName, description, notes, company, healthCare, accountTier, renewalDate, industry } = this.state;
+        if (errorData.companyLogo.isValid && errorData.companyName.isValid && errorData.description.isValid && errorData.notes.isValid && errorData.healthScore.isValid && errorData.domain.isValid && errorData.accountTier.isValid && errorData.renewalDate.isValid && errorData.industry.isValid) {
+            const { companyLogo, companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry } = this.state;
             const sendData = {
                 companyLogo,
                 companyName,
                 description,
                 notes,
-                company,
-                healthCare,
+                domain,
+                healthScore,
                 accountTier,
                 renewalDate,
                 industry,
@@ -64,8 +64,8 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
             formData.append("companyName", companyName);
             formData.append("description", description);
             formData.append("notes", notes);
-            formData.append("domain", company);
-            formData.append("healthScore", healthCare);
+            formData.append("domain", domain);
+            formData.append("healthScore", healthScore);
             formData.append("accountTier", accountTier);
             formData.append("renewalDate", renewalDate);
             formData.append("industry", industry);
@@ -73,8 +73,8 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                 "companyName": companyName,
                 "description": description,
                 "notes": notes,
-                "domain": company,
-                "healthScore": healthCare,
+                "domain": domain,
+                "healthScore": healthScore,
                 "accountTier": accountTier,
                 "renewalDate": renewalDate,
                 "industry": industry,
@@ -111,15 +111,15 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
             companyName: validObj,
             description: validObj,
             notes: validObj,
-            company: validObj,
-            healthCare: validObj,
+            domain: validObj,
+            healthScore: validObj,
             accountTier: validObj,
             renewalDate: validObj,
             industry: validObj,
             companyLogo:  validObj,
         };
         if (isSubmitted) {
-            const { companyName,companyLogo, description, notes, company, healthCare, accountTier, renewalDate, industry } = this.state;
+            const { companyName,companyLogo, description, notes, domain, healthScore, accountTier, renewalDate, industry } = this.state;
             if (!companyLogo) {
                 retData.companyLogo = {
                     isValid: false,
@@ -144,14 +144,14 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                     message: "Notes is required"
                 };
             }
-            if (!company) {
-                retData.company = {
+            if (!domain) {
+                retData.domain = {
                     isValid: false,
-                    message: "Company is required"
+                    message: "domain is required"
                 };
             }
-            if (!healthCare) {
-                retData.healthCare = {
+            if (!healthScore) {
+                retData.healthScore = {
                     isValid: false,
                     message: "Health Care is required"
                 };
@@ -197,7 +197,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
     }
 
     render() {
-        const { modal, companyLogo, companyName, description, notes, company, healthCare, accountTier, renewalDate, industry, isSubmitted } = this.state;
+        const { modal, companyLogo, companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry, isSubmitted } = this.state;
         const errorData = this.validate(isSubmitted);
         const state = this.state;
         return (
@@ -244,7 +244,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="company">Domains of Company</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="company" id="company" placeholder="eg: My company1.com, mycompany2.com" name="company" value={company} onChange={this.handleStateChange} isValid={errorData.company.isValid} message={errorData.company.message} />
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="domain" id="domain" placeholder="eg: My company1.com, mycompany2.com" name="domain" value={domain} onChange={this.handleStateChange} isValid={errorData.domain.isValid} message={errorData.domain.message} />
                                 </div>
                             </div>
                         </div>
@@ -252,7 +252,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                             <div className="col-lg-6 col-md-6 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="healthCare">Health Score</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="healthCare" id="healthCare" placeholder="Any" name="healthCare" value={healthCare} onChange={this.handleStateChange} isValid={errorData.healthCare.isValid} message={errorData.healthCare.message} />
+                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="healthCare" id="healthCare" placeholder="Any" name="healthScore" value={healthScore} onChange={this.handleStateChange} isValid={errorData.healthScore.isValid} message={errorData.healthScore.message} />
                                 </div>
                             </div>
                             <div className="col-lg-6 col-md-6 col-sm-12">
