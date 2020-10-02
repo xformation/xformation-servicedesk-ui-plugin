@@ -19,6 +19,8 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
     todata: any;
     constructor(props: any) {
         super(props);
+        this.fromdata = [];
+        this.todata = [];
         this.state = {
             modal: false,
             from: '',
@@ -159,8 +161,9 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
             for (let i = 0; i < fromArray.length; i++) {
                 let row = fromArray[i];
                 if (row.id == item.id) {
-                    fromArray.splice(item.id, 1);
+                    fromArray.splice(i, 1);
                     console.log(fromArray);
+                    break;
                 }
             }
             // this.setState({
@@ -214,7 +217,7 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
 
     setEmail = (item: any) => {
         if (item.value == 'from') {
-            this.fromdata.push(item)
+            this.fromdata.push(item);
         } else if (item.value == 'to') {
             this.todata.push(item);
         }
