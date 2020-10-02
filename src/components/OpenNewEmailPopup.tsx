@@ -15,12 +15,8 @@ class MySelectObj {
 }
 export class OpenNewEmailPopup extends React.Component<any, any> {
     steps: any;
-    fromdata: any;
-    todata: any;
     constructor(props: any) {
         super(props);
-        this.fromdata = [];
-        this.todata = [];
         this.state = {
             modal: false,
             from: '',
@@ -31,23 +27,23 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
             status: '',
             tags: '',
             isSubmitted: false,
-            fromData: [],
-            toData: [],
             option: [
-                { name: 'abc@a.com', id: 1, value: 'from' },
-                { name: 'xyz@x.com', id: 2, value: 'from' },
-                { name: 'abc@d.com', id: 3, value: 'from' },
-                { name: 'xyz@y.com', id: 4, value: 'from' },
-                { name: 'adc@a.com', id: 5, value: 'from' },
-                { name: 'xpz@x.com', id: 6, value: 'from' },
+                { name: 'abc@a.com', value: 'abc@a.com' },
+                { name: 'xyz@x.com', value: 'xyz@x.com' },
+                { name: 'abc@d.com', value: 'abc@d.com' },
+                { name: 'xyz@y.com', value: 'xyz@y.com' },
+                { name: 'adc@a.com', value: 'adc@a.com' },
+                { name: 'xpz@x.com', value: 'xpz@x.com' },
             ],
             toOptions: [
-                { name: 'dipti@gmail.com', id: 1, value: 'to' },
-                { name: 'shatish@gmail.com', id: 2, value: 'to' },
-                { name: 'jasmin@gmail.com', id: 3, value: 'to' },
-                { name: 'sunil@gmail.com', id: 4, value: 'to' },
-                { name: 'infotech@tech.com', id: 5, value: 'to' },
-            ]
+                { name: 'dipti@gmail.com', value: 'dipti@gmail.com' },
+                { name: 'shatish@gmail.com', value: 'shatish@gmail.com' },
+                { name: 'jasmin@gmail.com', value: 'jasmin@gmail.com' },
+                { name: 'sunil@gmail.com', value: 'sunil@gmail.com' },
+                { name: 'infotech@tech.com', value: 'infotech@tech.com' },
+            ],
+            toEmails: [],
+            fromEmails: []
         };
     }
 
@@ -152,83 +148,24 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
         });
     };
 
-    onSelect() { }
-
-    removeEmail = (item: any) => {
-        let fromArray = this.state.fromData;
-        let toArray = this.state.toData;
-        if (item.value == 'from') {
-            for (let i = 0; i < fromArray.length; i++) {
-                let row = fromArray[i];
-                if (row.id == item.id) {
-                    fromArray.splice(i, 1);
-                    console.log(fromArray);
-                    break;
-                }
-            }
-            // this.setState({
-            //     fromData: fromArray
-            // })
-        } else if (item.value == 'to') {
-            for (let i = 0; i < toArray.length; i++) {
-                let torow = toArray[i];
-                if (torow.id == item.id) {
-                    toArray.splice(item.id, 1);
-                }
-            }
-            // this.setState({
-            //     toData: toArray,
-            // })
+    onChangeEmail = (selectedValues: any, type: any) => {
+        if (type === "from") {
+            this.setState({
+                fromEmails: selectedValues
+            });
+        } else if (type === "to") {
+            this.setState({
+                toEmails: selectedValues
+            });
         }
+    };
 
-    }
-
-    onChangeEmail = (e: any) => {
-        let lastId = 0;
-        let newEmail = this.state.option;
-        if (e.target.value != '') {
-            for (let i = 0; i < this.state.option.length; i++) {
-                lastId = this.state.option[i].id;
-            }
-            newEmail.push({ 'name': e.target.value, id: lastId + 1 })
-            this.setEmail({ name: e.target.value, id: lastId + 1, value: 'from' });
-
-        }
-        this.setState({
-            option: newEmail
-        })
-    }
-
-    onChangeToEmail = (e: any) => {
-        let lastToId = 0;
-        let newToEmail = this.state.toOptions;
-        if (e.target.value != '') {
-            for (let i = 0; i < this.state.toOptions.length; i++) {
-                lastToId = this.state.toOptions[i].id;
-            }
-            newToEmail.push({ 'name': e.target.value, id: lastToId + 1 })
-            this.setEmail({ name: e.target.value, id: lastToId + 1, value: 'to' });
-
-        }
-        this.setState({
-            toOptions: newToEmail
-        })
-    }
-
-    setEmail = (item: any) => {
-        if (item.value == 'from') {
-            this.fromdata.push(item);
-        } else if (item.value == 'to') {
-            this.todata.push(item);
-        }
-        this.setState({
-            fromData: this.fromdata,
-            toData: this.todata
-        });
-    }
+    getAdHocItem = (value: any) => {
+        return { name: value, value: value };
+    };
 
     render() {
-        const { modal, from, to, subject, description, priority, status, tags, isSubmitted, text } = this.state;
+        const { modal, from, to, subject, description, priority, status, tags, isSubmitted, toEmails, fromEmails } = this.state;
         const errorData = this.validate(isSubmitted);
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
@@ -242,20 +179,14 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="from">From*</label>
-                                    {/* <input type="text" className="form-control" onChange={this.onTextChanges} value={text} placeholder="RK Fabrication Company (support@ramkaumr1578.maxamis.com)"/>
-                                    <ul>
-                                        {this.renderSuggestions()}
-                                    </ul> */}
                                     <Multiselect
                                         placeholder="RK Fabrication Company (support@ramkaumr1578.maxamis.com)"
                                         options={this.state.option}
-                                        selectedValues={this.state.selectedValue}
-                                        onSelect={this.onSelect}
-                                        onRemove={this.removeEmail}
-                                        onKeyPress={this.onChangeEmail}
-                                        onClick={this.setEmail}
+                                        onSelect={(selectedValues: any, item: any) => this.onChangeEmail(selectedValues, "from")}
+                                        onRemove={(selectedValues: any, item: any) => this.onChangeEmail(selectedValues, "from")}
                                         closeIcon="close"
                                         displayValue="name"
+                                        getAdHocItem={this.getAdHocItem}
                                     />
                                 </div>
                             </div>
@@ -266,13 +197,12 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                                     <label htmlFor="description">To*</label>
                                     <Multiselect
                                         options={this.state.toOptions}
-                                        selectedValues={this.state.selectedValue}
-                                        onSelect={this.onSelect}
-                                        onRemove={this.removeEmail}
-                                        onKeyPress={this.onChangeToEmail}
-                                        onClick={this.setEmail}
+                                        preselectedValues={toEmails}
+                                        onSelect={(selectedValues: any, item: any) => this.onChangeEmail(selectedValues, "to")}
+                                        onRemove={(selectedValues: any, item: any) => this.onChangeEmail(selectedValues, "to")}
                                         closeIcon="close"
                                         displayValue="name"
+                                        getAdHocItem={this.getAdHocItem}
                                     />
                                 </div>
                             </div>
