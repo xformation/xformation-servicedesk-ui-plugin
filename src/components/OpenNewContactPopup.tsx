@@ -70,7 +70,6 @@ export class OpenNewContactPopup extends React.Component<any, any> {
         } catch (err) {
             console.log("Loading company data failed. Error: ", err);
         }
-        console.log("companyNameList  : ", this.state.companyList);
     }
     toggle = () => {
         this.setState({
