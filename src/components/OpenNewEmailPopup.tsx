@@ -136,8 +136,8 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                 "tags": tags,
             }
             let formData = new FormData();
-            formData.append("from", from.toString());
-            formData.append("to", to.toString());
+            formData.append("mailFrom", from.toString());
+            formData.append("mailTo", to.toString());
             formData.append("subject", subject);
             formData.append("description", description);
             formData.append("priority", priorityValue);
