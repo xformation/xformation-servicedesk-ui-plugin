@@ -15,6 +15,7 @@ export const config = {
   GET_CONTACT_WITH_COMPANY_NAME: `${ticketSrvUrl}/contactWithCompanyName`,
   SEND_EMAIL_URL: `${ticketSrvUrl}/sendEmail`,
   GET_ALL_CONTACT_URL: `${ticketSrvUrl}/listAllContacts`,
+  GET_ALL_AGENT_URL: `${ticketSrvUrl}/listAllAgents`,
   GET_ALL_TICKET_URL: `${ticketSrvUrl}/listAllTickets`,
   SEVERITY_ERROR: "error",
   SEVERITY_SUCCESS: "success",

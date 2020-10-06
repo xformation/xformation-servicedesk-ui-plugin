@@ -142,13 +142,13 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                 if(response.data!=null){
                     this.setState({
                         severity : config.SEVERITY_SUCCESS,
-                        message: config.COMPANY_ADDED_SUCCESS,
+                        message: config.CONTACT_ADDED_SUCCESS,
                         isAlertOpen: true,
                     });
                 }else{
                     this.setState({
                         severity : config.SEVERITY_ERROR,
-                        message: config.COMPANY_ADDED_ERROR,
+                        message: config.CONTACT_ADDED_ERROR,
                         isAlertOpen: true,
                     });
                 }
