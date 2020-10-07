@@ -1,4 +1,4 @@
-const IP = "localhost";
+const IP = "100.64.108.25";
 
 const ticketSrvUrl = `http://${IP}:7100/api`;
 
