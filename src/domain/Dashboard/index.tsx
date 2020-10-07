@@ -177,6 +177,16 @@ export class Dashboard extends React.Component<any, any> {
         } catch (err) {
             console.log("Loading ticketing data failed. Error: ", err);
         }
+        try {
+            await RestService.getData(config.GET_TOP_PERFORMER_DATA_URL, null, null).then(
+                (response: any) => {
+                    this.setState({
+                        performerAgentsData : response,
+                    });
+                })
+        } catch (err) {
+            console.log("Loading ticketing data failed. Error: ", err);
+        }
     }
     onClickOpenSubLink = () => {
         let menu = !this.state.openCreateMenu;
