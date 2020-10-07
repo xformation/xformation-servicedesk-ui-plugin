@@ -10,6 +10,7 @@ import { OpenNewContactPopup } from '../../components/OpenNewContactPopup';
 import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
 import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
+import { OpenNewAgentPopup } from '../../components/OpenNewAgentPopup';
 
 export class Dashboard extends React.Component<any, any> {
     breadCrumbs: any;
@@ -19,6 +20,7 @@ export class Dashboard extends React.Component<any, any> {
     openNewCompanyRef: any;
     openNewEmailRef: any;
     openNewTicketRef: any;
+    openNewAgentRef: any;
     checkboxValue: any;
     ticketData:any;
     constructor(props: any) {
@@ -608,6 +610,7 @@ export class Dashboard extends React.Component<any, any> {
         this.openNewCompanyRef = React.createRef();
         this.openNewEmailRef = React.createRef();
         this.openNewTicketRef = React.createRef();
+        this.openNewAgentRef = React.createRef();
     }
 
     LineChartData = {
@@ -669,6 +672,9 @@ export class Dashboard extends React.Component<any, any> {
     onClickOpenNewCompany = (e: any) => {
         this.openNewCompanyRef.current.toggle();
     };
+    onClickOpenNewAgent = (e: any) => {
+        this.openNewAgentRef.current.toggle();
+    };
 
     onClickOpenNewEmail = (e: any) => {
         this.openNewEmailRef.current.toggle();
@@ -723,6 +729,9 @@ export class Dashboard extends React.Component<any, any> {
                                     </a>
                                     <a onClick={this.onClickOpenNewCompany}>
                                         Company
+                                    </a>
+                                    <a onClick={this.onClickOpenNewAgent}>
+                                        Agent
                                     </a>
                                 </div>
                                 }
@@ -842,6 +851,7 @@ export class Dashboard extends React.Component<any, any> {
                 <OpenNewCompanyPopup ref={this.openNewCompanyRef} />
                 <OpenNewEmailPopup ref={this.openNewEmailRef} />
                 <OpenNewTicketPopup ref={this.openNewTicketRef} />
+                <OpenNewAgentPopup ref={this.openNewAgentRef} />
             </div>
         );
     }
