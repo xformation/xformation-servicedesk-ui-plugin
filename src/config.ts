@@ -17,6 +17,8 @@ export const config = {
   GET_ALL_CONTACT_URL: `${ticketSrvUrl}/listAllContacts`,
   GET_ALL_AGENT_URL: `${ticketSrvUrl}/listAllAgents`,
   GET_ALL_TICKET_URL: `${ticketSrvUrl}/listAllTickets`,
+  GET_ALL_TICKET_FOR_TABLE_URL: `${ticketSrvUrl}/getTicketForTable`,
+  GET_ALL_TICKETING_DATA_URL: `${ticketSrvUrl}/getTicketingData`,
   SEVERITY_ERROR: "error",
   SEVERITY_SUCCESS: "success",
   COMPANY_ADDED_SUCCESS: "Company Successfully added",

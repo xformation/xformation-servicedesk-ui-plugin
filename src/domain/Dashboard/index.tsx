@@ -11,6 +11,7 @@ import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
 import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import { OpenNewAgentPopup } from '../../components/OpenNewAgentPopup';
+import { RestService } from '../_service/RestService';
 
 export class Dashboard extends React.Component<any, any> {
     breadCrumbs: any;
@@ -22,580 +23,89 @@ export class Dashboard extends React.Component<any, any> {
     openNewTicketRef: any;
     openNewAgentRef: any;
     checkboxValue: any;
-    ticketData:any;
+    ticketData: any;
     constructor(props: any) {
         super(props);
-        const res= async()=>{
-            const res =await  fetch(config.SERVICEDESK_API_URL + "/api/tickets", {
+        const res = async () => {
+            const res = await fetch(config.SERVICEDESK_API_URL + "/api/tickets", {
                 method: 'get',
-            }) .then((response) => response.json());
+            }).then((response) => response.json());
             return res;
         }
 
-        
-           
-            console.log("data in constructor",res())
-        this.tableValue = {
-            columns: [
-                {
-                    label: 'ID',
-                    key: 'index'
-                },
-                {
-                    label: 'Requester Name',
-                    key: 'requesterName'
-                },
-                {
-                    label: 'Subjects',
-                    key: 'subject'
-                },
-                {
-                    label: 'Status',
-                    key: 'status',
-                    renderCallback: (value: any) => {
-                        let strClass = "";
-                        if (value === "Open") {
-                            strClass = "yellow-green";
-                        } else if (value === "Closed") {
-                            strClass = "red";
-                        } else if (value === "Pending") {
-                            strClass = "orange";
-                        }
-                        return <td><span className={strClass}>{value}</span></td>
-                    }
-                },
-                {
-                    label: 'Priority',
-                    key: 'priority'
-                },
-                {
-                    label: 'Assignee',
-                    key: 'assignee'
-                },
-                {
-                    label: 'Create Date',
-                    key: 'createDate'
-                },
-            ],
-            data: [
-                {
-                    index: '#27',
-                    requesterName: 'Rodney Artichoke',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Open',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '10 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#39',
-                    requesterName: 'Chaplain Mondover',
-                    subject: 'I need help with aading a New Contact data to be pre...',
-                    status: 'Closed',
-                    priority: 'Medium',
-                    assignee: 'Bodrum Salvador',
-                    createDate: '12 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#47',
-                    requesterName: 'Rodney Artichoke',
-                    subject: 'Mobile Campaign',
-                    status: 'Pending',
-                    priority: 'Low',
-                    assignee: 'Inverness McKenzie',
-                    createDate: '15 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#52',
-                    requesterName: 'Inverness McKenzie',
-                    subject: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#87',
-                    requesterName: 'Douglas Lyphe',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Closed',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '19 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#52',
-                    requesterName: 'Inverness McKenzie',
-                    subject: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#87',
-                    requesterName: 'Douglas Lyphe',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Closed',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '19 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#39',
-                    requesterName: 'Chaplain Mondover',
-                    subject: 'I need help with aading a New Contact data to be pre...',
-                    status: 'Closed',
-                    priority: 'Medium',
-                    assignee: 'Bodrum Salvador',
-                    createDate: '12 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#47',
-                    requesterName: 'Rodney Artichoke',
-                    subject: 'Mobile Campaign',
-                    status: 'Pending',
-                    priority: 'Low',
-                    assignee: 'Inverness McKenzie',
-                    createDate: '15 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#52',
-                    requesterName: 'Inverness McKenzie',
-                    subject: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#47',
-                    requesterName: 'Rodney Artichoke',
-                    subject: 'Mobile Campaign',
-                    status: 'Pending',
-                    priority: 'Low',
-                    assignee: 'Inverness McKenzie',
-                    createDate: '15 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#52',
-                    requesterName: 'Inverness McKenzie',
-                    subject: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#87',
-                    requesterName: 'Douglas Lyphe',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Closed',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '19 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#52',
-                    requesterName: 'Inverness McKenzie',
-                    subject: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#87',
-                    requesterName: 'Douglas Lyphe',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Closed',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '19 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#39',
-                    requesterName: 'Chaplain Mondover',
-                    subject: 'I need help with aading a New Contact data to be pre...',
-                    status: 'Closed',
-                    priority: 'Medium',
-                    assignee: 'Bodrum Salvador',
-                    createDate: '12 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#27',
-                    requesterName: 'Rodney Artichoke',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Open',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '10 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#39',
-                    requesterName: 'Chaplain Mondover',
-                    subject: 'I need help with aading a New Contact data to be pre...',
-                    status: 'Closed',
-                    priority: 'Medium',
-                    assignee: 'Bodrum Salvador',
-                    createDate: '12 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#27',
-                    requesterName: 'Rodney Artichoke',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Open',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '10 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#39',
-                    requesterName: 'Chaplain Mondover',
-                    subject: 'I need help with aading a New Contact data to be pre...',
-                    status: 'Closed',
-                    priority: 'Medium',
-                    assignee: 'Bodrum Salvador',
-                    createDate: '12 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#47',
-                    requesterName: 'Rodney Artichoke',
-                    subject: 'Mobile Campaign',
-                    status: 'Pending',
-                    priority: 'Low',
-                    assignee: 'Inverness McKenzie',
-                    createDate: '15 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#52',
-                    requesterName: 'Inverness McKenzie',
-                    subject: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#87',
-                    requesterName: 'Douglas Lyphe',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Closed',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '19 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#52',
-                    requesterName: 'Inverness McKenzie',
-                    subject: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#87',
-                    requesterName: 'Douglas Lyphe',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Closed',
-                    priority: 'Low',
-                    assignee: 'Fergus Douchebag',
-                    createDate: '19 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Medium',
-                    assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    checkStatus: false
-                },
-                
-            ],
-        };
+
+
+        console.log("data in constructor", res())
         this.perPageLimit = 2,
-        this.checkboxValue = false,
-        this.state = {
-            openCreateMenu: false,
-            ticketData2:[],
-            ticketingData: [
-                {
-                    ticketingImage: '',
-                    ticketingNumber: '560',
-                    ticketingname: 'Open Tickets',
-                },
-                {
-                    ticketingImage: '',
-                    ticketingNumber: '284',
-                    ticketingname: 'Due Today',
-                },
-                {
-                    ticketingImage: '',
-                    ticketingNumber: '24',
-                    ticketingname: 'Unassigned',
-                },
-                {
-                    ticketingImage: '',
-                    ticketingNumber: '50',
-                    ticketingname: 'Unresolved',
-                },
-                {
-                    ticketingImage: '',
-                    ticketingNumber: '10',
-                    ticketingname: 'Overdue',
-                },
-            ],
-            performerAgentsData: [
-                {
-                    agentName: 'Spruce Springclean',
-                    ticket: '89',
-                    responseRate: '91',
-                },
-                {
-                    agentName: 'Archibald Northbottom',
-                    ticket: '75',
-                    responseRate: '85',
-                },
-                {
-                    agentName: 'Rodney Artichoke',
-                    ticket: '60',
-                    responseRate: '70',
-                },
-                {
-                    agentName: 'Gustav Purpleson',
-                    ticket: '53',
-                    responseRate: '63',
-                },
-            ],
-        };
+            this.checkboxValue = false,
+            this.state = {
+                openCreateMenu: false,
+                columns: [
+                    {
+                        label: 'ID',
+                        key: 'id'
+                    },
+                    {
+                        label: 'Requester Name',
+                        key: 'requesterName'
+                    },
+                    {
+                        label: 'Subjects',
+                        key: 'subject'
+                    },
+                    {
+                        label: 'Status',
+                        key: 'status',
+                        renderCallback: (value: any) => {
+                            let strClass = "";
+                            if (value === "Open") {
+                                strClass = "yellow-green";
+                            } else if (value === "Closed") {
+                                strClass = "red";
+                            } else if (value === "Pending") {
+                                strClass = "orange";
+                            }
+                            return <td><span className={strClass}>{value}</span></td>
+                        }
+                    },
+                    {
+                        label: 'Priority',
+                        key: 'priority'
+                    },
+                    {
+                        label: 'Assignee',
+                        key: 'assignedToName'
+                    },
+                    {
+                        label: 'Create Date',
+                        key: 'createDate'
+                    },
+                ],
+                ticketDataList: [],
+                ticketingData: [],
+                performerAgentsData: [
+                    {
+                        agentName: 'Spruce Springclean',
+                        ticket: '89',
+                        responseRate: '91',
+                    },
+                    {
+                        agentName: 'Archibald Northbottom',
+                        ticket: '75',
+                        responseRate: '85',
+                    },
+                    {
+                        agentName: 'Rodney Artichoke',
+                        ticket: '60',
+                        responseRate: '70',
+                    },
+                    {
+                        agentName: 'Gustav Purpleson',
+                        ticket: '53',
+                        responseRate: '63',
+                    },
+                ],
+            };
         this.breadCrumbs = [
             {
                 label: "Home",
@@ -646,17 +156,27 @@ export class Dashboard extends React.Component<any, any> {
         }
         return retData;
     }
-        async componentDidMount() {
-            const res = await fetch(config.SERVICEDESK_API_URL + "/api/tickets", {
-                method: 'get',
-            })
-                .then((response) => response.json());
-            this.ticketData=res;
-            this.setState({
-                ticketData2:eval(res),
-            });
-            console.log("tickte=",res);
-            console.log("table data in state variable 2="+this.state.ticketData2);
+    async componentDidMount() {
+        try {
+            await RestService.getData(config.GET_ALL_TICKET_FOR_TABLE_URL+"?pageType=all", null, null).then(
+                (response: any) => {
+                    this.setState({
+                        ticketDataList : response,
+                    });
+                })
+        } catch (err) {
+            console.log("Loading ticket data failed. Error: ", err);
+        }
+        try {
+            await RestService.getData(config.GET_ALL_TICKETING_DATA_URL, null, null).then(
+                (response: any) => {
+                    this.setState({
+                        ticketingData : response,
+                    });
+                })
+        } catch (err) {
+            console.log("Loading ticketing data failed. Error: ", err);
+        }
     }
     onClickOpenSubLink = () => {
         let menu = !this.state.openCreateMenu;
@@ -700,7 +220,7 @@ export class Dashboard extends React.Component<any, any> {
         return retData;
     }
     render() {
-        const { openCreateMenu } = this.state;
+        const { openCreateMenu, ticketDataList, columns } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -842,8 +362,8 @@ export class Dashboard extends React.Component<any, any> {
                                 </h2>
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
-                            <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
-                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="requesterName" showingLine = "Showing %start% to %end% of %total% Tickets"/>
+                            <Table valueFromData={{ columns: columns, data: ticketDataList }}  perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
+                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="requesterName" showingLine="Showing %start% to %end% of %total% Tickets" />
                         </div>
                     </div>
                 </div>

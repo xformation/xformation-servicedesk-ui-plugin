@@ -138,7 +138,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             if (assignType == "contact") {
                 assignedToId = assignedContact;
             } else if (assignType == "agent") {
-                assignedToId: assignedAgent;
+                assignedToId=assignedAgent;
             }
 
             let data = {

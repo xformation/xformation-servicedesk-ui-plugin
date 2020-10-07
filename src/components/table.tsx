@@ -22,7 +22,8 @@ export class Table extends React.Component<any, any> {
             sortKey: '',
             isAllChecked: false,
             visibleCheckbox: this.props.visiblecheckboxStatus,
-            showSelect: false
+            showSelect: false,
+            totalOPened:'',
         }
     };
 

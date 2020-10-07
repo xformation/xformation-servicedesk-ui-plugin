@@ -5,6 +5,8 @@ import { OpenNewContactPopup } from '../../components/OpenNewContactPopup';
 import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
 import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
+import { RestService } from '../_service/RestService';
+import { config } from '../../config';
 
 export class OpenTickets extends React.Component<any, any> {
     breadCrumbs: any;
@@ -19,11 +21,13 @@ export class OpenTickets extends React.Component<any, any> {
         super(props);
         this.perPageLimit = 6;
         this.checkboxValue = false,
-        this.tableValue = {
+        this.state = {
+            page_type: '',
+            openCreateMenu: false,
             columns: [
                 {
                     label: 'ID',
-                    key: 'index'
+                    key: 'id'
                 },
                 {
                     label: 'Requester Name',
@@ -54,123 +58,14 @@ export class OpenTickets extends React.Component<any, any> {
                 },
                 {
                     label: 'Assignee',
-                    key: 'Assignee'
+                    key: 'assignedToName'
                 },
                 {
                     label: 'Create Date',
                     key: 'createDate'
                 },
-                {
-                    label: 'Agents',
-                    key: 'agents'
-                },
-                {
-                    label: 'Groups',
-                    key: 'groups'
-                },
             ],
-            data: [
-                {
-                    index: '#27',
-                    requesterName: 'Rodney Artichoke',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Open',
-                    priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
-                    createDate: '10 July 2020',
-                    agents: 'Jacob Jones',
-                    groups: 'Billings',
-                    checkStatus: false
-                },
-                {
-                    index: '#39',
-                    requesterName: 'Chaplain Mondover',
-                    subject: 'I need help with aading a New Contact data to be pre...',
-                    status: 'Closed',
-                    priority: 'Medium',
-                    Assignee: 'Bodrum Salvador',
-                    createDate: '12 July 2020',
-                    agents: 'Jacob Jones',
-                    groups: 'Billings',
-                    checkStatus: false
-                },
-                {
-                    index: '#47',
-                    requesterName: 'Rodney Artichoke',
-                    subject: 'Mobile Campaign',
-                    status: 'Pending',
-                    priority: 'Low',
-                    Assignee: 'Inverness McKenzie',
-                    createDate: '15 July 2020',
-                    agents: 'Jacob Jones',
-                    groups: 'Billings',
-                    checkStatus: false
-                },
-                {
-                    index: '#52',
-                    requesterName: 'Inverness McKenzie',
-                    subject: 'Service related announcements',
-                    status: 'Open',
-                    priority: 'Hign',
-                    Assignee: 'Abraham Pigeon',
-                    createDate: '16 July 2020',
-                    agents: 'Jacob Jones',
-                    groups: 'Billings',
-                    checkStatus: false
-                },
-                {
-                    index: '#87',
-                    requesterName: 'Douglas Lyphe',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Closed',
-                    priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
-                    createDate: '19 July 2020',
-                    agents: 'Jacob Jones',
-                    groups: 'Billings',
-                    checkStatus: false
-                },
-                {
-                    index: '#92',
-                    requesterName: 'Theodore Handle',
-                    subject: 'Adding a payment methods',
-                    status: 'Pending',
-                    priority: 'Low',
-                    Assignee: 'Jarvis Pepperspray',
-                    createDate: '22 July 2020',
-                    agents: 'Jacob Jones',
-                    groups: 'Billings',
-                    checkStatus: false
-                },
-                {
-                    index: '#27',
-                    requesterName: 'Rodney Artichoke',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Open',
-                    priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
-                    createDate: '10 July 2020',
-                    agents: 'Jacob Jones',
-                    groups: 'Billings',
-                    checkStatus: false
-                },
-                {
-                    index: '#27',
-                    requesterName: 'Rodney Artichoke',
-                    subject: 'I need help with aading a New Contact....',
-                    status: 'Open',
-                    priority: 'Low',
-                    Assignee: 'Fergus Douchebag',
-                    createDate: '10 July 2020',
-                    agents: 'Jacob Jones',
-                    groups: 'Billings',
-                    checkStatus: false
-                }
-            ]
-        };
-        this.state = {
-            page_type: '',
-            openCreateMenu: false,
+            ticketDataList: [],
         };
         this.breadCrumbs = [
             {
@@ -187,13 +82,23 @@ export class OpenTickets extends React.Component<any, any> {
         this.openNewEmailRef = React.createRef();
         this.openNewTicketRef = React.createRef();
     }
-    componentDidMount() {
+   async componentDidMount() {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         const pageType = urlParams.get('type');
         this.setState({
             page_type: pageType,
         });
+        try {
+            await RestService.getData(config.GET_ALL_TICKET_FOR_TABLE_URL+"?pageType="+pageType, null, null).then(
+                (response: any) => {
+                    this.setState({
+                        ticketDataList : response,
+                    });
+                })
+        } catch (err) {
+            console.log("Loading ticket data failed. Error: ", err);
+        }
     };
 
     onClickOpenNewContact = (e: any) => {
@@ -220,7 +125,7 @@ export class OpenTickets extends React.Component<any, any> {
     }
 
     render() {
-        const { page_type, openCreateMenu } = this.state;
+        const { page_type, openCreateMenu,columns,ticketDataList } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -413,7 +318,7 @@ export class OpenTickets extends React.Component<any, any> {
                     </div>
                     <div className="common-container border-bottom-0">
                         <div className="d-block all-open-ticket-tabel">
-                            <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
+                            <Table valueFromData={{ columns: columns, data: ticketDataList}} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
                                 tableClasses={{ table: "open-ticket-tabel", tableParent: "d-block p-t-5 open-tickets-tabel", parentClass: "all-open-ticket-tabel" }} searchKey="subject" showingLine = "Showing %start% to %end% of %total% Tickets" />
                             
                         </div>
