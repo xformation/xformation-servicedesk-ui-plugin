@@ -6,13 +6,13 @@ import { CustomTextareabox } from './CustomTextareabox';
 import { config } from "../config";
 import axios from 'axios';
 import { RestService } from '../domain/_service/RestService';
-
-class MyObj {
+import AlertMessage from './AlertMessage';
+class MySelectObj {
     id: any;
     name: any;
     constructor(id: any, name: any) {
-      this.id = id;
-      this.name = name;
+        this.id = id;
+        this.name = name;
     }
 }
 
@@ -21,15 +21,19 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
     constructor(props: any) {
         super(props);
         this.state = {
+            isAlertOpen: false,
+            message: null,
+            severity: null,
             modal: false,
-            conatctFullNameList: [],
-            contactIndexsList: [],
-            contact: '',
+            requesterContact: '',
             subject: '',
             type: '',
             subjectText: '',
             priority: '',
             assign: '',
+            priorityValue: '',
+            assignValue: '',
+            typeValue: '',
             description: '',
             tags: '',
             isSubmitted: false,
@@ -37,14 +41,62 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                 { index: '', value: '' }
             ],
             totalContact: 1,
+            contactNameAndEmailList: [],
+            allContacts: [],
+            primaryEmailList: [],
+            assignType: '',
+            assignedContact: '',
+            AgentNameList: [],
+            allAgents: [],
+            assignedAgent: '',
         };
     }
-    
-    componentDidMount() {
+
+    async componentDidMount() {
         try {
-            this.fetchData();
+            await RestService.getData(config.GET_ALL_CONTACT_URL, null, null).then(
+                (response: any) => {
+
+                    let ary = [];
+                    let primaryEmailAry = [];
+                    let obj = new MySelectObj("", "Select Contact");
+                    let primaryEmailObj = new MySelectObj("", "Select Contact");
+                    primaryEmailAry.push(primaryEmailObj);
+                    ary.push(obj);
+                    for (let i = 0; i < response.length; i++) {
+                        obj = new MySelectObj(response[i].id, response[i].userName + " => " + response[i].primaryEmail);
+                        primaryEmailObj = new MySelectObj(response[i].id, response[i].primaryEmail);
+                        ary.push(obj);
+                        primaryEmailAry.push(primaryEmailObj);
+                    }
+                    this.setState({
+                        contactNameAndEmailList: ary,
+                        allContacts: response,
+                        primaryEmailList: primaryEmailAry,
+                    });
+                })
         } catch (err) {
-            console.log("OpenNewTicketPopup page. Loading contact data failed. Error: ", err);
+            console.log("Loading company data failed. Error: ", err);
+        }
+
+        try {
+            await RestService.getData(config.GET_ALL_AGENT_URL, null, null).then(
+                (response: any) => {
+
+                    let ary = [];
+                    let obj = new MySelectObj("", "Select Agent");
+                    ary.push(obj);
+                    for (let i = 0; i < response.length; i++) {
+                        obj = new MySelectObj(response[i].id, response[i].name);
+                        ary.push(obj);
+                    }
+                    this.setState({
+                        AgentNameList: ary,
+                        allAgents: response,
+                    });
+                })
+        } catch (err) {
+            console.log("Loading company data failed. Error: ", err);
         }
     }
 
@@ -63,30 +115,6 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             }
         );
     }
-
-    // async componentDidMount() {
-        // await fetch(config.SERVICEDESK_API_URL + "/api/contacts", {
-        //     method: 'get',
-        // })
-        //     .then((response) => response.json());
-        // let conatctFullNameList = [];
-        // let conatctFullNameJson={};
-        // let contactIndexsList = []
-        // let i;
-      
-        // for (i in res) {
-        //    let id=res[i].id
-        //    let fullName=res[i].fullName
-        //     conatctFullNameList.push(res[i].fullName);
-        //     contactIndexsList.push(res[i].id);
-        // }
-        // console.log(conatctFullNameJson);
-        // this.setState({
-        //     conatctFullNameList: conatctFullNameList,
-        //     contactIndexsList: contactIndexsList,
-        // });
-    // }
-   
     toggle = () => {
         this.setState({
             modal: !this.state.modal,
@@ -97,50 +125,53 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             modal: false,
         });
     }
-
-    handleSubmit =async (event: any) => {
+    handleSubmit = async (event: any) => {
         event.preventDefault();
         this.setState({
             isSubmitted: true
         });
         const errorData = this.validate(true);
-        if (errorData.subject.isValid && errorData.type.isValid && errorData.subjectText.isValid && errorData.priority.isValid && errorData.assign.isValid && errorData.description.isValid && errorData.tags.isValid) {
-            const { contact, subject, type, subjectText, priority, assign, description, tags } = this.state;
-            let sendData:any = {
-                contact,
-                subject,
-                type,
-                subjectText,
-                priority,
-                assign,
-                description,
-                tags,
-            };
-            console.log(sendData);
-            let formData = new FormData();
-            formData.append("contact",contact);
-            formData.append("subject",subject);
-            formData.append("type",type);
-            formData.append("subjectText",subjectText);
-            formData.append("priority",priority);
-            formData.append("assignTo",assign);
-            formData.append("description",description);
-            formData.append("tags",tags);
-            
+        console.log(errorData);
+        if (errorData.type.isValid && errorData.subjectText.isValid && errorData.priority.isValid && errorData.description.isValid && errorData.tags.isValid && errorData.requesterContact.isValid && errorData.assignType.isValid && (errorData.assignedAgent.isValid || errorData.assignedContact.isValid)) {
+            const { contact, subject, subjectText, priorityValue, assignValue, typeValue, description, tags, requesterContact, assignedAgent, assignType, assignedContact } = this.state;
+            let assignedToId;
+            if (assignType == "contact") {
+                assignedToId = assignedContact;
+            } else if (assignType == "agent") {
+                assignedToId=assignedAgent;
+            }
 
-            
-            axios.post(config.SERVICEDESK_API_URL+"/api/tickets", formData,{})
-                  .then((res:any) => {
-                    console.log(res.data);
-                  }).catch((err:any) => console.log(err))
-                //   const res= await fetch(config.SERVICEDESK_API_URL+"/api/tickets", {
-                //     method: 'post',
-                //     body: formData,
-                //   })
-                //     .then((response) => response.json());
-                //     console.log(res);
+            let data = {
+                type: typeValue,
+                subject: subjectText,
+                priority: priorityValue,
+                description: description,
+                tag: tags,
+                assignedToUserType: assignType,
+                requesterUserType: "contact",
+                requesterId: requesterContact,
+                assignedToId: assignedToId,
+            }
+            console.log("Send Data : ", data);
+            axios.post(config.ADD_TICKET_URL, data, {})
+                .then((response: any) => {
+                    if (response.data != null) {
+                        this.setState({
+                            severity: config.SEVERITY_SUCCESS,
+                            message: config.ADD_TICKET_SUCCESS,
+                            isAlertOpen: true,
+                        });
+                    } else {
+                        this.setState({
+                            severity: config.SEVERITY_ERROR,
+                            message: config.ADD_TICKET_ERROR,
+                            isAlertOpen: true,
+                        });
+                    }
+                    console.log("response data", response.data);
+                }).catch((err: any) => console.log(err));
         }
-        
+
 
     };
 
@@ -157,9 +188,34 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             assign: validObj,
             description: validObj,
             tags: validObj,
+            requesterContact: validObj,
+            assignType: validObj,
+            assignedAgent: validObj,
+            assignedContact: validObj,
         };
         if (isSubmitted) {
-            const { subject, type, subjectText, priority, assign, description, tags } = this.state;
+            const { subject, type, subjectText, priority, assign, description, tags, requesterContact, assignType, assignedAgent, assignedContact } = this.state;
+            if (!requesterContact) {
+                retData.requesterContact = {
+                    isValid: false,
+                    message: "Contact is required"
+                };
+            }
+            if (assignType == "contact") {
+                if (!assignedContact) {
+                    retData.assignedContact = {
+                        isValid: false,
+                        message: "Contact is required"
+                    };
+                }
+            } else if (assignType == "agent") {
+                if (!assignedAgent) {
+                    retData.assignedAgent = {
+                        isValid: false,
+                        message: "Agent is required"
+                    };
+                }
+            }
             if (!subject) {
                 retData.subject = {
                     isValid: false,
@@ -183,6 +239,12 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                     isValid: false,
                     message: "Priority is required"
                 };
+            }
+            if (!assignType) {
+                retData.assignType = {
+                    isValid: false,
+                    message: "Please select contact or agent"
+                }
             }
             if (!assign) {
                 retData.assign = {
@@ -237,24 +299,12 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
     };
 
     handleStateChange = (e: any) => {
-        const { name, value, id } = e.target;
-        let data = [];
-        if (name == 'contact') {
-            for (let i = 0; i < this.state.contacts.length; i++) {
-                if (id == i) {
-                    data.push({ index: i, value: value })
-                } else {
-                    data.push(this.state.contacts[i])
-                }
-            }
-            this.setState({
-                contacts: data
-            });
-        } else {
-            this.setState({
-                [name]: value
-            });
-        }
+        const { name, value } = e.target;
+
+        this.setState({
+            [name]: value
+        });
+
     };
 
     addContact = () => {
@@ -278,12 +328,50 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         }
         return retData;
     }
-
+    handleSelectBox = (e: any) => {
+        const { name, value } = e.target;
+        this.setState({
+            [name]: value,
+        });
+        if (name == "type") {
+            let type;
+            if (value == 0) {
+                type = "A";
+            } else if (value == 1) {
+                type = "B";
+            } else if (value == 2) {
+                type = "C";
+            }
+            this.setState({
+                typeValue: type
+            });
+        }
+        if (name == "priority") {
+            let priority;
+            if (value == 0) {
+                priority = "Low";
+            } else if (value == 1) {
+                priority = "Medium";
+            } else if (value == 2) {
+                priority = "High";
+            }
+            this.setState({
+                priorityValue: priority,
+            });
+        }
+    }
+    handleCloseAlert = (e: any) => {
+        this.setState({
+            isAlertOpen: false
+        })
+    }
     render() {
-        const { conatctFullNameList, contactIndexsList, modal, contact, subject, type, subjectText, priority, assign, description, tags, isSubmitted } = this.state;
+        const { contactNameAndEmailList, primaryEmailList, contactIndexsList, modal, requesterContact, type, subjectText, priority, description, tags, isSubmitted, assignType, assignedAgent, AgentNameList, assignedContact } = this.state;
         const errorData = this.validate(isSubmitted);
+        const state = this.state;
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
+                <AlertMessage handleCloseAlert={this.handleCloseAlert} open={state.isAlertOpen} severity={state.severity} msg={state.message}></AlertMessage>
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
                     <div className="d-block width-100 contact-popup-container new-ticket-container">
                         <div className="d-block width-100 p-b-20 heading">
@@ -293,30 +381,22 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
-                                    <label htmlFor="contact">Contact*</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="contact" id="contact" name="contact" value={contact} arrayData={conatctFullNameList} onChange={this.handleStateChange}  />
+                                    <label htmlFor="contact">Contact*(Requester)</label>
+                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="requesterContact" id="requesterContact" name="requesterContact" value={requesterContact} arrayData={contactNameAndEmailList} onChange={this.handleStateChange} isValid={errorData.requesterContact.isValid} message={errorData.requesterContact.message} />
                                     <div className="d-block text-right p-t-5">
                                         <button className="add-conatct">Add a Conatct</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="row">
+                        {/* <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="subject">Subject*</label>
                                     <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="subject" id="subject" name="subject" value={subject} arrayData={{ 0: 'abc', 1: 'def', 2: 'ghi' }} onChange={this.handleStateChange} isValid={errorData.subject.isValid} message={errorData.subject.message} />
                                 </div>
                             </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-lg-12 col-md-12 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="type">Type*</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="type" id="type" name="type" value={type} arrayData={{ 0: 'abc', 1: 'def', 2: 'ghi' }} onChange={this.handleStateChange} isValid={errorData.type.isValid} message={errorData.type.message} />
-                                </div>
-                            </div>
-                        </div>
+                        </div> */}
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
@@ -332,16 +412,36 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
+                                    <label htmlFor="type">Type*</label>
+                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="type" id="type" name="type" value={type} arrayData={[{ id: 0, name: "A" }, { id: 1, name: "B" }, { id: 2, name: "C" }]} onChange={this.handleSelectBox} isValid={errorData.type.isValid} message={errorData.type.message} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="row">
+                            <div className="col-lg-12 col-md-12 col-sm-12">
+                                <div className="form-group">
                                     <label htmlFor="priority">Priority*</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="priority" id="priority" name="priority" value={priority} arrayData={{ 0: 'Low', 1: 'High', 2: 'Medium' }} onChange={this.handleStateChange} isValid={errorData.priority.isValid} message={errorData.priority.message} />
+                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="priority" id="priority" name="priority" value={priority} arrayData={[{ id: 0, name: "Low" }, { id: 1, name: "High" }, { id: 2, name: "Medium" }]} onChange={this.handleSelectBox} isValid={errorData.priority.isValid} message={errorData.priority.message} />
                                 </div>
                             </div>
                         </div>
                         <div className="row">
+
                             <div className="col-lg-12 col-md-12 col-sm-12">
+
                                 <div className="form-group">
-                                    <label htmlFor="assign">Assign to*</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="assign" id="assign" name="assign" value={assign} arrayData={{ 0: 'Group/Agent', 1: 'Group', 2: 'agent' }} onChange={this.handleStateChange} isValid={errorData.assign.isValid} message={errorData.assign.message} />
+                                    <input type="radio" name="assignType" value="contact" className="contact_radio_button" onChange={this.handleStateChange} />Contact
+                                <input type="radio" name="assignType" value="agent" className="contact_radio_button" onChange={this.handleStateChange} />Agent
+                                <br></br><span style={{ color: "red" }}>{errorData.assignType.message}</span>
+                                    {assignType == "contact" && <div>
+                                        <label htmlFor="assign">Assign to Contacts*</label>
+                                        <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="assignedContact" id="assignedContact" name="assignedContact" value={assignedContact} arrayData={contactNameAndEmailList} onChange={this.handleStateChange} isValid={errorData.assignedContact.isValid} message={errorData.assignedContact.message} />
+                                    </div>}
+                                    {assignType == "agent" && <div>
+                                        <label htmlFor="assign">Assign to Agent*</label>
+                                        <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="assignedAgent" id="assignedAgent" name="assignedAgent" value={assignedAgent} arrayData={AgentNameList} onChange={this.handleStateChange} isValid={errorData.assignedAgent.isValid} message={errorData.assignedAgent.message} />
+                                    </div>}
                                 </div>
                             </div>
                         </div>

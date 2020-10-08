@@ -24,7 +24,8 @@ export class Table extends React.Component<any, any> {
             start_index: 0,
             ending_index: 9,
             visibleCheckbox: this.props.visiblecheckboxStatus,
-            showSelect: false
+            showSelect: false,
+            totalOPened:'',
         }
     };
 

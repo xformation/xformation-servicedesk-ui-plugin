@@ -22,16 +22,21 @@ export class AllContacts extends React.Component<any, any> {
             openCreateMenu: false,
             columns: [
                 {
-                    label: 'Contact',
-                    key: 'contact',
+                    label: 'Photo',
+                    key: 'photo',
                     renderCallback: (value: any) => {
                         let strClass = "image";
                         return <td><span className={strClass}></span>{value}</td>
                     }
                 },
+                
                 {
                     label: 'Title',
                     key: 'title'
+                },
+                {
+                    label: 'Contact',
+                    key: 'name'
                 },
                 {
                     label: 'Company',
@@ -80,10 +85,10 @@ export class AllContacts extends React.Component<any, any> {
                     this.setState({
                         contactData: response,
                     });
-                    console.log("company Data : ", response);
+                    console.log("contact Data : ", response);
                 })
         } catch (err) {
-            console.log("Loading company data failed. Error: ", err);
+            console.log("Loading contact data failed. Error: ", err);
         }
     }
     onClickOpenNewContact = (e: any) => {

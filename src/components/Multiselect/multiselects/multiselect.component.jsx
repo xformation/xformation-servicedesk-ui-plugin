@@ -29,7 +29,6 @@ export class Multiselect extends React.Component {
     this.searchBox = React.createRef();
     this.onChange = this.onChange.bind(this);
     this.onKeyPress = this.onKeyPress.bind(this);
-    // this.onSetValue = this.onSetValue.bind(this);
     this.renderMultiselectContainer = this.renderMultiselectContainer.bind(this);
     this.renderSelectedList = this.renderSelectedList.bind(this);
     this.onRemoveSelectedItem = this.onRemoveSelectedItem.bind(this);
@@ -159,13 +158,9 @@ export class Multiselect extends React.Component {
   }
 
   onKeyPress(event) {
-    if (this.props.onKeyPress && event.key == 'Enter') {
+    if (this.props.onKeyPress) {
       this.props.onKeyPress(event);
     }
-  }
-
-  onSetValue(value) {
-    this.props.onClick(value);
   }
 
   filterOptionsByInput() {
@@ -199,6 +194,13 @@ export class Multiselect extends React.Component {
       this.onRemoveSelectedItem(selectedValues.length - 1);
     }
     if (!options.length) {
+      if (e.key === "Enter") {
+        //This is to enter option that is not available in option
+        if (this.props.getAdHocItem) {
+          const item = this.props.getAdHocItem(e.target.value);
+          this.onSelectItem(item);
+        }
+      }
       return;
     }
     if (e.keyCode === 38) {
@@ -243,7 +245,6 @@ export class Multiselect extends React.Component {
       index = selectedValues.indexOf(item);
     }
     selectedValues.splice(index, 1);
-    this.props.onRemove(item);
     onRemove(selectedValues, item);
     this.setState({ selectedValues }, () => {
       if (!showCheckbox) {
@@ -271,7 +272,6 @@ export class Multiselect extends React.Component {
       return;
     }
     selectedValues.push(item);
-    this.onSetValue(item);
     onSelect(selectedValues, item);
     this.setState({ selectedValues }, () => {
       if (!showCheckbox) {
@@ -443,7 +443,6 @@ export class Multiselect extends React.Component {
             className="searchBox"
             id={`${id || 'search'}_input`}
             onChange={this.onChange}
-            onKeyPress={this.onKeyPress}
             value={inputValue}
             onFocus={this.toggelOptionList}
             onBlur={() => setTimeout(this.toggelOptionList, 200)}
