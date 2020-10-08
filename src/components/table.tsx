@@ -184,7 +184,7 @@ export class Table extends React.Component<any, any> {
                         <a className={currentPage === 0 ? 'page-link desable' : 'page-link enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
                     </li>
                     {rows}
-                   
+
                     <li className="page-item next">
                         <a className={currentPage === this.state.totalPages - 1 ? 'page-link desable' : 'page-link enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
                     </li>
@@ -213,16 +213,18 @@ export class Table extends React.Component<any, any> {
                 }
                 break;
             case 'next':
-                if (currentPage !== totalPages - 1 && currentPage != ending_index) {
-                    this.setState({
-                        currentPage: currentPage + 1,
-                    });
-                } else {
-                    this.setState({
-                        currentPage: currentPage + 1,
-                        start_index: ending_index + 1,
-                        ending_index: ending_index + 10
-                    });
+                if (currentPage !== totalPages - 1) {
+                    if (currentPage != ending_index) {
+                        this.setState({
+                            currentPage: currentPage + 1,
+                        });
+                    } else {
+                        this.setState({
+                            currentPage: currentPage + 1,
+                            start_index: ending_index + 1,
+                            ending_index: ending_index + 10
+                        });
+                    }
                 }
                 break;
             case 'btn-click':
