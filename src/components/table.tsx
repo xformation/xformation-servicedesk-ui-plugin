@@ -21,6 +21,8 @@ export class Table extends React.Component<any, any> {
             sortType: sortEnum.NONE,
             sortKey: '',
             isAllChecked: false,
+            start_index: 0,
+            ending_index: 9,
             visibleCheckbox: this.props.visiblecheckboxStatus,
             showSelect: false,
             totalOPened:'',
@@ -169,11 +171,13 @@ export class Table extends React.Component<any, any> {
     }
 
     peginationOfTable() {
-        const { currentPage, totalPages, displayData, perPageLimit } = this.state;
+        const { currentPage, totalPages, displayData, start_index, ending_index } = this.state;
         let rows = [];
         if (displayData.length > 0) {
             for (let i = 0; i < totalPages; i++) {
-                rows.push(<li className="page-item" key={i}><a className={currentPage === i ? 'page-link active' : 'page-link deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
+                if (i >= start_index && i <= ending_index) {
+                    rows.push(<li className="page-item" key={i}><a className={currentPage === i ? 'page-link active' : 'page-link deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
+                }
             }
             return (
                 <ul>
@@ -181,7 +185,7 @@ export class Table extends React.Component<any, any> {
                         <a className={currentPage === 0 ? 'page-link desable' : 'page-link enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
                     </li>
                     {rows}
-                    <li><a href="#">......</a></li>
+
                     <li className="page-item next">
                         <a className={currentPage === this.state.totalPages - 1 ? 'page-link desable' : 'page-link enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
                     </li>
@@ -191,21 +195,37 @@ export class Table extends React.Component<any, any> {
     }
 
     navigatePage(target: any, e: any, i: any = null) {
-        const { totalPages, currentPage } = this.state;
+        const { totalPages, currentPage, ending_index, start_index } = this.state;
         e.preventDefault();
         switch (target) {
             case 'pre':
                 if (currentPage !== 0) {
-                    this.setState({
-                        currentPage: currentPage - 1,
-                    });
+                    if (currentPage !== start_index) {
+                        this.setState({
+                            currentPage: currentPage - 1,
+                        });
+                    } else {
+                        this.setState({
+                            currentPage: currentPage - 1,
+                            start_index: start_index - 10,
+                            ending_index: ending_index - 10
+                        });
+                    }
                 }
                 break;
             case 'next':
                 if (currentPage !== totalPages - 1) {
-                    this.setState({
-                        currentPage: currentPage + 1,
-                    });
+                    if (currentPage != ending_index) {
+                        this.setState({
+                            currentPage: currentPage + 1,
+                        });
+                    } else {
+                        this.setState({
+                            currentPage: currentPage + 1,
+                            start_index: ending_index + 1,
+                            ending_index: ending_index + 10
+                        });
+                    }
                 }
                 break;
             case 'btn-click':

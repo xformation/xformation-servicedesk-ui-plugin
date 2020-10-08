@@ -5,6 +5,7 @@ import { OpenNewContactPopup } from '../../components/OpenNewContactPopup';
 import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
 import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
+import { config } from '../../config';
 import Table from './../../components/table';
 
 export class Tickets extends React.Component<any, any> {
@@ -178,7 +179,11 @@ export class Tickets extends React.Component<any, any> {
                 route: `/`
             },
             {
-                label: "Monitor | Alerts",
+                label: "Tickets",
+                route: `${config.basePath}/dashboard`
+            },
+            {
+                label: "Quick Statistics",
                 isCurrentPage: true
             }
         ];

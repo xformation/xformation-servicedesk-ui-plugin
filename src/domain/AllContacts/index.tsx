@@ -69,7 +69,11 @@ export class AllContacts extends React.Component<any, any> {
                 route: `/`
             },
             {
-                label: "Monitor | Alerts",
+                label: "Tickets",
+                route: `${config.basePath}/dashboard`
+            },
+            {
+                label: "All Contacts",
                 isCurrentPage: true
             }
         ];
