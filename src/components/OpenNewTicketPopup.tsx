@@ -132,13 +132,24 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         });
         const errorData = this.validate(true);
         console.log(errorData);
+
         if (errorData.type.isValid && errorData.subjectText.isValid && errorData.priority.isValid && errorData.description.isValid && errorData.tags.isValid && errorData.requesterContact.isValid && errorData.assignType.isValid && (errorData.assignedAgent.isValid || errorData.assignedContact.isValid)) {
             const { contact, subject, subjectText, priorityValue, assignValue, typeValue, description, tags, requesterContact, assignedAgent, assignType, assignedContact } = this.state;
             let assignedToId;
             if (assignType == "contact") {
                 assignedToId = assignedContact;
             } else if (assignType == "agent") {
-                assignedToId=assignedAgent;
+                assignedToId = assignedAgent;
+            }
+            let associatedEntityName;
+            let associatedEntityId;
+
+            if (this.props.guid == undefined) {
+                associatedEntityName = null;
+                associatedEntityId = null;
+            } else {
+                associatedEntityName = "alert";
+                associatedEntityId = this.props.guid;
             }
 
             let data = {
@@ -151,6 +162,8 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                 requesterUserType: "contact",
                 requesterId: requesterContact,
                 assignedToId: assignedToId,
+                associatedEntityName: associatedEntityName,
+                associatedEntityId: associatedEntityId,
             }
             console.log("Send Data : ", data);
             axios.post(config.ADD_TICKET_URL, data, {})
