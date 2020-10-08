@@ -425,6 +425,12 @@ a:hover {
   color: #49c740;
 }
 
+.contact-popup-container .upload-photo {
+  position: relative;
+  z-index: 10;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
 .contact-popup-container .upload-photo .upload-icon {
   background-color: #438afb;
   border-radius: 2px;
@@ -438,18 +444,35 @@ a:hover {
   margin-right: 15px;
   vertical-align: top;
 }
-
 .contact-popup-container .upload-photo strong {
   font-size: 16px;
   line-height: 20px;
   color: #438afb;
 }
-
 .contact-popup-container .upload-photo p {
   color: #a9b9c6;
   font-size: 12px;
   line-height: 18px;
   font-weight: 400;
+  margin-bottom: 0;
+}
+.contact-popup-container .upload-photo .contactPhoto {
+  opacity: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 60%;
+  height: 100%;
+  cursor: pointer;
+}
+.contact-popup-container .upload-photo .companyLogo {
+  opacity: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 60%;
+  height: 100%;
+  cursor: pointer;
 }
 
 .contact-popup-container .form-group {
@@ -613,6 +636,25 @@ a:hover {
 }
 .modal .modal-content {
   padding: 40px;
+  padding-right: 25px;
+}
+.modal .modal-content .modal-body {
+  padding-right: 15px;
+}
+.modal .modal-content .close-btn {
+  position: absolute;
+  right: -16px;
+  top: -16px;
+  background-color: #f93d3d;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 32px;
+  width: 32px;
+  text-align: center;
+  height: 32px;
+  border: none;
+  font-weight: 600;
 }
 
 .modal-backdrop {
@@ -2000,7 +2042,5 @@ a:hover {
   margin-bottom: 30px;
   padding: 30px;
 }
-.contact_radio_button {
-  margin: 6px;
-}
+
 /*# sourceMappingURL=servicedesk.light.css.map */

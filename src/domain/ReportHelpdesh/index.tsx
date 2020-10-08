@@ -73,7 +73,11 @@ export class ReportHelpdesh extends React.Component<any, any> {
                 route: `/`
             },
             {
-                label: "Monitor | Alerts",
+                label: "Tickets",
+                route: `${config.basePath}/dashboard`
+            },
+            {
+                label: "Reports",
                 isCurrentPage: true
             }
         ];

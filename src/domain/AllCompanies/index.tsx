@@ -49,7 +49,11 @@ export class AllCompanies extends React.Component<any, any> {
                 route: `/`
             },
             {
-                label: "Monitor | Alerts",
+                label: "Tickets",
+                route: `${config.basePath}/dashboard`
+            },
+            {
+                label: "All Companies",
                 isCurrentPage: true
             }
         ];

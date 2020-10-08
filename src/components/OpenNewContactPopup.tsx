@@ -364,19 +364,20 @@ export class OpenNewContactPopup extends React.Component<any, any> {
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
                 <AlertMessage handleCloseAlert={this.handleCloseAlert} open={state.isAlertOpen} severity={state.severity} msg={state.message}></AlertMessage>
+                <button className="close-btn" onClick={this.handleClose}>X</button>
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
                     <div className="d-block width-100 contact-popup-container">
                         <div className="d-block width-100 p-b-20 heading">
                             <h4 className="d-block"><i className="fa fa-user"></i> New Contact</h4>
                             <span className="d-block">When someone reaches out to you, they become a contact in your account. You can create companies and associate contacts with them. <a href="#">Learn more.</a></span>
                         </div>
-                        <div className="d-block width-100 p-t-10 p-b-10 upload-photo">
+                        <div className="d-block width-100 upload-photo">
                             <div className="d-inline-block upload-icon">
                                 <i className="fa fa-user"></i>
                             </div>
                             <div className="d-inline-block v-a-top">
                                 <strong className="d-block">Upload Photo</strong>
-                                <input type="file" id="contactPhoto" name="contactPhoto" onChange={this.handleImageChange} />
+                                <input type="file" id="contactPhoto" className="contactPhoto" name="contactPhoto" onChange={this.handleImageChange} />
                                 <p className="d-block">An image of the person, it's best if it has the same length and height</p>
                                 <span style={{color: "red"}}>{errorData.contactPhoto.message}</span>
                             </div>

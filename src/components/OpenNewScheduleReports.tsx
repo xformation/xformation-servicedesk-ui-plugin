@@ -113,6 +113,7 @@ export class OpenNewScheduleReports extends React.Component<any, any> {
         const errorData = this.validate(isSubmitted);
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
+                <button className="close-btn" onClick={this.handleClose}>X</button>
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
                     <div className="d-block width-100 contact-popup-container new-ticket-container">
                         <div className="d-block width-100 p-b-20 heading">

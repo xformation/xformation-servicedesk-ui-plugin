@@ -4,6 +4,7 @@ import { OpenNewContactPopup } from '../../components/OpenNewContactPopup';
 import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
 import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
+import { config } from '../../config';
 
 export class TicketsDetails extends React.Component<any, any> {
     breadCrumbs: any;
@@ -19,7 +20,11 @@ export class TicketsDetails extends React.Component<any, any> {
                 route: `/`
             },
             {
-                label: "Monitor | Alerts",
+                label: "Tickets",
+                route: `${config.basePath}/dashboard`
+            },
+            {
+                label: "Ticket Details",
                 isCurrentPage: true
             }
         ];
