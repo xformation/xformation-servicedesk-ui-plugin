@@ -112,11 +112,7 @@ export class Dashboard extends React.Component<any, any> {
                 route: `/`
             },
             {
-                label: "Tickets",
-                route: `${config.basePath}/dashboard`
-            },
-            {
-                label: "Dashboard",
+                label: "Tickets | Dashboard",
                 isCurrentPage: true
             }
         ];
