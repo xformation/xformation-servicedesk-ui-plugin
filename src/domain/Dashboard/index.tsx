@@ -39,6 +39,19 @@ export class Dashboard extends React.Component<any, any> {
         this.perPageLimit = 2,
             this.checkboxValue = false,
             this.state = {
+                LineChartData : {
+                    responsive: true,
+                    labels: [],
+                    datasets: [
+                        {
+                            label: "Hours",
+                            lineTension: 0.4,
+                            fill: false,
+                            borderColor: "rgba(0, 170, 240, 1)",
+                            data: []
+                        }
+                    ]
+                },
                 openCreateMenu: false,
                 columns: [
                     {
@@ -122,7 +135,6 @@ export class Dashboard extends React.Component<any, any> {
         this.openNewTicketRef = React.createRef();
         this.openNewAgentRef = React.createRef();
     }
-
     LineChartData = {
         responsive: true,
         labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],
@@ -158,10 +170,10 @@ export class Dashboard extends React.Component<any, any> {
     }
     async componentDidMount() {
         try {
-            await RestService.getData(config.GET_ALL_TICKET_FOR_TABLE_URL+"?pageType=all", null, null).then(
+            await RestService.getData(config.GET_ALL_TICKET_FOR_TABLE_URL + "?pageType=all", null, null).then(
                 (response: any) => {
                     this.setState({
-                        ticketDataList : response,
+                        ticketDataList: response,
                     });
                 })
         } catch (err) {
@@ -171,7 +183,7 @@ export class Dashboard extends React.Component<any, any> {
             await RestService.getData(config.GET_ALL_TICKETING_DATA_URL, null, null).then(
                 (response: any) => {
                     this.setState({
-                        ticketingData : response,
+                        ticketingData: response,
                     });
                 })
         } catch (err) {
@@ -181,11 +193,30 @@ export class Dashboard extends React.Component<any, any> {
             await RestService.getData(config.GET_TOP_PERFORMER_DATA_URL, null, null).then(
                 (response: any) => {
                     this.setState({
-                        performerAgentsData : response,
+                        performerAgentsData: response,
                     });
                 })
         } catch (err) {
-            console.log("Loading ticketing data failed. Error: ", err);
+            console.log("Loading top performer data failed. Error: ", err);
+        }
+        try {
+            await RestService.getData(config.GET_TODAYS_TICKETS__TREDNDS_DATA_URL, null, null).then(
+                (response: any) => {
+                    const { LineChartData } = this.state;
+                    let dataSets = [...LineChartData.datasets.slice(0, 0),
+                    Object.assign({}, LineChartData.datasets[0], { data: response.numberOfTicketsList }),
+                    ];
+                    this.setState({
+                        LineChartData: {
+                            ...LineChartData,
+                            labels: response.hoursList,
+                            datasets: dataSets,
+                        },
+                    });
+
+                })
+        } catch (err) {
+            console.log("Loading Bar stat data failed. Error: ", err);
         }
     }
     onClickOpenSubLink = () => {
@@ -230,7 +261,7 @@ export class Dashboard extends React.Component<any, any> {
         return retData;
     }
     render() {
-        const { openCreateMenu, ticketDataList, columns } = this.state;
+        const { openCreateMenu, ticketDataList, columns,LineChartData } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -306,7 +337,7 @@ export class Dashboard extends React.Component<any, any> {
                                     <div className="d-block p-t-20 width-100 ticket-graphs">
                                         <div className="d-block width-100" style={{ height: "100%" }}>
                                             <Line
-                                                data={this.LineChartData}
+                                                data={LineChartData}
                                                 options={{
                                                     responsive: true,
                                                     maintainAspectRatio: false,
@@ -372,7 +403,7 @@ export class Dashboard extends React.Component<any, any> {
                                 </h2>
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
-                            <Table valueFromData={{ columns: columns, data: ticketDataList }}  perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
+                            <Table valueFromData={{ columns: columns, data: ticketDataList }} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
                                 tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="requesterName" showingLine="Showing %start% to %end% of %total% Tickets" />
                         </div>
                     </div>

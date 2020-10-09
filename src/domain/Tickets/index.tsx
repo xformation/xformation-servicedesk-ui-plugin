@@ -7,6 +7,7 @@ import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import { config } from '../../config';
 import Table from './../../components/table';
+import { RestService } from '../_service/RestService';
 
 export class Tickets extends React.Component<any, any> {
     breadCrumbs: any;
@@ -169,10 +170,46 @@ export class Tickets extends React.Component<any, any> {
             ],
         };
         this.perPageLimit = 3,
-        this.checkboxValue = false,
-        this.state = {
-            openCreateMenu: false,
-        };
+            this.checkboxValue = false,
+            this.state = {
+                openCreateMenu: false,
+                quickStat: {
+                    unresolvedTicketsPercentage: 0,
+                    totalTickets: 0,
+                    opentTicketsPercentage: 0,
+                    closedTicktsPercentage: 0,
+                },
+                barChartData: {
+                    labels: [],
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: '',
+                            backgroundColor: 'rgba(222, 233, 249, 1)',
+                            borderColor: 'rgba(222, 233, 249, 1)',
+                            borderWidth: 1,
+                            hoverBackgroundColor: 'rgba(222, 233, 249, 1)',
+                            hoverBorderColor: 'rgba(222, 233, 249, 1)',
+                            data: []
+                        }, {
+                            label: '',
+                            backgroundColor: '#fff',
+                            data: [],
+                            type: 'line',
+                            pointRadius: 4,
+                            // pointBackgroundColor: 'rgba(67, 138, 251, 1)',
+                            pointBackgroundColor: function (context: any) {
+                                var index = context.dataIndex;
+                                var value = context.dataset.data[index];
+                                return value < 20 ? '#438AFB' :  // draw negative values in red
+                                    value > 20 && value <= 30 ? '#FB7CA4' :    // else, alternate values in blue and green
+                                        '#FBB48B';
+                            },
+                            borderColor: '#fff',
+                        }
+                    ]
+                },
+            };
         this.breadCrumbs = [
             {
                 label: "Home",
@@ -192,8 +229,40 @@ export class Tickets extends React.Component<any, any> {
         this.openNewEmailRef = React.createRef();
         this.openNewTicketRef = React.createRef();
     }
-    componentDidMount() {
+    async componentDidMount() {
         // this.calculateTotalPages(this.state.TicketsData);
+        try {
+            await RestService.getData(config.GET_REPORT_QUICK_STAT_URL, null, null).then(
+                (response: any) => {
+                    this.setState({
+                        quickStat: response,
+                    });
+                })
+        } catch (err) {
+            console.log("Loading quick stat data failed. Error: ", err);
+        }
+        try {
+            await RestService.getData(config.GET_GRAPH_STAT_DATA_URL, null, null).then(
+                (response: any) => {
+                    const { barChartData } = this.state;
+                 let data1 =[...barChartData.datasets.slice(0,0),
+                        Object.assign({}, barChartData.datasets[0], { data: response.numberOfTicketsList }),
+                        Object.assign({}, barChartData.datasets[1], { data: response.numberOfTicketsList }),
+                        ...barChartData.datasets[0].data.slice(0+1),
+                        ...barChartData.datasets[0].data.slice(1+1)
+                    ];
+             this.setState({
+                        barChartData: {
+                            ...barChartData,
+                            labels: response.daysList,
+                            datasets: data1 ,
+                        },
+                    });
+
+                })
+        } catch (err) {
+            console.log("Loading Bar stat data failed. Error: ", err);
+        }
     };
 
     onClickOpenNewContact = (e: any) => {
@@ -219,7 +288,7 @@ export class Tickets extends React.Component<any, any> {
         });
     }
     barChartData = {
-        labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '01', '02', '03', '04', '05', '06', '07', '08', '09', 10],
+        labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'],
         datasets: [
             {
                 type: 'bar',
@@ -229,11 +298,11 @@ export class Tickets extends React.Component<any, any> {
                 borderWidth: 1,
                 hoverBackgroundColor: 'rgba(222, 233, 249, 1)',
                 hoverBorderColor: 'rgba(222, 233, 249, 1)',
-                data: [5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14, 16, 18, 16, 17, 12, 22, 23, 21, 5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14]
+                data: [5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14, 16, 18, 16, 17, 12, 22, 23, 21, 5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14, 20, 30]
             }, {
                 label: '',
                 backgroundColor: '#fff',
-                data: [5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14, 16, 18, 16, 17, 12, 22, 23, 21, 5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14],
+                data: [5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14, 16, 18, 16, 17, 12, 22, 23, 21, 5, 10, 12, 15, 20, 4, 10, 13, 17, 16, 20, 22, 13, 17, 15, 14, 20, 30],
                 type: 'line',
                 pointRadius: 4,
                 // pointBackgroundColor: 'rgba(67, 138, 251, 1)',
@@ -250,7 +319,7 @@ export class Tickets extends React.Component<any, any> {
     };
 
     render() {
-        const { openCreateMenu } = this.state;
+        const { openCreateMenu, quickStat, barChartData } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -290,22 +359,22 @@ export class Tickets extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-3 col-md-4 col-sm-12">
                                 <div className="d-inline-block tickets-number-box">
-                                    <h3 className="d-block m-b-5 red">2450</h3>
+                                    <h3 className="d-block m-b-5 red">{quickStat.totalTickets}</h3>
                                     <span className="d-block">Total No.of Tickets</span>
                                 </div>
                             </div>
                             <div className="col-lg-7 col-md-8 col-sm-12">
                                 <div className="d-block w-100 text-right">
                                     <div className="d-inline-block tickets-number-box">
-                                        <h3 className="d-block m-b-5 blue">67%</h3>
+                                        <h3 className="d-block m-b-5 blue">{quickStat.opentTicketsPercentage}%</h3>
                                         <span className="d-block">Open Tickets</span>
                                     </div>
                                     <div className="d-inline-block tickets-number-box">
-                                        <h3 className="d-block m-b-5 orange">18%</h3>
+                                        <h3 className="d-block m-b-5 orange">{quickStat.unresolvedTicketsPercentage}%</h3>
                                         <span className="d-block">Unresolved Tickets</span>
                                     </div>
                                     <div className="d-inline-block tickets-number-box">
-                                        <h3 className="d-block m-b-5 red">15%</h3>
+                                        <h3 className="d-block m-b-5 red">{quickStat.closedTicktsPercentage}%</h3>
                                         <span className="d-block">Closed Tickets</span>
                                     </div>
                                 </div>
@@ -325,7 +394,7 @@ export class Tickets extends React.Component<any, any> {
                         </div>
                         <div className="d-block width-100 p-t-10 chart-inner">
                             <Bar
-                                data={this.barChartData}
+                                data={barChartData}
                                 options={{
                                     maintainAspectRatio: false,
                                     legend: {
@@ -520,7 +589,7 @@ export class Tickets extends React.Component<any, any> {
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
                             <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
-                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="subject" showingLine = "Showing %start% to %end% of %total% Tickets"/>
+                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="subject" showingLine="Showing %start% to %end% of %total% Tickets" />
                         </div>
                     </div>
                 </div>

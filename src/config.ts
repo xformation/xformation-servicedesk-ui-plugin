@@ -1,4 +1,4 @@
-const IP = "100.64.108.25";
+const IP = "localhost";
 
 const ticketSrvUrl = `http://${IP}:7100/api`;
 
@@ -20,6 +20,9 @@ export const config = {
   GET_ALL_TICKET_FOR_TABLE_URL: `${ticketSrvUrl}/getTicketForTable`,
   GET_ALL_TICKETING_DATA_URL: `${ticketSrvUrl}/getTicketingData`,
   GET_TOP_PERFORMER_DATA_URL: `${ticketSrvUrl}/topPerformerAgents`,
+  GET_REPORT_QUICK_STAT_URL: `${ticketSrvUrl}/reportQuicStatistics`,
+  GET_GRAPH_STAT_DATA_URL: `${ticketSrvUrl}/getBarGraphStatData`,
+  GET_TODAYS_TICKETS__TREDNDS_DATA_URL: `${ticketSrvUrl}/getTodaysTicketTrendsData`,
   SEVERITY_ERROR: "error",
   SEVERITY_SUCCESS: "success",
   COMPANY_ADDED_SUCCESS: "Company Successfully added",
