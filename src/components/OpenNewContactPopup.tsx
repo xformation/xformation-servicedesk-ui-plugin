@@ -5,17 +5,17 @@ import { Customselectbox } from './Customselectbox';
 import { config } from "../config";
 import { RestService } from '../domain/_service/RestService';
 import AlertMessage from './AlertMessage';
-import axios from 'axios'
+import axios from 'axios';
 
 class MySelectObj {
     id: any;
     name: any;
-    constructor(id: any, name: any){
+    constructor(id: any, name: any) {
         this.id = id;
         this.name = name;
     }
 }
-export class OpenNewContactPopup extends React.Component<any, any> { 
+export class OpenNewContactPopup extends React.Component<any, any> {
     steps: any;
     constructor(props: any) {
         super(props);
@@ -43,13 +43,16 @@ export class OpenNewContactPopup extends React.Component<any, any> {
             industry: '',
             orgCompanyList: [],
             oldCompanyFlag: true,
-            newCompanyFlag : false,
-            contactPhoto:null,
+            newCompanyFlag: false,
+            contactPhoto: null,
             isAlertOpen: false,
             message: null,
             severity: null,
+            contactfile: null,
+            companyfile: null
         };
     }
+
     async componentDidMount() {
         try {
             await RestService.getData(config.GET_ALL_COMPANIES_URL, null, null).then(
@@ -93,10 +96,10 @@ export class OpenNewContactPopup extends React.Component<any, any> {
         if (errorData.companyLogo.isValid && errorData.contactPhoto.isValid && errorData.fullName.isValid && errorData.title.isValid && errorData.companyId.isValid && errorData.companyLogo.isValid && errorData.companyName.isValid && errorData.description.isValid && errorData.notes.isValid && errorData.healthScore.isValid && errorData.domain.isValid && errorData.accountTier.isValid && errorData.renewalDate.isValid && errorData.industry.isValid && (errorData.email.isValid || errorData.alternateEmail.isValid ||
             errorData.workPhone.isValid || errorData.mobilePhone.isValid || errorData.twitter.isValid || errorData.uniqueExternalId.isValid)) {
 
-            const { newCompanyFlag,oldCompanyFlag,contactPhoto , fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId,
-                companyId,companyLogo, companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry } = this.state;
+            const { newCompanyFlag, oldCompanyFlag, contactPhoto, fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId,
+                companyId, companyLogo, companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry } = this.state;
             const sendData = {
-                contactPhoto,fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId, companyId,
+                contactPhoto, fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId, companyId,
                 companyLogo,
                 companyName,
                 description,
@@ -119,11 +122,11 @@ export class OpenNewContactPopup extends React.Component<any, any> {
             formData.append("mobilePhone", mobilePhone);
             formData.append("twitterHandle", twitter);
             formData.append("uniqueExternalId", uniqueExternalId);
-            if(oldCompanyFlag){
-            formData.append("companyId", companyId);
+            if (oldCompanyFlag) {
+                formData.append("companyId", companyId);
             }
-            if(newCompanyFlag){
-                formData.append("companyId","-1");
+            if (newCompanyFlag) {
+                formData.append("companyId", "-1");
             }
             formData.append("logo", companyLogo);
             formData.append("companyName", companyName);
@@ -138,22 +141,22 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                 headers: {
                     'content-type': 'multipart/form-data'
                 }
-            }).then((response:any) => {
-                if(response.data!=null){
+            }).then((response: any) => {
+                if (response.data != null) {
                     this.setState({
-                        severity : config.SEVERITY_SUCCESS,
+                        severity: config.SEVERITY_SUCCESS,
                         message: config.CONTACT_ADDED_SUCCESS,
                         isAlertOpen: true,
                     });
-                }else{
+                } else {
                     this.setState({
-                        severity : config.SEVERITY_ERROR,
+                        severity: config.SEVERITY_ERROR,
                         message: config.CONTACT_ADDED_ERROR,
                         isAlertOpen: true,
                     });
                 }
-                console.log("response data",response.data);
-            }).catch((err:any) => console.log(err))
+                console.log("response data", response.data);
+            }).catch((err: any) => console.log(err))
 
         }
     }
@@ -181,11 +184,11 @@ export class OpenNewContactPopup extends React.Component<any, any> {
             accountTier: validObj,
             renewalDate: validObj,
             industry: validObj,
-            companyLogo:  validObj,
-            contactPhoto:validObj,
+            companyLogo: validObj,
+            contactPhoto: validObj,
         };
         if (isSubmitted) {
-            const { newCompanyFlag,oldCompanyFlag,contactPhoto,fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId, companyId,companyLogo,companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry, } = this.state;
+            const { newCompanyFlag, oldCompanyFlag, contactPhoto, fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId, companyId, companyLogo, companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry, } = this.state;
             if (!contactPhoto) {
                 retData.contactPhoto = {
                     isValid: false,
@@ -240,16 +243,16 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                     message: "Atleast one of these fields is mandatory*"
                 };
             }
-            if(oldCompanyFlag){
-            if (!companyId) {
-                retData.companyId = {
-                    isValid: false,
-                    message: "companyId name is required"
-                };
+            if (oldCompanyFlag) {
+                if (!companyId) {
+                    retData.companyId = {
+                        isValid: false,
+                        message: "companyId name is required"
+                    };
+                }
             }
-        }
-        
-            if(newCompanyFlag){
+
+            if (newCompanyFlag) {
                 if (!companyLogo) {
                     retData.companyLogo = {
                         isValid: false,
@@ -257,7 +260,7 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                     };
                 }
             }
-            
+
             if (!companyName) {
                 retData.companyName = {
                     isValid: false,
@@ -317,15 +320,15 @@ export class OpenNewContactPopup extends React.Component<any, any> {
         });
     }
     handleSelectBox = (e: any) => {
-        const {orgCompanyList} = this.state;
+        const { orgCompanyList } = this.state;
         const { name, value } = e.target;
         this.setState({
             [name]: value,
         });
         console.log("company org list : ", orgCompanyList);
-        for(let i=0; i<orgCompanyList.length; i++){
+        for (let i = 0; i < orgCompanyList.length; i++) {
             let obj = orgCompanyList[i];
-            if(parseInt(value) === obj.id) {
+            if (parseInt(value) === obj.id) {
                 this.setState({
                     companyName: obj.companyName,
                     description: obj.description,
@@ -334,31 +337,31 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                     accountTier: obj.accountTier,
                     renewalDate: obj.renewalDate,
                     industry: obj.industry,
-                    domain:obj.domain,
+                    domain: obj.domain,
                 });
-                break;        
+                break;
             }
-        }        
+        }
     }
-    addNewCompany= ()=>{
+    addNewCompany = () => {
         this.setState({
-            oldCompanyFlag:false,
+            oldCompanyFlag: false,
             newCompanyFlag: true,
         });
     }
     handleImageChange = (e: any) => {
-        console.log("file=", e.target.files[0])
         this.setState({
-            [e.target.name]: e.target.files[0]
+            [e.target.name]: URL.createObjectURL(e.target.files[0])
         })
     };
-    handleCloseAlert = (e: any) =>{
+
+    handleCloseAlert = (e: any) => {
         this.setState({
-          isAlertOpen: false
+            isAlertOpen: false
         })
     }
     render() {
-        const { modal, isSubmitted, companyList,contactPhoto, fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId, companyId,companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry,oldCompanyFlag,newCompanyFlag } = this.state;
+        const { modal, isSubmitted, companyList, contactPhoto, fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId, companyId, companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry, oldCompanyFlag, newCompanyFlag } = this.state;
         const state = this.state;
         const errorData = this.validate(isSubmitted);
         return (
@@ -379,7 +382,8 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                                 <strong className="d-block">Upload Photo</strong>
                                 <input type="file" id="contactPhoto" className="contactPhoto" name="contactPhoto" onChange={this.handleImageChange} />
                                 <p className="d-block">An image of the person, it's best if it has the same length and height</p>
-                                <span style={{color: "red"}}>{errorData.contactPhoto.message}</span>
+                                <span style={{ color: "red" }}>{errorData.contactPhoto.message}</span>
+                                <img src={contactPhoto} />
                             </div>
                         </div>
                         <div className="row">
@@ -442,153 +446,154 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                             </div>
                         </div>
                         {
-                            oldCompanyFlag ==true &&
+                            oldCompanyFlag == true &&
                             <div>
-                            <div className="row">
-                            <div className="col-lg-12 col-md-12 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="company">Company</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="company" id="companyId" name="companyId" value={companyId} arrayData={companyList} onChange={this.handleSelectBox} isValid={errorData.companyId.isValid} message={errorData.companyId.message} />
-                                    <div className="d-block text-right p-t-5">
-                                        <button className="add-conatct" onClick={this.addNewCompany}>Add a Company</button>
+                                <div className="row">
+                                    <div className="col-lg-12 col-md-12 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="company">Company</label>
+                                            <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="company" id="companyId" name="companyId" value={companyId} arrayData={companyList} onChange={this.handleSelectBox} isValid={errorData.companyId.isValid} message={errorData.companyId.message} />
+                                            <div className="d-block text-right p-t-5">
+                                                <button className="add-conatct" onClick={this.addNewCompany}>Add a Company</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="companyName">Company Name*</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="companyName" id="companyName" placeholder="" name="companyName" value={companyName} onChange={this.handleStateChange} isValid={errorData.companyName.isValid} message={errorData.companyName.message} />
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="description">Description</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="description" id="description" placeholder="Write something that describe this company" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="notes">Notes</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="notes" id="notes" placeholder="Add notes about this company - make something about a recent deal, etc." name="notes" value={notes} onChange={this.handleStateChange} isValid={errorData.notes.isValid} message={errorData.notes.message} />
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="company">Domains of Company</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="domain" id="domain" placeholder="eg: My company1.com, mycompany2.com" name="company2" value={domain} onChange={this.handleStateChange} isValid={errorData.domain.isValid} message={errorData.domain.message} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="healthCare">Health Score</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="healthCare" id="healthCare" placeholder="Any" name="healthScore" value={healthScore} onChange={this.handleStateChange} isValid={errorData.healthScore.isValid} message={errorData.healthScore.message} />
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="accountTier">Account tier</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="accountTier" id="accountTier" placeholder="Any" name="accountTier" value={accountTier} onChange={this.handleStateChange} isValid={errorData.accountTier.isValid} message={errorData.accountTier.message} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="renewalDate">Renewal Date</label>
+                                            <CustomTextbox containerClass="form-group-inner" type="date" inputClass="form-control" htmlFor="renewalDate" id="renewalDate" placeholder="Any" name="renewalDate" value={renewalDate} onChange={this.handleStateChange} isValid={errorData.renewalDate.isValid} message={errorData.renewalDate.message} />
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="industry">Industry</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="industry" id="industry" placeholder="Any" name="industry" value={industry} onChange={this.handleStateChange} isValid={errorData.industry.isValid} message={errorData.industry.message} />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="row">
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                            <div className="form-group">
-                                <label htmlFor="companyName">Company Name*</label>
-                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="companyName" id="companyName" placeholder="" name="companyName" value={companyName} onChange={this.handleStateChange} isValid={errorData.companyName.isValid} message={errorData.companyName.message} />
-                            </div>
-                        </div>
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                            <div className="form-group">
-                                <label htmlFor="description">Description</label>
-                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="description" id="description" placeholder="Write something that describe this company" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                            <div className="form-group">
-                                <label htmlFor="notes">Notes</label>
-                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="notes" id="notes" placeholder="Add notes about this company - make something about a recent deal, etc." name="notes" value={notes} onChange={this.handleStateChange} isValid={errorData.notes.isValid} message={errorData.notes.message} />
-                            </div>
-                        </div>
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                            <div className="form-group">
-                                <label htmlFor="company">Domains of Company</label>
-                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="domain" id="domain" placeholder="eg: My company1.com, mycompany2.com" name="company2" value={domain} onChange={this.handleStateChange} isValid={errorData.domain.isValid} message={errorData.domain.message} />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                            <div className="form-group">
-                                <label htmlFor="healthCare">Health Score</label>
-                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="healthCare" id="healthCare" placeholder="Any" name="healthScore" value={healthScore} onChange={this.handleStateChange} isValid={errorData.healthScore.isValid} message={errorData.healthScore.message} />
-                            </div>
-                        </div>
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                            <div className="form-group">
-                                <label htmlFor="accountTier">Account tier</label>
-                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="accountTier" id="accountTier" placeholder="Any" name="accountTier" value={accountTier} onChange={this.handleStateChange} isValid={errorData.accountTier.isValid} message={errorData.accountTier.message} />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                            <div className="form-group">
-                                <label htmlFor="renewalDate">Renewal Date</label>
-                                <CustomTextbox containerClass="form-group-inner" type="date" inputClass="form-control" htmlFor="renewalDate" id="renewalDate" placeholder="Any" name="renewalDate" value={renewalDate} onChange={this.handleStateChange} isValid={errorData.renewalDate.isValid} message={errorData.renewalDate.message} />
-                            </div>
-                        </div>
-                        <div className="col-lg-6 col-md-6 col-sm-12">
-                            <div className="form-group">
-                                <label htmlFor="industry">Industry</label>
-                                <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="industry" id="industry" placeholder="Any" name="industry" value={industry} onChange={this.handleStateChange} isValid={errorData.industry.isValid} message={errorData.industry.message} />
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-                            
+
                         }
                         {
-                            newCompanyFlag==true && 
+                            newCompanyFlag == true &&
                             <div className="d-block width-100 contact-popup-container">
-                        <div className="d-block width-100 p-b-20 heading">
-                            <h4 className="d-block"><i className="fa fa-building"></i> New Company</h4>
-                            <span className="d-block">When someone reaches out to you, they become a contact in your account. You can create companies and associate contacts with them. <a href="#">Learn more.</a></span>
-                        </div>
-                        <div className="d-block width-100 p-t-10 p-b-10 upload-photo">
-                            <div className="d-inline-block upload-icon">
-                                <i className="fa fa-building"></i>
-                            </div>
-                            <div className="d-inline-block v-a-top">
-                                <strong className="d-block">Upload Logo</strong>
-                                <input type="file" id="companyLogo" name="companyLogo" onChange={this.handleImageChange} />
-                                <p className="d-block">An image of the person, it's best if it has the same length and height</p>
-                                <span style={{color: "red"}}>{errorData.companyLogo.message}</span>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="companyName">Company Name*</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="companyName" id="companyName" placeholder="" name="companyName" value={companyName} onChange={this.handleStateChange} isValid={errorData.companyName.isValid} message={errorData.companyName.message} />
+                                <div className="d-block width-100 p-b-20 heading">
+                                    <h4 className="d-block"><i className="fa fa-building"></i> New Company</h4>
+                                    <span className="d-block">When someone reaches out to you, they become a contact in your account. You can create companies and associate contacts with them. <a href="#">Learn more.</a></span>
+                                </div>
+                                <div className="d-block width-100 p-t-10 p-b-10 upload-photo">
+                                    <div className="d-inline-block upload-icon">
+                                        <i className="fa fa-building"></i>
+                                    </div>
+                                    <div className="d-inline-block v-a-top">
+                                        <strong className="d-block">Upload Logo</strong>
+                                        <input type="file" id="companyLogo" name="companyLogo" onChange={this.handleImageChange} />
+                                        <p className="d-block">An image of the person, it's best if it has the same length and height</p>
+                                        <span style={{ color: "red" }}>{errorData.companyLogo.message}</span>
+                                        <img src={this.state.companyLogo} />
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="companyName">Company Name*</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="companyName" id="companyName" placeholder="" name="companyName" value={companyName} onChange={this.handleStateChange} isValid={errorData.companyName.isValid} message={errorData.companyName.message} />
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="description">Description</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="description" id="description" placeholder="Write something that describe this company" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="notes">Notes</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="notes" id="notes" placeholder="Add notes about this company - make something about a recent deal, etc." name="notes" value={notes} onChange={this.handleStateChange} isValid={errorData.notes.isValid} message={errorData.notes.message} />
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="company">Domains of Company</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="domain" id="domian" placeholder="eg: My company1.com, mycompany2.com" name="domain" value={domain} onChange={this.handleStateChange} isValid={errorData.domain.isValid} message={errorData.domain.message} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="healthCare">Health Score</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="healthCare" id="healthCare" placeholder="Any" name="healthScore" value={healthScore} onChange={this.handleStateChange} isValid={errorData.healthScore.isValid} message={errorData.healthScore.message} />
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="accountTier">Account tier</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="accountTier" id="accountTier" placeholder="Any" name="accountTier" value={accountTier} onChange={this.handleStateChange} isValid={errorData.accountTier.isValid} message={errorData.accountTier.message} />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="row">
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="renewalDate">Renewal Date</label>
+                                            <CustomTextbox containerClass="form-group-inner" type="date" inputClass="form-control" htmlFor="renewalDate" id="renewalDate" placeholder="Any" name="renewalDate" value={renewalDate} onChange={this.handleStateChange} isValid={errorData.renewalDate.isValid} message={errorData.renewalDate.message} />
+                                        </div>
+                                    </div>
+                                    <div className="col-lg-6 col-md-6 col-sm-12">
+                                        <div className="form-group">
+                                            <label htmlFor="industry">Industry</label>
+                                            <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="industry" id="industry" placeholder="Any" name="industry" value={industry} onChange={this.handleStateChange} isValid={errorData.industry.isValid} message={errorData.industry.message} />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="description">Description</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="description" id="description" placeholder="Write something that describe this company" name="description" value={description} onChange={this.handleStateChange} isValid={errorData.description.isValid} message={errorData.description.message} />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="notes">Notes</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="notes" id="notes" placeholder="Add notes about this company - make something about a recent deal, etc." name="notes" value={notes} onChange={this.handleStateChange} isValid={errorData.notes.isValid} message={errorData.notes.message} />
-                                </div>
-                            </div>
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="company">Domains of Company</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="domain" id="domian" placeholder="eg: My company1.com, mycompany2.com" name="domain" value={domain} onChange={this.handleStateChange} isValid={errorData.domain.isValid} message={errorData.domain.message} />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="healthCare">Health Score</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="healthCare" id="healthCare" placeholder="Any" name="healthScore" value={healthScore} onChange={this.handleStateChange} isValid={errorData.healthScore.isValid} message={errorData.healthScore.message} />
-                                </div>
-                            </div>
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="accountTier">Account tier</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="accountTier" id="accountTier" placeholder="Any" name="accountTier" value={accountTier} onChange={this.handleStateChange} isValid={errorData.accountTier.isValid} message={errorData.accountTier.message} />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="renewalDate">Renewal Date</label>
-                                    <CustomTextbox containerClass="form-group-inner" type="date" inputClass="form-control" htmlFor="renewalDate" id="renewalDate" placeholder="Any" name="renewalDate" value={renewalDate} onChange={this.handleStateChange} isValid={errorData.renewalDate.isValid} message={errorData.renewalDate.message} />
-                                </div>
-                            </div>
-                            <div className="col-lg-6 col-md-6 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="industry">Industry</label>
-                                    <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="industry" id="industry" placeholder="Any" name="industry" value={industry} onChange={this.handleStateChange} isValid={errorData.industry.isValid} message={errorData.industry.message} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                         }
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
