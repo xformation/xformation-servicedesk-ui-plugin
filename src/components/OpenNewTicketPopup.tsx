@@ -132,7 +132,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         });
         const errorData = this.validate(true);
         if (errorData.type.isValid && errorData.subjectText.isValid && errorData.priority.isValid && errorData.description.isValid && errorData.tags.isValid && errorData.requesterContact.isValid && errorData.assignType.isValid && (errorData.assignedAgent.isValid || errorData.assignedContact.isValid)) {
-            const { contact, subject, subjectText, priorityValue, assignValue, typeValue, description, tags, requesterContact, assignedAgent, assignType, assignedContact } = this.state;
+            const { contact, subject, subjectText, priorityValue, assignValue, typeValue, description, tags, requesterContact, assignedAgent, assignType, assignedContact,contacts } = this.state;
             let assignedToId;
             if (assignType == "contact") {
                 assignedToId = assignedContact;
@@ -151,6 +151,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             }
 
             let data = {
+                contact: contacts,
                 type: typeValue,
                 subject: subjectText,
                 priority: priorityValue,
@@ -347,7 +348,6 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         const contactValidation = this.validateContacts(isSubmitted);
         const errorList = contactValidation.errorList;
         let retData = [];
-        console.log(contacts);
         for (let i = 0; i < contacts.length; i++) {
             const error = errorList[i];
             retData.push(
