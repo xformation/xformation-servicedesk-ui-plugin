@@ -7,6 +7,7 @@ const sortEnum = {
 };
 
 export class Table extends React.Component<any, any> {
+    paginationRef: any;
     constructor(props: any) {
         super(props);
         this.state = {
@@ -21,12 +22,10 @@ export class Table extends React.Component<any, any> {
             sortType: sortEnum.NONE,
             sortKey: '',
             isAllChecked: false,
-            start_index: 0,
-            ending_index: 9,
             visibleCheckbox: this.props.visiblecheckboxStatus,
-            showSelect: false,
-            totalOPened:'',
+            showSelect: false
         }
+        this.paginationRef = React.createRef();
     };
 
     tableBodyData() {
@@ -171,21 +170,21 @@ export class Table extends React.Component<any, any> {
     }
 
     peginationOfTable() {
-        const { currentPage, totalPages, displayData, start_index, ending_index } = this.state;
+        const { currentPage, totalPages, displayData, perPageLimit } = this.state;
         let rows = [];
         if (displayData.length > 0) {
             for (let i = 0; i < totalPages; i++) {
-                if (i >= start_index && i <= ending_index) {
-                    rows.push(<li className="page-item" key={i}><a className={currentPage === i ? 'page-link active' : 'page-link deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
-                }
+                rows.push(<li className="page-item" key={i}><a className={currentPage === i ? 'page-link active' : 'page-link deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
             }
             return (
                 <ul>
                     <li className="page-item previous">
                         <a className={currentPage === 0 ? 'page-link desable' : 'page-link enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
                     </li>
-                    {rows}
-
+                    <div ref={this.paginationRef}>
+                        {rows}
+                    </div>
+                    {/* <li><a href="#">......</a></li> */}
                     <li className="page-item next">
                         <a className={currentPage === this.state.totalPages - 1 ? 'page-link desable' : 'page-link enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
                     </li>
@@ -195,67 +194,52 @@ export class Table extends React.Component<any, any> {
     }
 
     navigatePage(target: any, e: any, i: any = null) {
-        const { totalPages, currentPage, ending_index, start_index } = this.state;
+        let { totalPages, currentPage } = this.state;
         e.preventDefault();
         switch (target) {
             case 'pre':
                 if (currentPage !== 0) {
-                    if (currentPage !== start_index) {
-                        this.setState({
-                            currentPage: currentPage - 1,
-                        });
-                    } else {
-                        this.setState({
-                            currentPage: currentPage - 1,
-                            start_index: start_index - 10,
-                            ending_index: ending_index - 10
-                        });
-                    }
+                    currentPage = currentPage - 1;
                 }
                 break;
             case 'next':
                 if (currentPage !== totalPages - 1) {
-                    if (currentPage != ending_index) {
-                        this.setState({
-                            currentPage: currentPage + 1,
-                        });
-                    } else {
-                        this.setState({
-                            currentPage: currentPage + 1,
-                            start_index: ending_index + 1,
-                            ending_index: ending_index + 10
-                        });
-                    }
+                    currentPage = currentPage + 1;
                 }
                 break;
             case 'btn-click':
-                this.setState({
-                    currentPage: i
-                });
+                currentPage = i;
                 break;
         }
+        this.setState({
+            currentPage
+        }, () => {
+            this.setCurrentPageIntoView();
+        });
     }
+
+    setCurrentPageIntoView = () => {
+        const { currentPage } = this.state;
+        let scrollLeft = currentPage * 28;
+        if(this.paginationRef.current){
+            this.paginationRef.current.scrollTo(scrollLeft, 0);
+        }
+    };
 
     handleChange = (e: any) => {
         const { displayData } = this.state;
         const totalData = displayData.length;
+        let totalPages = 1;
+        let perPageLimit = totalData;
         if (e.target.value !== 'all') {
-            let indexOfLastData = Math.ceil(totalData / e.target.value);
-            this.setState({
-                perPageLimit: e.target.value,
-                totalPages: indexOfLastData,
-                start_index: 1,
-                ending_index: e.target.value,
-            });
-        } else {
-            let indexOfLastData = Math.ceil(totalData / totalData);
-            this.setState({
-                perPageLimit: totalData,
-                totalPages: indexOfLastData,
-                start_index: 1,
-                ending_index: totalData
-            });
+            totalPages = Math.ceil(totalData / e.target.value);
+            perPageLimit = e.target.value;
         }
+        this.setState({
+            perPageLimit,
+            totalPages,
+            currentPage: 0
+        });
     }
 
     onSearchChange = (e: any) => {
