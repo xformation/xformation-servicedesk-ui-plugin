@@ -452,17 +452,21 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
-                                    <input type="radio" name="assignType" value="contact" className="contact_radio_button" onChange={this.handleStateChange} />Contact
-                                <input type="radio" name="assignType" value="agent" className="contact_radio_button" onChange={this.handleStateChange} />Agent
-                                <br></br><span style={{ color: "red" }}>{errorData.assignType.message}</span>
-                                    {assignType == "contact" && <div>
-                                        <label htmlFor="assign">Assign to Contacts*</label>
-                                        <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="assignedContact" id="assignedContact" name="assignedContact" value={assignedContact} arrayData={contactNameAndEmailList} onChange={this.handleStateChange} isValid={errorData.assignedContact.isValid} message={errorData.assignedContact.message} />
-                                    </div>}
+                                    <div className="d-inline-block form-check create-author">
+                                        <input type="radio" name="assignType" value="contact" className="form-check-input contact_radio_button" onChange={this.handleStateChange} /><label className="form-check-label" htmlFor="Contact">Contact</label> 
+                                        {assignType == "contact" && <div>
+                                            <label htmlFor="assign">Assign to Contacts*</label>
+                                            <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="assignedContact" id="assignedContact" name="assignedContact" value={assignedContact} arrayData={contactNameAndEmailList} onChange={this.handleStateChange} isValid={errorData.assignedContact.isValid} message={errorData.assignedContact.message} />
+                                        </div>}
+                                    </div>
+                                    <div className="d-inline-block form-check create-author">
+                                    <input type="radio" name="assignType" value="agent" className="form-check-input contact_radio_button" onChange={this.handleStateChange} /><label className="form-check-label" htmlFor="Agent">Agent</label> 
                                     {assignType == "agent" && <div>
                                         <label htmlFor="assign">Assign to Agent*</label>
                                         <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="assignedAgent" id="assignedAgent" name="assignedAgent" value={assignedAgent} arrayData={AgentNameList} onChange={this.handleStateChange} isValid={errorData.assignedAgent.isValid} message={errorData.assignedAgent.message} />
                                     </div>}
+                                    </div>
+                                    <span style={{ color: "red" }}>{errorData.assignType.message}</span>
                                 </div>
                             </div>
                         </div>

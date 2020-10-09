@@ -539,6 +539,22 @@ a:hover {
   margin-bottom: 20px;
 }
 
+.contact-popup-container .form-check {
+  padding-right: 10px;
+}
+.contact-popup-container .form-check .form-check-input {
+  display: inline-block;
+  margin-top: 2px;
+}
+.contact-popup-container .form-check .form-check-label {
+  font-size: 14px;
+  line-height: 18px;
+  color: #323c47;
+  font-weight: 600;
+  display: inline-block;
+  padding-left: 7px;
+}
+
 .contact-popup-container .contact-popup-buttons button {
   border: 1px solid #a9b9c6;
   background-color: #ffffff;
@@ -558,24 +574,6 @@ a:hover {
 
 .contact-popup-container .contact-popup-buttons .create-author {
   padding-right: 5px;
-}
-.contact-popup-container
-  .contact-popup-buttons
-  .create-author
-  .form-check-input {
-  display: inline-block;
-  margin-top: 2px;
-}
-.contact-popup-container
-  .contact-popup-buttons
-  .create-author
-  .form-check-label {
-  font-size: 14px;
-  line-height: 18px;
-  color: #323c47;
-  font-weight: 600;
-  display: inline-block;
-  padding-left: 7px;
 }
 
 .contact-popup-container.new-ticket-container .form-group label {
