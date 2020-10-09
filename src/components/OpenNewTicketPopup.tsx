@@ -131,8 +131,6 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             isSubmitted: true
         });
         const errorData = this.validate(true);
-        console.log(errorData);
-
         if (errorData.type.isValid && errorData.subjectText.isValid && errorData.priority.isValid && errorData.description.isValid && errorData.tags.isValid && errorData.requesterContact.isValid && errorData.assignType.isValid && (errorData.assignedAgent.isValid || errorData.assignedContact.isValid)) {
             const { contact, subject, subjectText, priorityValue, assignValue, typeValue, description, tags, requesterContact, assignedAgent, assignType, assignedContact } = this.state;
             let assignedToId;
@@ -312,11 +310,27 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
     };
 
     handleStateChange = (e: any) => {
-        const { name, value } = e.target;
-
-        this.setState({
-            [name]: value
-        });
+        const { name, value, id } = e.target;
+        let data = [];
+        if (name == 'contact') {
+            for (let i = 0; i < this.state.contacts.length; i++) {
+                if (id == i) {
+                    data.push({ index: i, value: value })
+                } else {
+                    data.push(this.state.contacts[i])
+                }
+            }
+            this.setState({
+                contacts: data
+            });
+        } else {
+            this.setState({
+                [name]: value
+            });
+        }
+        // this.setState({
+        //     [name]: value
+        // });
 
     };
 
@@ -333,10 +347,11 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         const contactValidation = this.validateContacts(isSubmitted);
         const errorList = contactValidation.errorList;
         let retData = [];
+        console.log(contacts);
         for (let i = 0; i < contacts.length; i++) {
             const error = errorList[i];
             retData.push(
-                <Customselectbox containerClass="form-group-inner p-b-10" inputClass="form-control" htmlFor="contact" id={i} name="contact" value={contacts[i].value} arrayData={{ 0: 'abc', 1: 'def', 2: 'ghi' }} onChange={this.handleStateChange} isValid={error.isValid} message={error.message} />
+                <Customselectbox containerClass="form-group-inner p-b-10" inputClass="form-control" htmlFor="contact" id={i} name="contact" value={contacts[i].value} arrayData={[{ id: 0, name: "ABC" }, { id: 1, name: "DEF" }, { id: 2, name: "GHI" }]} onChange={this.handleStateChange} isValid={error.isValid} message={error.message} />
             );
         }
         return retData;
@@ -396,21 +411,15 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="contact">Contact*(Requester)</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="requesterContact" id="requesterContact" name="requesterContact" value={requesterContact} arrayData={contactNameAndEmailList} onChange={this.handleStateChange} isValid={errorData.requesterContact.isValid} message={errorData.requesterContact.message} />
+                                    {this.displayContact()}
+                                    {/* <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="requesterContact" id="requesterContact" name="requesterContact" value={requesterContact} arrayData={contactNameAndEmailList} onChange={this.handleStateChange} isValid={errorData.requesterContact.isValid} message={errorData.requesterContact.message} /> */}
                                     <div className="d-block text-right p-t-5">
-                                        <button className="add-conatct">Add a Conatct</button>
+                                        <button className="add-conatct" onClick={() => this.addContact()}>Add a Conatct</button>
+                                        {/* <button className="add-conatct">Add a Conatct</button> */}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {/* <div className="row">
-                            <div className="col-lg-12 col-md-12 col-sm-12">
-                                <div className="form-group">
-                                    <label htmlFor="subject">Subject*</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="subject" id="subject" name="subject" value={subject} arrayData={{ 0: 'abc', 1: 'def', 2: 'ghi' }} onChange={this.handleStateChange} isValid={errorData.subject.isValid} message={errorData.subject.message} />
-                                </div>
-                            </div>
-                        </div> */}
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
@@ -441,9 +450,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                             </div>
                         </div>
                         <div className="row">
-
                             <div className="col-lg-12 col-md-12 col-sm-12">
-
                                 <div className="form-group">
                                     <input type="radio" name="assignType" value="contact" className="contact_radio_button" onChange={this.handleStateChange} />Contact
                                 <input type="radio" name="assignType" value="agent" className="contact_radio_button" onChange={this.handleStateChange} />Agent
