@@ -187,7 +187,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
     handleImageChange = (e: any) => {
         console.log("file=", e.target.files[0])
         this.setState({
-            companyLogo: e.target.files[0]
+            companyLogo: URL.createObjectURL(e.target.files[0])
         })
     };
     handleCloseAlert = (e: any) =>{
@@ -219,6 +219,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                                 <input type="file" id="companyLogo" name="companyLogo" className="companyLogo" onChange={this.handleImageChange} />
                                 <p className="d-block">An image of the person, it's best if it has the same length and height</p>
                                 <span style={{color: "red"}}>{errorData.companyLogo.message}</span>
+                                <img src={companyLogo} />
                             </div>
                         </div>
                         <div className="row">
