@@ -383,7 +383,7 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                                 <input type="file" id="contactPhoto" className="contactPhoto" name="contactPhoto" onChange={this.handleImageChange} />
                                 <p className="d-block">An image of the person, it's best if it has the same length and height</p>
                                 <span style={{ color: "red" }}>{errorData.contactPhoto.message}</span>
-                                <img src={contactPhoto} />
+                                <img src={contactPhoto} alt="" width="100" height="100" />
                             </div>
                         </div>
                         <div className="row">
@@ -531,10 +531,10 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                                     </div>
                                     <div className="d-inline-block v-a-top">
                                         <strong className="d-block">Upload Logo</strong>
-                                        <input type="file" id="companyLogo" name="companyLogo" onChange={this.handleImageChange} />
+                                        <input type="file" id="companyLogo" name="companyLogo" className="contactPhoto" onChange={this.handleImageChange} />
                                         <p className="d-block">An image of the person, it's best if it has the same length and height</p>
                                         <span style={{ color: "red" }}>{errorData.companyLogo.message}</span>
-                                        <img src={this.state.companyLogo} />
+                                        <img src={this.state.companyLogo} alt="" width="100" height="100" />
                                     </div>
                                 </div>
                                 <div className="row">
