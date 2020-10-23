@@ -164,6 +164,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                 associatedEntityId: associatedEntityId,
                 alertName: alertName,
             }
+            
             let formData = new FormData()
             formData.append("type", typeValue);
             formData.append("subject", subjectText);
