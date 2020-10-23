@@ -30,7 +30,6 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             type: '',
             subjectText: '',
             priority: '',
-            assign: '',
             priorityValue: '',
             assignValue: '',
             typeValue: '',
@@ -141,17 +140,17 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             }
             let associatedEntityName;
             let associatedEntityId;
-
+            let alertName;
             if (this.props.guid == undefined) {
-                associatedEntityName = null;
+                associatedEntityName = "";
                 associatedEntityId = null;
             } else {
                 associatedEntityName = "alert";
                 associatedEntityId = this.props.guid;
+                alertName=this.props.alertName;
             }
 
             let data = {
-                contact: contacts,
                 type: typeValue,
                 subject: subjectText,
                 priority: priorityValue,
@@ -163,9 +162,24 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                 assignedToId: assignedToId,
                 associatedEntityName: associatedEntityName,
                 associatedEntityId: associatedEntityId,
+                alertName: alertName,
             }
+            let formData = new FormData()
+            formData.append("type", typeValue);
+            formData.append("subject", subjectText);
+            formData.append("priority", priorityValue);
+            formData.append("description", description);
+            formData.append("tag", tags);
+            formData.append("assignedToUserType", assignType);
+            formData.append("requesterUserType", "contact");
+            formData.append("requesterId", requesterContact);
+            formData.append("assignedToId", assignedToId);
+            formData.append("associatedEntityName", associatedEntityName);
+            formData.append("associatedEntityId", associatedEntityId);
+            formData.append("alertName", alertName);
+
             console.log("Send Data : ", data);
-            axios.post(config.ADD_TICKET_URL, data, {})
+            axios.post(config.ADD_TICKET_URL, formData, {})
                 .then((response: any) => {
                     if (response.data != null) {
                         this.setState({
@@ -197,7 +211,6 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             type: validObj,
             subjectText: validObj,
             priority: validObj,
-            assign: validObj,
             description: validObj,
             tags: validObj,
             requesterContact: validObj,
@@ -206,7 +219,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             assignedContact: validObj,
         };
         if (isSubmitted) {
-            const { subject, type, subjectText, priority, assign, description, tags, requesterContact, assignType, assignedAgent, assignedContact } = this.state;
+            const { subject, type, subjectText, priority, description, tags, requesterContact, assignType, assignedAgent, assignedContact } = this.state;
             if (!requesterContact) {
                 retData.requesterContact = {
                     isValid: false,
@@ -217,7 +230,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                 if (!assignedContact) {
                     retData.assignedContact = {
                         isValid: false,
-                        message: "Contact is required"
+                        message: "Please select assign type"
                     };
                 }
             } else if (assignType == "agent") {
@@ -228,12 +241,12 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                     };
                 }
             }
-            if (!subject) {
-                retData.subject = {
-                    isValid: false,
-                    message: "Subject is required"
-                };
-            }
+            // if (!subject) {
+            //     retData.subject = {
+            //         isValid: false,
+            //         message: "Subject is required"
+            //     };
+            // }
             if (!type) {
                 retData.type = {
                     isValid: false,
@@ -257,12 +270,6 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                     isValid: false,
                     message: "Please select contact or agent"
                 }
-            }
-            if (!assign) {
-                retData.assign = {
-                    isValid: false,
-                    message: "Group and Agent Name is required"
-                };
             }
             if (!description) {
                 retData.description = {
@@ -351,7 +358,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         for (let i = 0; i < contacts.length; i++) {
             const error = errorList[i];
             retData.push(
-                <Customselectbox containerClass="form-group-inner p-b-10" inputClass="form-control" htmlFor="contact" id={i} name="contact" value={contacts[i].value} arrayData={[{ id: 0, name: "ABC" }, { id: 1, name: "DEF" }, { id: 2, name: "GHI" }]} onChange={this.handleStateChange} isValid={error.isValid} message={error.message} />
+                <Customselectbox containerClass="form-group-inner p-b-10" inputClass="form-control" htmlFor="contact" id={i} name="requesterContact" value={contacts[i].value} arrayData={[{ id: 0, name: "ABC" }, { id: 1, name: "DEF" }, { id: 2, name: "GHI" }]} onChange={this.handleStateChange} isValid={error.isValid} message={error.message} />
             );
         }
         return retData;
@@ -411,8 +418,8 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="contact">Contact*(Requester)</label>
-                                    {this.displayContact()}
-                                    {/* <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="requesterContact" id="requesterContact" name="requesterContact" value={requesterContact} arrayData={contactNameAndEmailList} onChange={this.handleStateChange} isValid={errorData.requesterContact.isValid} message={errorData.requesterContact.message} /> */}
+                                    {/* {this.displayContact()} */}
+                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="requesterContact" id="requesterContact" name="requesterContact" value={requesterContact} arrayData={contactNameAndEmailList} onChange={this.handleStateChange} isValid={errorData.requesterContact.isValid} message={errorData.requesterContact.message} />
                                     <div className="d-block text-right p-t-5">
                                         <button className="add-conatct" onClick={() => this.addContact()}>Add a Conatct</button>
                                         {/* <button className="add-conatct">Add a Conatct</button> */}
