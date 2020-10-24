@@ -65,7 +65,181 @@
             }
         }
     }
-    
+    .add-note-popup{
+        .add-note-popup-bg{
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            z-index: 10;
+        }
+        .add-note-popup-inner{
+            position: absolute;
+            left: 15px;
+            top: 130px;
+            width: 745px;
+            background-color: #ffffff;
+            box-shadow: 0px 0px 10px #D5D7DB;
+            z-index: 11;
+            padding: 20px;
+            border-radius: 3px;
+            .form-group{
+                position: relative;
+                label{
+                    display: block;
+                    font-weight: 600;
+                    font-size: 14px;
+                    line-height: 18px;
+                    color: #323C47;
+                }
+                textarea{
+                    display: block;
+                    border: 1px solid #D1DAE2;
+                    padding: 15px;
+                    padding-bottom: 30px;
+                    font-weight: 400;
+                    font-size: 14px;
+                    line-height: 18px;
+                    color: #323C47;
+                    background-color: #ffffff;
+                    text-align: left;
+                    width: 100%;
+                    height: 300px;
+                }
+                .formatting-options{
+                    position: absolute;
+                    left: 10px;
+                    bottom: 10px;
+                    a{  
+                        display: inline-block;
+                        color: #D1DAE2;
+                        padding: 3px 5px;
+                        font-size: 14px;
+                        line-height: 18px;
+                        &:hover{
+                            color: #323C47; 
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .reply-popup{
+        .reply-popup-bg{
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            z-index: 10;
+        }
+        .reply-popup-inner{
+            position: absolute;
+            left: 15px;
+            top: 130px;
+            width: 97%;
+            background-color: #ffffff;
+            box-shadow: 0px 0px 10px #D5D7DB;
+            z-index: 11;
+            padding: 20px;
+            border-radius: 3px;
+            .replyto{
+                padding-bottom: 15px;
+                strong{
+                    color: #323C47;
+                    font-size: 14px;
+                    font-weight: 600;
+                    padding: 0 7px 0 10px;
+                    line-height: 22px;
+                }
+                .replyto-email{
+                    border: 1px solid #707070;
+                    border-radius: 3px;
+                    color: #A9B9C6;
+                    font-size: 12px;
+                    font-weight: 400;
+                    line-height: 22px;
+                    padding: 0 7px;
+                    span{
+                        display: inline-block;
+                        padding: 0 10px 0 5px;
+                    }
+                }
+            }
+            .reply-to-links{
+                padding-bottom: 15px;
+                a{
+                    color: #323C47;
+                    font-size: 13px;
+                    font-weight: 600;
+                    padding: 0 7px;
+                    line-height: 22px;
+                    display: inline-block;
+                }
+            }
+            .subject-text{
+                font-size: 14px;
+                line-height: 18px;
+                color: #323C47;
+                display: block;
+                padding-bottom: 15px;
+                strong{
+                    font-weight: 600;
+                }
+            }
+            .forwarded-message{
+                display: block;
+                margin: -10px 0 50px -20px;
+                width: 60%;
+                span{
+                    color: #707070;
+                    font-size: 16px;
+                    line-height: 20px;
+                    padding-bottom: 5px;
+                }
+                ul{
+                    display: block;
+                    list-style: none;
+                    li{
+                        display: inline-block;
+                        padding-right: 30px;
+                        color: #323C47;
+                        font-size: 13px;
+                        line-height: 18px;
+                        font-weight: 400;
+                        strong{
+                            font-weight: 600;
+                        }
+                    }
+                }
+            }
+            .reply-ticket-detail-box{
+                border: 1px solid #D1DAE2;
+                padding: 50px 50px 30px;
+                margin-bottom: 15px;
+                display: block;
+                position: relative;
+                .formatting-options{
+                    position: absolute;
+                    left: 10px;
+                    bottom: 10px;
+                    a{  
+                        display: inline-block;
+                        color: #D1DAE2;
+                        padding: 3px 5px;
+                        font-size: 14px;
+                        line-height: 18px;
+                        &:hover{
+                            color: #323C47; 
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 .ticket-detail-box{
@@ -87,15 +261,96 @@
             vertical-align: top;
             border-radius: 50%;
             margin-right: 10px;
+            cursor: pointer;
         }
-        .contanct-details-form{
+        .contact-details-popup{
             position: absolute;
-            left: 0;
+            left: 60px;
             top: 0;
             width: 350px;
-            height: 450px;
             background: #F0F3F7;
             box-shadow: 0px 2px 6px #464C56A8;
+            z-index: 1;
+            &:before{
+                content: "";
+                position: absolute;
+                width: 0;
+                height: 0;
+                margin-left: 0;
+                top: 6px;
+                left: 0;
+                box-sizing: border-box;
+                border: 0.5em solid black;
+                border-color: transparent transparent #F0F3F7 #F0F3F7;
+                transform-origin: 0 0;
+                transform: rotate(45deg);
+                box-shadow: -2px 2px 2px 0 rgba(0, 0, 0, 0.4);
+            }
+            .head{
+                padding: 10px 20px;
+                background: rgba(214, 222, 229, 0.4);
+                h4{
+                    font-size: 14px;
+                    line-height: 20px;
+                    font-weight: 600;
+                    color: #323C47;
+                    display: inline-block;
+                    margin-bottom: 0;
+                }
+                a{
+                    float: right;
+                    color: #48C741;
+                    font-size: 14px;
+                    line-height: 20px;
+                    font-weight: 600;
+                }
+            }
+            .contact-details{
+                display: block;
+                padding: 10px 20px;
+                .contact-profile{
+                    display: block;
+                    padding-bottom: 25px;
+                    .profile-image{
+                        display: inline-block;
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 3px;
+                        background-color: rgba(209, 218, 226, 1);
+                        margin-right: 10px;
+                        vertical-align: top;
+                    }
+                    .profile-name{
+                        display: inline-block;
+                        padding-top: 10px;
+                        color: #323C47;
+                        font-size: 14px;
+                        line-height: 18px;
+                        font-weight: 600;
+                        vertical-align: top;
+                    }
+                }
+                .contact-detail{
+                    display: block;
+                    padding-bottom: 25px;
+                    span{
+                        display: block;
+                        font-weight: 600;
+                        font-size: 14px;
+                        color: #323C47;
+                        line-height: 18px;
+                        padding-bottom: 3px;
+                    }
+                    p{
+                        display: block;
+                        font-weight: 400;
+                        font-size: 14px;
+                        color: #D1DAE2;
+                        line-height: 18px;
+                        margin-bottom: 0;
+                    }
+                }
+            }
         }
 
         .head-text{
@@ -139,6 +394,7 @@
             background-color: transparent!important;
             vertical-align: top;
             margin-right: 0;
+            border: none!important;
             i{
                 color: #323C47!important;
             }
@@ -190,4 +446,109 @@
         }
     }
     
+}
+
+.ticket-details-popup-container{
+    .heading{
+        h4{
+            color: #323C47;
+            font-size: 20px;
+            line-height: 24px;
+            font-weight: 600;
+        }
+    }
+    .form-group{
+        margin-bottom: 0;
+        label{
+            color: #323C47;
+            font-size: 14px;
+            line-height: 18px;
+            font-weight: 600;
+            display: block;
+        }
+        .form-control{
+            height: 220px;
+            padding: 15px;
+            font-size: 14px;
+            line-height: 20px;
+            font-weight: 500;
+            display: block;
+        }
+        .input-group-text{
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 100%;
+            border: 1px solid #707070;
+            text-align: left;
+        }
+    }
+    .merge-ticket-container{
+        .ticket-heading{
+            color: #A9B9C6;
+            font-size: 13px;
+            line-height: 18px;
+            font-weight: 500;
+        }
+        .ticket-box{
+            border: 1px solid #707070;
+            border-radius: 5px;
+            padding: 10px 15px 15px;
+            margin-top: 10px;
+            .heading{
+                h5{
+                    display: block;
+                    color: #323C47;
+                    font-size: 14px;
+                    line-height: 18px;
+                    font-weight: 600;
+                    margin-bottom: 5px;
+                }
+            }
+            .text{
+                span{
+                    display: inline-block;
+                    color: #A9B9C6;
+                    font-size: 13px;
+                    line-height: 22px;
+                    font-weight: 400;
+                    padding-right: 15px;
+                }
+                p{
+                    color: #A9B9C6;
+                    font-size: 13px;
+                    line-height: 22px;
+                    font-weight: 400;
+                    margin-bottom: 0;
+                    float: right;
+                }
+            }
+            .form-check{
+                text-align: center;
+                .form-check-input{
+                    display: inline-block;
+                    vertical-align: middle;
+                }
+                .form-check-label{
+                    display: inline-block;
+                    padding-left: 7px;
+                    color: #A9B9C6;
+                    font-weight: 400;
+                    font-size: 14px;
+                    line-height: 18px;
+                    vertical-align: middle;
+                }
+            }
+            
+        }
+        .recipient{
+            line-height: 37px;
+            font-size: 15px;
+            color: #323C47;
+            font-weight: 600;
+            .form-check-input{
+                display: inline-block;
+                margin-right: 7px;
+            }
+        }
+    }
 }

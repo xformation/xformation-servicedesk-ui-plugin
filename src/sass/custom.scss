@@ -92,7 +92,7 @@
     margin-right: 10px;
     display: inline-block!important;
     text-align: center;
-
+    border: 1px solid #e6e6e6!important;
     &:hover, &:focus {
         background: #e6e6e6!important;
         color: #3b4859!important;
@@ -298,6 +298,7 @@ a {
     margin: 10px 20px;
     border-radius: 10px;
     padding-bottom: 10px;
+    position: relative;
     .common-container {
         padding-top: 20px;
         padding-left: 15px;
