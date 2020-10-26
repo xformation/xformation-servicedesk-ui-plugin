@@ -17,7 +17,7 @@
             border-radius: 0px;
             min-width: inherit;
             font-size: 12px;
-            margin: 0!important;
+            margin-right: 0!important;
             &:first-child{
                 border-bottom-left-radius: 3px!important;
                 border-top-left-radius: 3px!important;
@@ -548,6 +548,44 @@
             .form-check-input{
                 display: inline-block;
                 margin-right: 7px;
+            }
+        }
+    }
+    .successfully-heading{
+        padding-top: 60px;
+        strong{
+            color: #323C47;
+            font-size: 20px;
+            line-height: 24px;
+            font-weight: 600;
+        }
+    }
+}
+
+@media (max-width: 1200px){
+    .ticket-buttons{
+        .white-button{
+            margin-bottom: 10px;
+        }
+        .group-buttons{
+            .blue-button{
+                margin-bottom: 1px;
+            }
+        }
+        .properties-box{
+            float: none;
+            margin-top: 10px;
+        }
+        .add-note-popup{
+            .add-note-popup-inner{
+                width: 94%;
+            }
+        }
+    }
+    .ticket-detail-box{
+        .ticket-detail-head{
+            .head-right-text{
+                text-align: left;
             }
         }
     }

@@ -171,7 +171,7 @@ export class TicketsDetails extends React.Component<any, any> {
                                 <button className="blue-button">Print</button>
                             </div>
                             <div className="float-right properties-box">
-                                <button className="blue-button m-r-0 m-b-0" onClick={this.onClickOpenProperties}>Properties</button>
+                                <button className="blue-button m-r-0" onClick={this.onClickOpenProperties}>Properties</button>
                                 {openPropertiesForm == true && <div className="properties-form">
                                     <div className="form-group">
                                         <label htmlFor="Type">Type</label>
@@ -288,7 +288,7 @@ export class TicketsDetails extends React.Component<any, any> {
                                                             <p><span>Ingredia Nutrisha</span> reported in Issue</p>
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-5 col-sm-12 text-right">
+                                                    <div className="col-lg-5 col-sm-12 text-right head-right-text">
                                                         <div className="head-time-text">a day ago ( Wed 08 2018 at 08:15AM )</div>
                                                         <button className="white-button"><i className="fa fa-ellipsis-v"></i></button>
                                                     </div>
@@ -310,7 +310,7 @@ export class TicketsDetails extends React.Component<any, any> {
                                                             <p>Replied to <a href="#">nutrisha.21@maxamis.com</a></p>
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-5 col-sm-12 text-right">
+                                                    <div className="col-lg-5 col-sm-12 text-right head-right-text">
                                                         <div className="head-time-text">a day ago ( Wed 08 2018 at 08:15AM )</div>
                                                         <button className="white-button"><i className="fa fa-ellipsis-v"></i></button>
                                                     </div>
@@ -341,7 +341,7 @@ export class TicketsDetails extends React.Component<any, any> {
                                                             <p><strong>Ingredia Nutrisha</strong> Replied to <a href="#">nutrisha.21@maxamis.com</a></p>
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-5 col-sm-12 text-right">
+                                                    <div className="col-lg-5 col-sm-12 text-right head-right-text">
                                                         <div className="head-time-text">a day ago ( Wed 08 2018 at 08:15AM )</div>
                                                         <button className="white-button"><i className="fa fa-ellipsis-v"></i></button>
                                                     </div>
@@ -430,7 +430,7 @@ export class TicketsDetails extends React.Component<any, any> {
                                                             <p><span>Ingredia Nutrisha</span> reported in Issue</p>
                                                         </div>
                                                     </div>
-                                                    <div className="col-lg-5 col-sm-12 text-right">
+                                                    <div className="col-lg-5 col-sm-12 text-right head-right-text">
                                                         <div className="head-time-text">a day ago ( Wed 08 2018 at 08:15AM )</div>
                                                         <button className="white-button"><i className="fa fa-ellipsis-v"></i></button>
                                                     </div>
@@ -497,7 +497,7 @@ export class TicketsDetails extends React.Component<any, any> {
                                             <p><span>Ingredia Nutrisha</span> reported in Issue</p>
                                         </div>
                                     </div>
-                                    <div className="col-lg-5 col-sm-12 text-right">
+                                    <div className="col-lg-5 col-sm-12 text-right head-right-text">
                                         <div className="head-time-text">a day ago ( Wed 08 2018 at 08:15AM )</div>
                                         <button className="white-button"><i className="fa fa-ellipsis-v"></i></button>
                                     </div>
@@ -519,7 +519,7 @@ export class TicketsDetails extends React.Component<any, any> {
                                             <p>Replied to <a href="#">nutrisha.21@maxamis.com</a></p>
                                         </div>
                                     </div>
-                                    <div className="col-lg-5 col-sm-12 text-right">
+                                    <div className="col-lg-5 col-sm-12 text-right head-right-text">
                                         <div className="head-time-text">a day ago ( Wed 08 2018 at 08:15AM )</div>
                                         <button className="white-button"><i className="fa fa-ellipsis-v"></i></button>
                                     </div>
@@ -550,7 +550,7 @@ export class TicketsDetails extends React.Component<any, any> {
                                             <p><strong>Ingredia Nutrisha</strong> Replied to <a href="#">nutrisha.21@maxamis.com</a></p>
                                         </div>
                                     </div>
-                                    <div className="col-lg-5 col-sm-12 text-right">
+                                    <div className="col-lg-5 col-sm-12 text-right head-right-text">
                                         <div className="head-time-text">a day ago ( Wed 08 2018 at 08:15AM )</div>
                                         <button className="white-button"><i className="fa fa-ellipsis-v"></i></button>
                                     </div>
@@ -572,7 +572,7 @@ export class TicketsDetails extends React.Component<any, any> {
                                             <p>Survey response for Default survey to Anne Richard</p>
                                         </div>
                                     </div>
-                                    <div className="col-lg-5 col-sm-12 text-right">
+                                    <div className="col-lg-5 col-sm-12 text-right head-right-text">
                                         <div className="head-time-text">
                                             a day ago ( Wed 08 2018 at 08:15AM )
                                         </div>

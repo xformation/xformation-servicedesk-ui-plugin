@@ -1525,7 +1525,7 @@ a:hover {
   border-radius: 0px;
   min-width: inherit;
   font-size: 12px;
-  margin: 0 !important;
+  margin-right: 0 !important;
 }
 .ticket-buttons .group-buttons .blue-button:first-child {
   border-bottom-left-radius: 3px !important;
@@ -2129,6 +2129,35 @@ a:hover {
   .form-check-input {
   display: inline-block;
   margin-right: 7px;
+}
+
+.ticket-details-popup-container .successfully-heading {
+  padding-top: 60px;
+}
+.ticket-details-popup-container .successfully-heading strong {
+  color: #323c47;
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+@media (max-width: 1200px) {
+  .ticket-buttons .white-button {
+    margin-bottom: 10px;
+  }
+  .ticket-buttons .group-buttons .blue-button {
+    margin-bottom: 1px;
+  }
+  .ticket-buttons .properties-box {
+    float: none;
+    margin-top: 10px;
+  }
+  .ticket-buttons .add-note-popup .add-note-popup-inner {
+    width: 94%;
+  }
+  .ticket-detail-box .ticket-detail-head .head-right-text {
+    text-align: left;
+  }
 }
 
 .reports-page-container {
