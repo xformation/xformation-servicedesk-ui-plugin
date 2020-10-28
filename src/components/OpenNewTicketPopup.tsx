@@ -63,7 +63,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                     primaryEmailAry.push(primaryEmailObj);
                     ary.push(obj);
                     for (let i = 0; i < response.length; i++) {
-                        obj = new MySelectObj(response[i].id, response[i].userName + " => " + response[i].primaryEmail);
+                        obj = new MySelectObj(response[i].id, response[i].primaryEmail);
                         primaryEmailObj = new MySelectObj(response[i].id, response[i].primaryEmail);
                         ary.push(obj);
                         primaryEmailAry.push(primaryEmailObj);
