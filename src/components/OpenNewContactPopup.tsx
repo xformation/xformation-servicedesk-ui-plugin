@@ -367,12 +367,16 @@ export class OpenNewContactPopup extends React.Component<any, any> {
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
                 <AlertMessage handleCloseAlert={this.handleCloseAlert} open={state.isAlertOpen} severity={state.severity} msg={state.message}></AlertMessage>
-                <button className="close-btn" onClick={this.handleClose}>X</button>
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
                     <div className="d-block width-100 contact-popup-container">
-                        <div className="d-block width-100 p-b-20 heading">
-                            <h4 className="d-block"><i className="fa fa-user"></i> New Contact</h4>
-                            <span className="d-block">When someone reaches out to you, they become a contact in your account. You can create companies and associate contacts with them. <a href="#">Learn more.</a></span>
+                        <div className="d-block p-b-20 heading">
+                            <div className="d-inline-block width-75 v-a-top">
+                                <h4 className="d-block"><i className="fa fa-user"></i> New Contact</h4>
+                                <span className="d-block">When someone reaches out to you, they become a contact in your account. You can create companies and associate contacts with them. <a href="#">Learn more.</a></span>
+                            </div>
+                            <div className="d-inline-block width-25 text-right v-a-top">
+                                <button className="close-btn" onClick={this.handleClose}>X</button>
+                            </div>
                         </div>
                         <div className="d-block width-100 upload-photo">
                             <div className="d-inline-block upload-icon">

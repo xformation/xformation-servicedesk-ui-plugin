@@ -26,10 +26,14 @@ export class OpenClosePopup extends React.Component<any, any> {
         const state = this.state;
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container ticket-details-popup-container">
-                <button className="close-btn" onClick={this.handleClose}>X</button>
                 <ModalBody style={{ height: 'calc(60vh - 20px)', overflowY: 'auto', overflowX: "hidden" }}>
-                    <div className="d-block width-100 p-b-20 heading">
-                        <h4 className="d-block">Close ticket</h4>
+                    <div className="d-block p-b-20 heading">
+                        <div className="d-inline-block width-75 v-a-top">
+                            <h4 className="d-block">Close ticket</h4>
+                        </div>
+                        <div className="d-inline-block width-25 text-right v-a-top">
+                            <button className="close-btn" onClick={this.handleClose}>X</button>
+                        </div>
                     </div>
                     <div className="row">
                         <div className="col-lg-12 col-md-12 col-sm-12">

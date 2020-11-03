@@ -270,13 +270,17 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
         const state = this.state;
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
-                 <AlertMessage handleCloseAlert={this.handleCloseAlert} open={state.isAlertOpen} severity={state.severity} msg={state.message}></AlertMessage>
-                 <button className="close-btn" onClick={this.handleClose}>X</button>
+                <AlertMessage handleCloseAlert={this.handleCloseAlert} open={state.isAlertOpen} severity={state.severity} msg={state.message}></AlertMessage>
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
                     <div className="d-block width-100 contact-popup-container new-ticket-container">
-                        <div className="d-block width-100 p-b-20 heading">
-                            <h4 className="d-block">Send an Email</h4>
-                            <span className="d-block">When you hit send, the Contact will receive an email and a Ticket will be associated with Them</span>
+                        <div className="d-block p-b-20 heading">
+                            <div className="d-inline-block width-75 v-a-top">
+                                <h4 className="d-block">Send an Email</h4>
+                                <span className="d-block">When you hit send, the Contact will receive an email and a Ticket will be associated with Them</span>
+                            </div>
+                            <div className="d-inline-block width-25 text-right v-a-top">
+                                <button className="close-btn" onClick={this.handleClose}>X</button>
+                            </div>
                         </div>
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
