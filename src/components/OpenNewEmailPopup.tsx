@@ -363,10 +363,10 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="d-block text-right p-t-20 contact-popup-buttons">
-                                    <div className="d-inline-block form-check create-author">
+                                    {/* <div className="d-inline-block form-check create-author">
                                         <input type="checkbox" className="form-check-input" id="CreateAuthor" />
                                         <label className="form-check-label" htmlFor="CreateAuthor">Create Author</label>
-                                    </div>
+                                    </div> */}
                                     <button className="cancel" onClick={this.handleClose}>Cancel</button>
                                     <button className="save create" onClick={this.handleSubmit}>Send</button>
                                 </div>
