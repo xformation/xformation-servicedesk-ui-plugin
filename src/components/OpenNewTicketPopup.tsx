@@ -408,12 +408,16 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         return (
             <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
                 <AlertMessage handleCloseAlert={this.handleCloseAlert} open={state.isAlertOpen} severity={state.severity} msg={state.message}></AlertMessage>
-                <button className="close-btn" onClick={this.handleClose}>X</button>
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
                     <div className="d-block width-100 contact-popup-container new-ticket-container">
-                        <div className="d-block width-100 p-b-20 heading">
-                            <h4 className="d-block">New Ticket</h4>
-                            <span className="d-block">The Contact will receive an Email about this Ticket</span>
+                        <div className="d-block p-b-20 heading">
+                            <div className="d-inline-block width-75 v-a-top">
+                                <h4 className="d-block">New Ticket</h4>
+                                <span className="d-block">The Contact will receive an Email about this Ticket</span>
+                            </div>
+                            <div className="d-inline-block width-25 text-right v-a-top">
+                                <button className="close-btn" onClick={this.handleClose}>X</button>
+                            </div>
                         </div>
                         <div className="row">
                             <div className="col-lg-12 col-md-12 col-sm-12">
