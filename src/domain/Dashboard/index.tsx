@@ -12,6 +12,7 @@ import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import { OpenNewAgentPopup } from '../../components/OpenNewAgentPopup';
 import { RestService } from '../_service/RestService';
+import Rbac from '../Rbac/Rbac';
 
 export class Dashboard extends React.Component<any, any> {
     breadCrumbs: any;
@@ -275,25 +276,37 @@ export class Dashboard extends React.Component<any, any> {
                                 </div>
                             </div>
                             <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                                <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto create-btn">
-                                    Create
-                                </a>
+                                <Rbac childName="CreateLink-TicketPlugin">
+                                    <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto create-btn">
+                                        Create
+                                    </a>
+                                </Rbac>
                                 {openCreateMenu == true && <div className="text-center open-create-menu">
-                                    <a onClick={this.onClickOpenNewTicket}>
-                                        Ticket
-                                    </a>
-                                    <a onClick={this.onClickOpenNewEmail}>
-                                        Email
-                                    </a>
-                                    <a onClick={this.onClickOpenNewContact}>
-                                        Contact
-                                    </a>
-                                    <a onClick={this.onClickOpenNewCompany}>
-                                        Company
-                                    </a>
-                                    <a onClick={this.onClickOpenNewAgent}>
-                                        Agent
-                                    </a>
+                                    <Rbac childName="CreateTicket-TicketPlugin">
+                                        <a onClick={this.onClickOpenNewTicket}>
+                                            Ticket
+                                        </a>
+                                    </Rbac>
+                                    <Rbac childName="CreateEmail-TicketPlugin">
+                                        <a onClick={this.onClickOpenNewEmail}>
+                                            Email
+                                        </a>
+                                    </Rbac>
+                                    <Rbac childName="CreateContact-TicketPlugin">
+                                        <a onClick={this.onClickOpenNewContact}>
+                                            Contact
+                                        </a>
+                                    </Rbac>
+                                    <Rbac childName="CreateCompany-TicketPlugin">
+                                        <a onClick={this.onClickOpenNewCompany}>
+                                            Company
+                                        </a>
+                                    </Rbac>
+                                    <Rbac childName="CreateAgent-TicketPlugin">
+                                        <a onClick={this.onClickOpenNewAgent}>
+                                            Agent
+                                        </a>
+                                    </Rbac>
                                 </div>
                                 }
                             </div>
