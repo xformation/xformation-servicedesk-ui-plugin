@@ -281,32 +281,35 @@ export class Dashboard extends React.Component<any, any> {
                                         Create
                                     </a>
                                 </Rbac>
-                                {openCreateMenu == true && <div className="text-center open-create-menu">
-                                    <Rbac childName="CreateTicket-TicketPlugin">
-                                        <a onClick={this.onClickOpenNewTicket}>
-                                            Ticket
-                                        </a>
-                                    </Rbac>
-                                    <Rbac childName="CreateEmail-TicketPlugin">
-                                        <a onClick={this.onClickOpenNewEmail}>
-                                            Email
-                                        </a>
-                                    </Rbac>
-                                    <Rbac childName="CreateContact-TicketPlugin">
-                                        <a onClick={this.onClickOpenNewContact}>
-                                            Contact
-                                        </a>
-                                    </Rbac>
-                                    <Rbac childName="CreateCompany-TicketPlugin">
-                                        <a onClick={this.onClickOpenNewCompany}>
-                                            Company
-                                        </a>
-                                    </Rbac>
-                                    <Rbac childName="CreateAgent-TicketPlugin">
-                                        <a onClick={this.onClickOpenNewAgent}>
-                                            Agent
-                                        </a>
-                                    </Rbac>
+                                {openCreateMenu == true && <div>
+                                    <div className="open-full-screen" onClick={this.onClickOpenSubLink}></div>
+                                    <div className="text-center open-create-menu">
+                                        <Rbac childName="CreateTicket-TicketPlugin">
+                                            <a onClick={this.onClickOpenNewTicket}>
+                                                Ticket
+                                            </a>
+                                        </Rbac>
+                                        <Rbac childName="CreateEmail-TicketPlugin">
+                                            <a onClick={this.onClickOpenNewEmail}>
+                                                Email
+                                            </a>
+                                        </Rbac>
+                                        <Rbac childName="CreateContact-TicketPlugin">
+                                            <a onClick={this.onClickOpenNewContact}>
+                                                Contact
+                                            </a>
+                                        </Rbac>
+                                        <Rbac childName="CreateCompany-TicketPlugin">
+                                            <a onClick={this.onClickOpenNewCompany}>
+                                                Company
+                                            </a>
+                                        </Rbac>
+                                        <Rbac childName="CreateAgent-TicketPlugin">
+                                            <a onClick={this.onClickOpenNewAgent}>
+                                                Agent
+                                            </a>
+                                        </Rbac>
+                                    </div>
                                 </div>
                                 }
                             </div>

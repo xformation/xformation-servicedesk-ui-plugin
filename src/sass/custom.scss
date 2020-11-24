@@ -362,8 +362,21 @@ a {
     }
 }
 
+.create-btn{
+    position: relative;
+    z-index: 100;
+}
+.open-full-screen{
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
 .open-create-menu{
     position: absolute;
+    z-index: 100;
     right: 15px;
     top: 36px;
     background-color: #f0f3f7;
@@ -574,3 +587,4 @@ a {
 .there-no-data {
     text-align: center;
 }
+

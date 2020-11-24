@@ -156,19 +156,22 @@ export class ReportHelpdesh extends React.Component<any, any> {
                                 <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto create-btn">
                                     Create
                                 </a>
-                                {openCreateMenu == true && <div className="text-center open-create-menu">
-                                    <a onClick={this.onClickOpenNewTicket}>
-                                        Ticket
-                                    </a>
-                                    <a onClick={this.onClickOpenNewEmail}>
-                                        Email
-                                    </a>
-                                    <a onClick={this.onClickOpenNewContact}>
-                                        Contact
-                                    </a>
-                                    <a onClick={this.onClickOpenNewCompany}>
-                                        Company
-                                    </a>
+                                {openCreateMenu == true && <div>
+                                    <div className="open-full-screen" onClick={this.onClickOpenSubLink}></div>
+                                    <div className="text-center open-create-menu">
+                                        <a onClick={this.onClickOpenNewTicket}>
+                                            Ticket
+                                        </a>
+                                        <a onClick={this.onClickOpenNewEmail}>
+                                            Email
+                                        </a>
+                                        <a onClick={this.onClickOpenNewContact}>
+                                            Contact
+                                        </a>
+                                        <a onClick={this.onClickOpenNewCompany}>
+                                            Company
+                                        </a>
+                                    </div>
                                 </div>
                                 }
                             </div>
