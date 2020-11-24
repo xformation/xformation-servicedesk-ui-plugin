@@ -1,9 +1,5 @@
 import * as React from 'react';
 import './table.css';
-// import './bootstrap.css';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-// import { faSearch,faChevronDown } from '@fortawesome/free-solid-svg-icons'
-
 const sortEnum = {
     NONE: 0,
     ASCENDING: 1,
@@ -76,7 +72,6 @@ export class Table extends React.Component<any, any> {
     componentDidMount() {
         this.calculateTotalPages(this.state.data);
     }
-    
 
     componentDidUpdate(prevProps: any, prevState: any) {
         if (JSON.stringify(prevProps.valueFromData) !== JSON.stringify(this.props.valueFromData)) {
@@ -226,7 +221,7 @@ export class Table extends React.Component<any, any> {
     setCurrentPageIntoView = () => {
         const { currentPage } = this.state;
         let scrollLeft = currentPage * 28;
-        if (this.paginationRef.current) {
+        if(this.paginationRef.current){
             this.paginationRef.current.scrollTo(scrollLeft, 0);
         }
     };
@@ -246,8 +241,9 @@ export class Table extends React.Component<any, any> {
             currentPage: 0
         });
     }
+
     onSearchChange = (e: any) => {
-        let { name,value } = e.target;
+        let { value } = e.target;
         this.setState({
             searchKey: value,
             currentPage: 0,
@@ -255,52 +251,19 @@ export class Table extends React.Component<any, any> {
             sortKey: '',
         });
         const { data } = this.state;
-        /* old code for single key search */
-        // const { searchKey } = this.props;
-        // var queryResult = [];
-        // value = value ? value.toLowerCase() : "";
-        // for (let i = 0; i < data.length; i++) {
-        //     const searchKeyValue = data[i][searchKey];
-        //     if ((searchKeyValue && searchKeyValue.toLowerCase().indexOf(value) !== -1) || value === '') {
-        //         queryResult.push(data[i]);
-        //     }
-        // }
-        /* old code for single key search */
-        let result = [];
-        if (value !== "") {
-            if (data && data.length > 0) {
-                for (let i = 0; i < data.length; i++) {
-                    let prm = data[i];
-                    let k;
-                    let name="";
-                    for(k in prm){
-                        name=name+" "+prm[k];
-                    }
-                    /* old code for single key search */
-                    // let name = prm.name + " " + prm.permission + " " + prm.description;
-                    /* old code for single key search */
-                    name = name.toLowerCase();
-                    if (name.indexOf(value.toLowerCase()) !== -1) {
-                        result.push(prm);
-                    }
-                }
-                this.setState({
-                    displayData: result
-                });
-                this.calculateTotalPages(result);        
+        const { searchKey } = this.props;
+        var queryResult = [];
+        value = value ? value.toLowerCase() : "";
+        for (let i = 0; i < data.length; i++) {
+            const searchKeyValue = data[i][searchKey];
+            if ((searchKeyValue && searchKeyValue.toLowerCase().indexOf(value) !== -1) || value === '') {
+                queryResult.push(data[i]);
             }
-        } else {
-            this.setState({
-                displayData: data,
-            });
-            
         }
-        /* old code for single key search */
-        // this.setState({
-        //     displayData: queryResult,
-        // });
-        // this.calculateTotalPages(queryResult);
-        /* old code for single key search */
+        this.setState({
+            displayData: queryResult,
+        });
+        this.calculateTotalPages(queryResult);
     }
 
     displayShowPageLimit() {
@@ -392,10 +355,10 @@ export class Table extends React.Component<any, any> {
             showingLine = showingLine.replace("%total%", displayData.length);
         }
         return (
-            <div className={`${tableClasses.parentClass} custom-table p-5`}>
+            <div className={`${tableClasses.parentClass} custom-table`}>
                 <div className="row">
                     <div className="col-sm-12">
-                        <div className="d-inline-block">{showingLine}</div>
+                        <div className="d-inline-block showing">{showingLine}</div>
                         <div className="d-inline-block showby">
                             <label className="d-inline-block">Show</label>
                             <select onChange={this.handleChange} className="form-control">
@@ -405,9 +368,7 @@ export class Table extends React.Component<any, any> {
                         </div>
                         <div className="d-inline-block multiselect">
                             <div className="form-control select-label" onClick={this.toggleColumnSelect}>
-                                Select columns 
-                                {/* <FontAwesomeIcon icon={faChevronDown} />  */}
-                                <i className="fa fa-chevron-down float-right"></i>
+                                Select columns <i className="fa fa-chevron-down float-right"></i>
                             </div>
                             <div style={{ display: showSelect ? "" : "none" }} className="options">
                                 {this.renderColumns()}
@@ -416,8 +377,7 @@ export class Table extends React.Component<any, any> {
                         <div className="d-inline-block float-right form-group filter-search-control">
                             <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey} />
                             <button>
-                            <i className="fa fa-search float-right"></i>
-                            {/* <FontAwesomeIcon icon={faSearch} /> */}
+                                <i className="fa fa-search"></i>
                             </button>
                         </div>
                     </div>

@@ -7,6 +7,7 @@ import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import { RestService } from '../_service/RestService';
 import { config } from '../../config';
+import { UnimplementedFeaturePopup } from '../../components/UnimplementedFeaturePopup';
 class MySelectObj {
     id: any;
     name: any;
@@ -16,6 +17,7 @@ class MySelectObj {
     }
 }
 export class OpenTickets extends React.Component<any, any> {
+    unimplementedFeatureModalRef: any;
     breadCrumbs: any;
     perPageLimit: any;
     tableValue: any;
@@ -125,7 +127,12 @@ export class OpenTickets extends React.Component<any, any> {
         this.openNewCompanyRef = React.createRef();
         this.openNewEmailRef = React.createRef();
         this.openNewTicketRef = React.createRef();
+        this.unimplementedFeatureModalRef = React.createRef();
     }
+    onClickUnImplementedFeature = (link: any) => {
+        this.unimplementedFeatureModalRef.current.setLink(link);
+        this.unimplementedFeatureModalRef.current.toggle();
+    };
     async componentDidMount() {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
@@ -148,10 +155,10 @@ export class OpenTickets extends React.Component<any, any> {
                 (response: any) => {
 
                     let ary = [];
-                    let obj = new MySelectObj("", "Select Agent");
-                    ary.push(obj);
+                    // let obj = new MySelectObj("", "Select Agent");
+                    // ary.push(obj);
                     for (let i = 0; i < response.length; i++) {
-                        obj = new MySelectObj(response[i].id, response[i].name);
+                        let obj = new MySelectObj(response[i].id, response[i].name);
                         ary.push(obj);
                     }
                     this.setState({
@@ -255,14 +262,10 @@ export class OpenTickets extends React.Component<any, any> {
                 const lowerCaseKeys = ticketKeys.map((key) => key.toLocaleLowerCase());
                 let isMatched = true;
                 if (agent) {
-                    console.log("keys : ", lowerCaseKeys);
                     let index = lowerCaseKeys.indexOf("assignedtoname");
                     if (index !== -1) {
                         let key = ticketKeys[index];
-
                         let data = ticket[key];
-                        console.log(" key : ", key);
-                        console.log(" data : ", data)
                         if (data) {
                             isMatched = agent === data.toLowerCase();
                         } else {
@@ -276,6 +279,58 @@ export class OpenTickets extends React.Component<any, any> {
 
                 }
                 if (isMatched && dueBy) {
+                    let index = lowerCaseKeys.indexOf("expecteddateofcompletion");
+                    if (index !== -1) {
+                        let key = ticketKeys[index];
+                        let data = ticket[key];
+
+                        if (data) {
+                            var today = new Date();
+                            var dd = today.getDate();
+                            var mm = today.getMonth() + 1;
+                            var yyyy = today.getFullYear();
+                            var day;
+                            var month;
+                            var year;
+                            if (dd < 10) {
+                                day = '0' + dd.toString();
+                            }
+
+                            if (mm < 10) {
+                                month = '0' + mm.toString();
+                            }
+                            var todayDate = year + '-' + month + '-' + day;
+                            console.log("dueBy=",dueBy);
+                            if (dueBy == "overdue") {
+                                isMatched = todayDate > data;
+                            } else if (dueBy == "today") {
+                                isMatched = todayDate == data;
+                            } else if (dueBy == "tomorrow") {
+                                var tomorrow = new Date(today)
+                                tomorrow.setDate(tomorrow.getDate() + 1)
+                                dd = tomorrow.getDate();
+                                mm = tomorrow.getMonth();
+                                year = tomorrow.getFullYear();
+                                var tomorrowDay;
+                                var tomorrowMonth;
+                                if (dd < 10) {
+                                    tomorrowDay = '0' + dd.toString();
+                                }
+
+                                if (mm < 10) {
+                                    tomorrowMonth = '0' + mm.toString();
+                                }
+                                var tomorrowDate = year + '-' + tomorrowMonth + '-' + tomorrowDay;
+                                isMatched = tomorrowDate == data;
+                            }
+
+                        } else {
+                            isMatched = false;
+                        }
+                    } else {
+                        isMatched = false;
+                    }
+
                 }
                 if (isMatched && status) {
                     let index = lowerCaseKeys.indexOf("status");
@@ -335,7 +390,7 @@ export class OpenTickets extends React.Component<any, any> {
                 }
                 if (isMatched && company) {
                     let index = lowerCaseKeys.indexOf("requestercompany");
-                    console.log("index",index);
+                    console.log("index", index);
                     if (index !== -1) {
                         let key = ticketKeys[index];
                         let data = ticket[key];
@@ -456,12 +511,12 @@ export class OpenTickets extends React.Component<any, any> {
                                     <label htmlFor="Created">
                                         Created
                                     </label>
-                                    <select className="form-control" id="created" value={created} name="created" onChange={this.handleStateChange}>
-                                        <option value="" selected>Select Created</option>
+                                    <select className="form-control" id="created" value={created} name="created" onClick={() => this.onClickUnImplementedFeature("")}>
+                                        {/* <option value="" selected>Select Created</option>
                                         <option value="AnyTime">Any Time</option>
                                         <option value="Whithin30">Whithin 30</option>
                                         <option value="Whithin1hour">Whithin 1 hour</option>
-                                        <option value="Whithin6hour">Whithin 6 hour</option>
+                                        <option value="Whithin6hour">Whithin 6 hour</option> */}
                                     </select>
                                 </div>
                             </div>
@@ -475,7 +530,7 @@ export class OpenTickets extends React.Component<any, any> {
                                         <option value="overdue">Overdue</option>
                                         <option value="today">Today</option>
                                         <option value="tomorrow">Tomorrow</option>
-                                        <option value="next8hours">Next 8 Hours</option>
+                                        {/* <option value="next8hours">Next 8 Hours</option> */}
                                     </select>
                                 </div>
                             </div>
@@ -595,6 +650,7 @@ export class OpenTickets extends React.Component<any, any> {
                         </div>
                     </div>
                 </div>
+                <UnimplementedFeaturePopup ref={this.unimplementedFeatureModalRef} />
                 <OpenNewContactPopup ref={this.openNewContactRef} />
                 <OpenNewCompanyPopup ref={this.openNewCompanyRef} />
                 <OpenNewEmailPopup ref={this.openNewEmailRef} />
