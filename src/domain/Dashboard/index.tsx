@@ -361,7 +361,6 @@ export class Dashboard extends React.Component<any, any> {
                                                 </div>
                                             </div> */}
                                             <div className="d-inline-block v-a-top calendar-box">
-
                                                 <DatePicker
                                                     onChange={this.setDate}
                                                     value={selectedDate}
@@ -369,11 +368,7 @@ export class Dashboard extends React.Component<any, any> {
                                                     clearIcon={null}
 
                                                 />
-
-                                                {/* <i className="fa fa-chevron-left"></i>
-                                                <i className="fa fa-calendar"></i>
-                                                <span>July 2020</span>
-                                                <i className="fa fa-chevron-right"></i> */}
+                                                
                                             </div>
                                         </div>
                                     </div>
