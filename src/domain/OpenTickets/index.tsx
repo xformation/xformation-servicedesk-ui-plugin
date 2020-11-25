@@ -1,10 +1,7 @@
 import * as React from 'react';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import Table from './../../components/table';
-import { OpenNewContactPopup } from '../../components/OpenNewContactPopup';
-import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
-import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
-import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
+import { CreateButtonComponent } from "../CommanComponents/CreateButtonComponent";
 import { RestService } from '../_service/RestService';
 import { config } from '../../config';
 import { UnimplementedFeaturePopup } from '../../components/UnimplementedFeaturePopup';
@@ -21,10 +18,6 @@ export class OpenTickets extends React.Component<any, any> {
     breadCrumbs: any;
     perPageLimit: any;
     tableValue: any;
-    openNewContactRef: any;
-    openNewCompanyRef: any;
-    openNewEmailRef: any;
-    openNewTicketRef: any;
     checkboxValue: any;
     constructor(props: any) {
         super(props);
@@ -123,11 +116,6 @@ export class OpenTickets extends React.Component<any, any> {
                 isCurrentPage: true
             }
         ];
-        this.openNewContactRef = React.createRef();
-        this.openNewCompanyRef = React.createRef();
-        this.openNewEmailRef = React.createRef();
-        this.openNewTicketRef = React.createRef();
-        this.unimplementedFeatureModalRef = React.createRef();
     }
     onClickUnImplementedFeature = (link: any) => {
         this.unimplementedFeatureModalRef.current.setLink(link);
@@ -222,21 +210,7 @@ export class OpenTickets extends React.Component<any, any> {
         }
         return retData;
     }
-    onClickOpenNewContact = (e: any) => {
-        this.openNewContactRef.current.toggle();
-    };
 
-    onClickOpenNewCompany = (e: any) => {
-        this.openNewCompanyRef.current.toggle();
-    };
-
-    onClickOpenNewEmail = (e: any) => {
-        this.openNewEmailRef.current.toggle();
-    };
-
-    onClickOpenNewTicket = (e: any) => {
-        this.openNewTicketRef.current.toggle();
-    };
 
     onClickOpenSubLink = () => {
         let menu = !this.state.openCreateMenu;
@@ -300,7 +274,7 @@ export class OpenTickets extends React.Component<any, any> {
                                 month = '0' + mm.toString();
                             }
                             var todayDate = year + '-' + month + '-' + day;
-                            console.log("dueBy=",dueBy);
+        
                             if (dueBy == "overdue") {
                                 isMatched = todayDate > data;
                             } else if (dueBy == "today") {
@@ -457,29 +431,10 @@ export class OpenTickets extends React.Component<any, any> {
                                     <h1>{page_type}</h1>
                                 </div>
                             </div>
-                            <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                                <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto create-btn">
-                                    Create
-                                </a>
-                                {openCreateMenu == true && <div>
-                                    <div className="open-full-screen" onClick={this.onClickOpenSubLink}></div>
-                                    <div className="text-center open-create-menu">
-                                        <a onClick={this.onClickOpenNewTicket}>
-                                            Ticket
-                                        </a>
-                                        <a onClick={this.onClickOpenNewEmail}>
-                                            Email
-                                        </a>
-                                        <a onClick={this.onClickOpenNewContact}>
-                                            Contact
-                                        </a>
-                                        <a onClick={this.onClickOpenNewCompany}>
-                                            Company
-                                        </a>
-                                    </div>
-                                </div>
-                                }
-                            </div>
+                            {/* create component */}
+                            <CreateButtonComponent />
+                            {/* create component */}
+
                         </div>
                     </div>
                     <div className="common-container border-bottom-0 filter-container">
@@ -509,20 +464,20 @@ export class OpenTickets extends React.Component<any, any> {
                                     </select>
                                 </div>
                             </div> */}
-                            <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
+                            {/* <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="Created">
                                         Created
                                     </label>
                                     <select className="form-control" id="created" value={created} name="created" onClick={() => this.onClickUnImplementedFeature("")}>
-                                        {/* <option value="" selected>Select Created</option>
+                             <option value="" selected>Select Created</option>
                                         <option value="AnyTime">Any Time</option>
                                         <option value="Whithin30">Whithin 30</option>
                                         <option value="Whithin1hour">Whithin 1 hour</option>
-                                        <option value="Whithin6hour">Whithin 6 hour</option> */}
+                                        <option value="Whithin6hour">Whithin 6 hour</option> 
                                     </select>
                                 </div>
-                            </div>
+                            </div> */}
                             <div className="col-xl-2 col-lg-3 col-md-4 col-sm-12">
                                 <div className="form-group filter-control-group">
                                     <label htmlFor="dueby">
@@ -654,10 +609,6 @@ export class OpenTickets extends React.Component<any, any> {
                     </div>
                 </div>
                 <UnimplementedFeaturePopup ref={this.unimplementedFeatureModalRef} />
-                <OpenNewContactPopup ref={this.openNewContactRef} />
-                <OpenNewCompanyPopup ref={this.openNewCompanyRef} />
-                <OpenNewEmailPopup ref={this.openNewEmailRef} />
-                <OpenNewTicketPopup ref={this.openNewTicketRef} />
             </div>
         );
     }

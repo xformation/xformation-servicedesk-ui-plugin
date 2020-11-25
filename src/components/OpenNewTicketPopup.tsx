@@ -426,7 +426,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                                     {/* {this.displayContact()} */}
                                     <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="requesterContact" id="requesterContact" name="requesterContact" value={requesterContact} arrayData={contactNameAndEmailList} onChange={this.handleStateChange} isValid={errorData.requesterContact.isValid} message={errorData.requesterContact.message} />
                                     <div className="d-block text-right p-t-5">
-                                        <button className="add-conatct" onClick={() => this.addContact()}>Add a Conatct</button>
+                                        {/* <button className="add-conatct" onClick={() => this.addContact()}>Add a Conatct</button> */}
                                         {/* <button className="add-conatct">Add a Conatct</button> */}
                                     </div>
                                 </div>

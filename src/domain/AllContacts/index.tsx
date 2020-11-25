@@ -1,10 +1,6 @@
 import * as React from 'react';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
-import { OpenNewContactPopup } from '../../components/OpenNewContactPopup';
-import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
-import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
-import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
-import { OpenNewAgentPopup } from '../../components/OpenNewAgentPopup';
+import { CreateButtonComponent } from "../CommanComponents/CreateButtonComponent";
 import Table from './../../components/table';
 import { RestService } from '../_service/RestService';
 import { config } from '../../config';
@@ -12,11 +8,6 @@ import Rbac from '../Rbac/Rbac';
 
 export class AllContacts extends React.Component<any, any> {
     breadCrumbs: any;
-    openNewContactRef: any;
-    openNewCompanyRef: any;
-    openNewEmailRef: any;
-    openNewTicketRef: any;
-    openNewAgentRef: any;
     perPageLimit: any;
     checkboxValue: any;
     constructor(props: any) {
@@ -65,26 +56,22 @@ export class AllContacts extends React.Component<any, any> {
             contactData: [],
         };
         this.checkboxValue = false,
-        this.perPageLimit = 6,
-        this.breadCrumbs = [
-            {
-                label: "Home",
-                route: `/`
-            },
-            {
-                label: "Tickets",
-                route: `${config.basePath}/dashboard`
-            },
-            {
-                label: "All Contacts",
-                isCurrentPage: true
-            }
-        ];
-        this.openNewContactRef = React.createRef();
-        this.openNewCompanyRef = React.createRef();
-        this.openNewEmailRef = React.createRef();
-        this.openNewTicketRef = React.createRef();
-        this.openNewAgentRef = React.createRef();
+            this.perPageLimit = 6,
+            this.breadCrumbs = [
+                {
+                    label: "Home",
+                    route: `/`
+                },
+                {
+                    label: "Tickets",
+                    route: `${config.basePath}/dashboard`
+                },
+                {
+                    label: "All Contacts",
+                    isCurrentPage: true
+                }
+            ];
+
     }
     async componentDidMount() {
         try {
@@ -99,25 +86,6 @@ export class AllContacts extends React.Component<any, any> {
             console.log("Loading contact data failed. Error: ", err);
         }
     }
-    onClickOpenNewContact = (e: any) => {
-        this.openNewContactRef.current.toggle();
-    };
-
-    onClickOpenNewCompany = (e: any) => {
-        this.openNewCompanyRef.current.toggle();
-    };
-
-    onClickOpenNewAgent = (e: any) => {
-        this.openNewAgentRef.current.toggle();
-    };
-
-    onClickOpenNewEmail = (e: any) => {
-        this.openNewEmailRef.current.toggle();
-    };
-
-    onClickOpenNewTicket = (e: any) => {
-        this.openNewTicketRef.current.toggle();
-    };
 
     onClickOpenSubLink = () => {
         let menu = !this.state.openCreateMenu;
@@ -127,7 +95,7 @@ export class AllContacts extends React.Component<any, any> {
     }
 
     render() {
-        const { openCreateMenu,columns,contactData } = this.state;
+        const { openCreateMenu, columns, contactData } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -139,56 +107,16 @@ export class AllContacts extends React.Component<any, any> {
                                     <h1>All Contacts</h1>
                                 </div>
                             </div>
-                            <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                                <Rbac childName="CreateLink-TicketPlugin">
-                                    <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto create-btn">
-                                        Create
-                                    </a>
-                                </Rbac>
-                                {openCreateMenu == true && <div>
-                                    <div className="open-full-screen" onClick={this.onClickOpenSubLink}></div>
-                                    <div className="text-center open-create-menu">
-                                        <Rbac childName="CreateTicket-TicketPlugin">
-                                            <a onClick={this.onClickOpenNewTicket}>
-                                                Ticket
-                                            </a>
-                                        </Rbac>
-                                        <Rbac childName="CreateEmail-TicketPlugin">
-                                            <a onClick={this.onClickOpenNewEmail}>
-                                                Email
-                                            </a>
-                                        </Rbac>
-                                        <Rbac childName="CreateContact-TicketPlugin">
-                                            <a onClick={this.onClickOpenNewContact}>
-                                                Contact
-                                            </a>
-                                        </Rbac>
-                                        <Rbac childName="CreateCompany-TicketPlugin">
-                                            <a onClick={this.onClickOpenNewCompany}>
-                                                Company
-                                            </a>
-                                        </Rbac>
-                                        <Rbac childName="CreateAgent-TicketPlugin">
-                                            <a onClick={this.onClickOpenNewAgent}>
-                                                Agent
-                                            </a>
-                                        </Rbac>
-                                    </div>
-                                </div>
-                                }
-                            </div>
+                            {/* create component */}
+                            <CreateButtonComponent />
+                            {/* create component */}
                         </div>
                     </div>
 
                     <div className="common-container border-bottom-0 p-t-0">
-                        <Table valueFromData={{ columns: columns, data: contactData }} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue} tableClasses={{ table: "contact-tabel", tableParent: "d-block p-t-5 contacts-tabel", parentClass: "d-block p-t-20 all-contacts-tabel" }} searchKey="contact" showingLine = "Showing %start% to %end% of %total% Contacts"/>
+                        <Table valueFromData={{ columns: columns, data: contactData }} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue} tableClasses={{ table: "contact-tabel", tableParent: "d-block p-t-5 contacts-tabel", parentClass: "d-block p-t-20 all-contacts-tabel" }} searchKey="contact" showingLine="Showing %start% to %end% of %total% Contacts" />
                     </div>
                 </div>
-                <OpenNewContactPopup ref={this.openNewContactRef} />
-                <OpenNewCompanyPopup ref={this.openNewCompanyRef} />
-                <OpenNewEmailPopup ref={this.openNewEmailRef} />
-                <OpenNewTicketPopup ref={this.openNewTicketRef} />
-                <OpenNewAgentPopup ref={this.openNewAgentRef} />
             </div>
         );
     }
