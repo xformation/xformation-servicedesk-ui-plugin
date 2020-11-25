@@ -13,6 +13,8 @@ import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import { OpenNewAgentPopup } from '../../components/OpenNewAgentPopup';
 import { RestService } from '../_service/RestService';
 import Rbac from '../Rbac/Rbac';
+import DatePicker from 'react-date-picker';
+import "react-datepicker/dist/react-datepicker.css";
 
 export class Dashboard extends React.Component<any, any> {
     breadCrumbs: any;
@@ -40,7 +42,7 @@ export class Dashboard extends React.Component<any, any> {
         this.perPageLimit = 2,
             this.checkboxValue = false,
             this.state = {
-                LineChartData : {
+                LineChartData: {
                     responsive: true,
                     labels: [],
                     datasets: [
@@ -119,6 +121,7 @@ export class Dashboard extends React.Component<any, any> {
                         responseRate: '63',
                     },
                 ],
+                selectedDate: new Date()
             };
         this.breadCrumbs = [
             {
@@ -261,8 +264,23 @@ export class Dashboard extends React.Component<any, any> {
         }
         return retData;
     }
+
+    setDate = (value: any) => {
+        this.setState({
+            selectedDate: value,
+        })
+    }
+
+    getSelectedDateStr = () => {
+        const { selectedDate } = this.state;
+        if (selectedDate) {
+            return selectedDate.toDateString();
+        }
+        return "";
+    };
+
     render() {
-        const { openCreateMenu, ticketDataList, columns,LineChartData } = this.state;
+        const { openCreateMenu, ticketDataList, columns, LineChartData, selectedDate } = this.state;
         return (
             <div className="servicedesk-dashboard-container">
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
@@ -328,11 +346,11 @@ export class Dashboard extends React.Component<any, any> {
                                         <div className="col-lg-5 col-md-12 col-sm-12">
                                             <div className="d-block heading">
                                                 <h3 className="d-block mb-0">Today's Ticket Trends</h3>
-                                                <span className="d-block mb-0">13 August 2020</span>
+                                                <span className="d-block mb-0">{this.getSelectedDateStr()}</span>
                                             </div>
                                         </div>
                                         <div className="col-lg-7 col-md-12 col-sm-12 text-right">
-                                            <div className="d-inline-block v-a-top days-box">
+                                            {/* <div className="d-inline-block v-a-top days-box">
                                                 <div className="d-inline-block form-check">
                                                     <input type="checkbox" className="form-check-input" id="Today" />
                                                     <label className="form-check-label" htmlFor="Today">Today</label>
@@ -341,12 +359,21 @@ export class Dashboard extends React.Component<any, any> {
                                                     <input type="checkbox" className="form-check-input" id="Yesterday" />
                                                     <label className="form-check-label" htmlFor="Yesterday">Yesterday</label>
                                                 </div>
-                                            </div>
+                                            </div> */}
                                             <div className="d-inline-block v-a-top calendar-box">
-                                                <i className="fa fa-chevron-left"></i>
+
+                                                <DatePicker
+                                                    onChange={this.setDate}
+                                                    value={selectedDate}
+                                                    format="dd-MM-y"
+                                                    clearIcon={null}
+
+                                                />
+
+                                                {/* <i className="fa fa-chevron-left"></i>
                                                 <i className="fa fa-calendar"></i>
                                                 <span>July 2020</span>
-                                                <i className="fa fa-chevron-right"></i>
+                                                <i className="fa fa-chevron-right"></i> */}
                                             </div>
                                         </div>
                                     </div>

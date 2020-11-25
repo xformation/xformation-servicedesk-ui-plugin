@@ -725,21 +725,24 @@ a:hover {
   font-weight: 400;
 }
 .ticket-trends .days-box .form-check {
-  margin-right: 25px;
+  margin-right: 20px;
 }
 .ticket-trends .days-box .form-check .form-check-input {
   display: inline-block;
   vertical-align: top;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 .ticket-trends .days-box .form-check .form-check-label {
   font-size: 12px;
-  line-height: 21px;
+  line-height: 19px;
   color: #3b4859;
   font-weight: 400;
   display: inline-block;
   padding-left: 8px;
   vertical-align: top;
+}
+.ticket-trends .calendar-box {
+  font-size: 12px;
 }
 .ticket-trends .calendar-box .fa {
   font-size: 12px;
@@ -754,6 +757,12 @@ a:hover {
   color: #3b4859;
   font-weight: 400;
   padding: 0 4px;
+}
+.ticket-trends .calendar-box .react-date-picker__wrapper {
+  border: none;
+}
+.ticket-trends .calendar-box .react-date-picker__button {
+  padding: 0 0 0 4px;
 }
 .ticket-trends .ticket-graphs canvas {
   height: 220px !important;
