@@ -13,7 +13,7 @@ import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import { OpenNewAgentPopup } from '../../components/OpenNewAgentPopup';
 import { RestService } from '../_service/RestService';
 import Rbac from '../Rbac/Rbac';
-
+import RbacWithParent from '../Rbac/RbacWithParent';
 export class CreateButtonComponent extends React.Component<any, any> {
     openNewContactRef: any;
     openNewCompanyRef: any;
@@ -24,7 +24,7 @@ export class CreateButtonComponent extends React.Component<any, any> {
     ticketData: any;
     constructor(props: any) {
         super(props);
-        this.state={
+        this.state = {
             openCreateMenu: false,
         }
         this.openNewContactRef = React.createRef();
@@ -69,33 +69,33 @@ export class CreateButtonComponent extends React.Component<any, any> {
         return (
 
             <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                <Rbac childName="CreateLink-TicketPlugin">
+                <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateLink-TicketPlugin">
                     <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto create-btn">
                         Create
                                     </a>
                 </Rbac>
                 {openCreateMenu == true && <div className="text-center open-create-menu">
-                    <Rbac childName="CreateTicket-TicketPlugin">
+                    <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateTicket-TicketPlugin">
                         <a onClick={this.onClickOpenNewTicket}>
                             Ticket
                                         </a>
                     </Rbac>
-                    <Rbac childName="CreateEmail-TicketPlugin">
+                    <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateEmail-TicketPlugin">
                         <a onClick={this.onClickOpenNewEmail}>
                             Email
                                         </a>
                     </Rbac>
-                    <Rbac childName="CreateContact-TicketPlugin">
+                    <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateContact-TicketPlugin">
                         <a onClick={this.onClickOpenNewContact}>
                             Contact
                                         </a>
                     </Rbac>
-                    <Rbac childName="CreateCompany-TicketPlugin">
+                    <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateCompany-TicketPlugin">
                         <a onClick={this.onClickOpenNewCompany}>
                             Company
                                         </a>
                     </Rbac>
-                    <Rbac childName="CreateAgent-TicketPlugin">
+                    <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateAgent-TicketPlugin">
                         <a onClick={this.onClickOpenNewAgent}>
                             Agent
                                         </a>
