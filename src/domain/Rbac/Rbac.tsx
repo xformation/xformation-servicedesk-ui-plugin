@@ -32,7 +32,7 @@ export default class Rbac extends React.Component<any, any>{
   }
 
   include(arr: any, obj: any) {
-    console.log("parents permissions:  ", arr);
+    // console.log("parents permissions:  ",arr);
     return (arr.indexOf(obj) != -1);
   }
   checkParent(mapPermissions: any, str: any) {
