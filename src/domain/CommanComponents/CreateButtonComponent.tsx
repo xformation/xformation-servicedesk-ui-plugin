@@ -69,33 +69,33 @@ export class CreateButtonComponent extends React.Component<any, any> {
         return (
 
             <div className="col-lg-4 col-md-4 col-sm-12 text-right">
-                <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateLink-TicketPlugin">
+                <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-createbtn">
                     <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto create-btn">
                         Create
                                     </a>
                 </Rbac>
                 {openCreateMenu == true && <div className="text-center open-create-menu">
-                    <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateTicket-TicketPlugin">
+                    <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-ticketbtn">
                         <a onClick={this.onClickOpenNewTicket}>
                             Ticket
                                         </a>
                     </Rbac>
-                    <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateEmail-TicketPlugin">
+                    <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-emailbtn">
                         <a onClick={this.onClickOpenNewEmail}>
                             Email
                                         </a>
                     </Rbac>
-                    <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateContact-TicketPlugin">
+                    <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-contactbtn">
                         <a onClick={this.onClickOpenNewContact}>
                             Contact
                                         </a>
                     </Rbac>
-                    <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateCompany-TicketPlugin">
+                    <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-companytbtn">
                         <a onClick={this.onClickOpenNewCompany}>
                             Company
                                         </a>
                     </Rbac>
-                    <Rbac parentName="xformation-servicedesk-ui-plugin" childName="CreateAgent-TicketPlugin">
+                    <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-agentbtn">
                         <a onClick={this.onClickOpenNewAgent}>
                             Agent
                                         </a>

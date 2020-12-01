@@ -1,5 +1,5 @@
-const IP = "localhost";
-
+// const IP = "localhost";
+const IP = "100.64.108.25";
 const ticketSrvUrl = `http://${IP}:7100/api`;
 
 export const config = {
@@ -35,6 +35,7 @@ export const config = {
   SEND_EMAIL_ERROR: "Can't send Email",
   ADD_TICKET_SUCCESS: "Ticket Successfully added",
   ADD_TICKET_ERROR: "Ticket Can't added",
+  PARENT_NAME: "xformation-servicedesk-ui-plugin",
   SERVER_ERROR_MESSAGE:
     "Operation failed. Please check service logs for details"
 };
