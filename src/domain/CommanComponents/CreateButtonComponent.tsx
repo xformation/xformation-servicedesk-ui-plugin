@@ -13,7 +13,6 @@ import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import { OpenNewAgentPopup } from '../../components/OpenNewAgentPopup';
 import { RestService } from '../_service/RestService';
 import Rbac from '../Rbac/Rbac';
-import RbacWithParent from '../Rbac/RbacWithParent';
 export class CreateButtonComponent extends React.Component<any, any> {
     openNewContactRef: any;
     openNewCompanyRef: any;
