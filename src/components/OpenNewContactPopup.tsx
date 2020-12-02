@@ -33,6 +33,7 @@ export class OpenNewContactPopup extends React.Component<any, any> {
             isSubmitted: false,
             companyList: [],
             companyLogo: null,
+            companyLogoUrl: null,
             companyName: '',
             description: '',
             notes: '',
@@ -45,11 +46,10 @@ export class OpenNewContactPopup extends React.Component<any, any> {
             oldCompanyFlag: true,
             newCompanyFlag: false,
             contactPhoto: null,
+            contactPhotoUrl: null,
             isAlertOpen: false,
             message: null,
             severity: null,
-            contactfile: null,
-            companyfile: null
         };
     }
 
@@ -351,7 +351,10 @@ export class OpenNewContactPopup extends React.Component<any, any> {
     }
     handleImageChange = (e: any) => {
         this.setState({
-            [e.target.name]: URL.createObjectURL(e.target.files[0])
+            [e.target.name+"Url"]: URL.createObjectURL(e.target.files[0])
+        })
+        this.setState({
+            [e.target.name]: e.target.files[0]
         })
     };
 
@@ -361,7 +364,7 @@ export class OpenNewContactPopup extends React.Component<any, any> {
         })
     }
     render() {
-        const { modal, isSubmitted, companyList, contactPhoto, fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId, companyId, companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry, oldCompanyFlag, newCompanyFlag } = this.state;
+        const { modal, isSubmitted, companyList, contactPhoto,contactPhotoUrl, fullName, title, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId, companyId, companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry, oldCompanyFlag, newCompanyFlag } = this.state;
         const state = this.state;
         const errorData = this.validate(isSubmitted);
         return (
@@ -387,7 +390,7 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                                 <input type="file" id="contactPhoto" className="contactPhoto" name="contactPhoto" onChange={this.handleImageChange} />
                                 <p className="d-block">An image of the person, it's best if it has the same length and height</p>
                                 <span style={{ color: "red" }}>{errorData.contactPhoto.message}</span>
-                                <img src={contactPhoto} alt="" width="100" height="100" />
+                                <img src={contactPhotoUrl} alt="" width="100" height="100" />
                             </div>
                         </div>
                         <div className="row">
@@ -538,7 +541,7 @@ export class OpenNewContactPopup extends React.Component<any, any> {
                                         <input type="file" id="companyLogo" name="companyLogo" className="contactPhoto" onChange={this.handleImageChange} />
                                         <p className="d-block">An image of the person, it's best if it has the same length and height</p>
                                         <span style={{ color: "red" }}>{errorData.companyLogo.message}</span>
-                                        <img src={this.state.companyLogo} alt="" width="100" height="100" />
+                                        <img src={this.state.companyLogoUrl} alt="" width="100" height="100" />
                                     </div>
                                 </div>
                                 <div className="row">
