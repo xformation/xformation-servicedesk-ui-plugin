@@ -11,6 +11,7 @@ export const config = {
   GET_COMPANIES_CONTACT_LIST_URL: `${ticketSrvUrl}/companyConatctList`,
   ADD_CONTACT_URL: `${ticketSrvUrl}/addContact`,
   ADD_TICKET_URL: `${ticketSrvUrl}/addTicket`,
+  UPDATE_TICKET_URL: `${ticketSrvUrl}/updateTicket`,
   ADD_AGENT_URL: `${ticketSrvUrl}/addAgent`,
   GET_CONTACT_WITH_COMPANY_NAME: `${ticketSrvUrl}/contactWithCompanyName`,
   SEND_EMAIL_URL: `${ticketSrvUrl}/sendEmail`,
@@ -19,6 +20,7 @@ export const config = {
   GET_ALL_TICKET_URL: `${ticketSrvUrl}/listAllTickets`,
   GET_ALL_TICKET_FOR_TABLE_URL: `${ticketSrvUrl}/getTicketForTable`,
   GET_ALL_TICKETING_DATA_URL: `${ticketSrvUrl}/getTicketingData`,
+  GET_TICKET_BY_ID: `${ticketSrvUrl}/getTicketById`,
   GET_TOP_PERFORMER_DATA_URL: `${ticketSrvUrl}/topPerformerAgents`,
   GET_REPORT_QUICK_STAT_URL: `${ticketSrvUrl}/reportQuicStatistics`,
   GET_GRAPH_STAT_DATA_URL: `${ticketSrvUrl}/getBarGraphStatData`,
@@ -34,6 +36,7 @@ export const config = {
   SEND_EMAIL_SUCCESS: "Email sent successfully",
   SEND_EMAIL_ERROR: "Can't send Email",
   ADD_TICKET_SUCCESS: "Ticket Successfully added",
+  UPDATE_TICKET_SUCCESS: "Ticket Updated successfully",
   ADD_TICKET_ERROR: "Ticket Can't added",
   PARENT_NAME: "xformation-servicedesk-ui-plugin",
   SERVER_ERROR_MESSAGE:

@@ -6,10 +6,11 @@ import ticketIconImage1 from '../../img/ticket-icon-img1.png';
 import { Line } from 'react-chartjs-2';
 import { Tickets } from './../Tickets';
 import Table from './../../components/table';
-import { RestService } from '../_service/RestService';import Rbac from '../Rbac/Rbac';
+import { RestService } from '../_service/RestService'; import Rbac from '../Rbac/Rbac';
 import { CreateButtonComponent } from "../CommanComponents/CreateButtonComponent";
 import DatePicker from 'react-date-picker';
 import "react-datepicker/dist/react-datepicker.css";
+import { OpenEditTicketPopup } from '../../components/OpenEditTicketPopup';
 
 export class Dashboard extends React.Component<any, any> {
     breadCrumbs: any;
@@ -17,6 +18,8 @@ export class Dashboard extends React.Component<any, any> {
     perPageLimit: any;
     checkboxValue: any;
     ticketData: any;
+    openEditTicketRef: any;
+    
     constructor(props: any) {
         super(props);
         const res = async () => {
@@ -26,7 +29,7 @@ export class Dashboard extends React.Component<any, any> {
             return res;
         }
 
-
+        this.openEditTicketRef = React.createRef();
 
         console.log("data in constructor", res())
         this.perPageLimit = 2,
@@ -86,6 +89,44 @@ export class Dashboard extends React.Component<any, any> {
                         label: 'Create Date',
                         key: 'createDate'
                     },
+                    {
+                        label: 'Action',
+                        key: 'action',
+                        renderCallback: (value: any, ticketObj: any) => {
+                            return <td>
+                                <div className="d-inline-block">
+                                    <Rbac parentName={config.PARENT_NAME} childName="dashborad-index-tickettbl-editbtn">
+                                        <button className="btn btn-link" onClick={e=>this.onClickOpenEditTicket(e,ticketObj)}>
+                                            {/* <i onClick={e => this.onClickEditAlert(e, alert)} className="fa fa-edit"></i> */}
+                                            <i className="fa fa-edit"></i>
+
+                                        </button>
+                                    </Rbac>
+                                    <Rbac parentName={config.PARENT_NAME} childName="dashborad-index-tickettbl-deletebtn">
+                                        <button className="btn btn-link">
+                                            {/* <i onClick={e => this.onClickDeleteAlert(e, alert)} className="fa fa-trash"></i> */}
+                                            <i className="fa fa-trash"></i>
+                                        </button>
+                                    </Rbac>
+                                    {/* <button className="btn btn-link" id={`PopoverFocus-${alert.guid}`}>
+
+                                        <i className="fa fa-ellipsis-h"></i>
+                                    </button> */}
+                                    {/* <UncontrolledPopover trigger="legacy" placement="bottom" target={`PopoverFocus-${alert.guid}`}>
+                                        <PopoverBody>
+                                        <Rbac parentName={config.PARENT_NAME} childName="allalerts-index-alerttbl-createticketbtn">
+                                            <Link className=" " to={`${config.basePath}/alltickets?guid=` + alert.guid+"&alertName="+alert.name}>Create Ticket</Link>
+                                        </Rbac>
+                                        <Rbac parentName={config.PARENT_NAME} childName="allalerts-index-alerttbl-silencebtn">
+                                            <Link className=" " to="#">Silence</Link>
+                                        </Rbac>
+                                        </PopoverBody>
+                                    </UncontrolledPopover> */}
+                                </div>
+                            </td>
+                        },
+                        isCaseInsensitive: true
+                    }
                 ],
                 ticketDataList: [],
                 ticketingData: [],
@@ -135,7 +176,9 @@ export class Dashboard extends React.Component<any, any> {
                 borderColor: "rgba(0, 170, 240, 1)",
                 data: [10, 25, 15, 9, 30, 34, 35, 35, 15, 10, 25, 30, 40, 46, 49, 33, 40, 42, 33, 35, 48, 50]
             }
+    
         ]
+        
     };
 
     displayTicketingData() {
@@ -157,6 +200,9 @@ export class Dashboard extends React.Component<any, any> {
         }
         return retData;
     }
+    onClickOpenEditTicket = (e: any,selectedTicket:any) => {
+        this.openEditTicketRef.current.toggle(selectedTicket);
+    };
     async componentDidMount() {
         try {
             await RestService.getData(config.GET_ALL_TICKET_FOR_TABLE_URL + "?pageType=all", null, null).then(
@@ -214,8 +260,13 @@ export class Dashboard extends React.Component<any, any> {
             openCreateMenu: menu,
         });
     }
+    updateTicketList = (ticketList: any) => {
+        console.log("Updated ticket list :::: ", ticketList);
+        this.setState({
+            ticketDataList: ticketList,
+        });
+    }
 
-    
 
     performerAgentsData() {
         const { performerAgentsData } = this.state;
@@ -301,7 +352,7 @@ export class Dashboard extends React.Component<any, any> {
                                                     clearIcon={null}
 
                                                 />
-                                                
+
                                             </div>
                                         </div>
                                     </div>
@@ -379,6 +430,7 @@ export class Dashboard extends React.Component<any, any> {
                         </div>
                     </div>
                 </div>
+                <OpenEditTicketPopup onSaveUpdate={this.updateTicketList} ref={this.openEditTicketRef} />
             </div>
         );
     }
