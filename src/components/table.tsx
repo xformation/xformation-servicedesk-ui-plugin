@@ -329,14 +329,14 @@ export class Table extends React.Component<any, any> {
         if (sortVal === sortEnum.ASCENDING) {
             data.sort((a: any, b: any) => {
                 if (a[sortkey] && b[sortkey]) {
-                    return a[sortkey].localeCompare(b[sortkey]);
+                    return a[sortkey].toString().localeCompare(b[sortkey].toString());
                 }
                 return 0;
             });
         } else if (sortVal === sortEnum.DESCENDING) {
             data.sort((a: any, b: any) => {
                 if (a[sortkey] && b[sortkey]) {
-                    return a[sortkey].localeCompare(b[sortkey]);
+                    return a[sortkey].toString().localeCompare(b[sortkey].toString());
                 }
                 return 0;
             }).reverse()
