@@ -27,12 +27,12 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             modal: false,
             requesterContact: '',
             subject: '',
-            type: '',
+            type: 0,
             subjectText: '',
-            priority: '',
-            priorityValue: '',
+            priority: 0,
+            priorityValue: "Low",
             assignValue: '',
-            typeValue: '',
+            typeValue: "A",
             description: '',
             tags: '',
             isSubmitted: false,
@@ -130,6 +130,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             isSubmitted: true
         });
         const errorData = this.validate(true);
+        // console.log("Error Data : ",errorData);
         if (errorData.type.isValid && errorData.subjectText.isValid && errorData.priority.isValid && errorData.description.isValid && errorData.tags.isValid && errorData.requesterContact.isValid && errorData.assignType.isValid && (errorData.assignedAgent.isValid || errorData.assignedContact.isValid)) {
             const { contact, subject, subjectText, priorityValue, assignValue, typeValue, description, tags, requesterContact, assignedAgent, assignType, assignedContact,contacts } = this.state;
             let assignedToId;
@@ -188,6 +189,10 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                             message: config.ADD_TICKET_SUCCESS,
                             isAlertOpen: true,
                         });
+                        if(this.props.refreshParm){
+                            let refreshMethod=this.props.refreshParm;
+                            refreshMethod();
+                        }
                     } else {
                         this.setState({
                             severity: config.SEVERITY_ERROR,
@@ -248,24 +253,24 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             //         message: "Subject is required"
             //     };
             // }
-            if (!type) {
-                retData.type = {
-                    isValid: false,
-                    message: "Type is required"
-                };
-            }
+            // if (!type) {
+            //     retData.type = {
+            //         isValid: false,
+            //         message: "Type is required"
+            //     };
+            // }
             if (!subjectText) {
                 retData.subjectText = {
                     isValid: false,
                     message: "Subject Detail required"
                 };
             }
-            if (!priority) {
-                retData.priority = {
-                    isValid: false,
-                    message: "Priority is required"
-                };
-            }
+            // if (!priority) {
+            //     retData.priority = {
+            //         isValid: false,
+            //         message: "Priority is required"
+            //     };
+            // }
             if (!assignType) {
                 retData.assignType = {
                     isValid: false,
