@@ -462,7 +462,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <label htmlFor="priority">Priority*</label>
-                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="priority" id="priority" name="priority" value={priority} arrayData={[{ id: 0, name: "Low" }, { id: 1, name: "High" }, { id: 2, name: "Medium" }]} onChange={this.handleSelectBox} isValid={errorData.priority.isValid} message={errorData.priority.message} />
+                                    <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="priority" id="priority" name="priority" value={priority} arrayData={[{ id: 0, name: "Low" }, { id: 1, name: "Medium" }, { id: 2, name: "High" }]} onChange={this.handleSelectBox} isValid={errorData.priority.isValid} message={errorData.priority.message} />
                                 </div>
                             </div>
                         </div>
