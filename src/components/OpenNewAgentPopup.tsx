@@ -95,8 +95,7 @@ export class OpenNewAgentPopup extends React.Component<any, any> {
         });
         const errorData = this.validate(true);
         console.log("Error Data : ", errorData)
-        if (errorData.companyLogo.isValid && errorData.contactPhoto.isValid && errorData.fullName.isValid && errorData.title.isValid && errorData.agentDescription.isValid && errorData.address.isValid && errorData.companyId.isValid && errorData.companyLogo.isValid && errorData.companyName.isValid && errorData.description.isValid && errorData.notes.isValid && errorData.healthScore.isValid && errorData.domain.isValid && errorData.accountTier.isValid && errorData.renewalDate.isValid && errorData.industry.isValid && (errorData.email.isValid || errorData.alternateEmail.isValid ||
-            errorData.workPhone.isValid || errorData.mobilePhone.isValid || errorData.twitter.isValid || errorData.uniqueExternalId.isValid)) {
+        if (errorData.companyLogo.isValid && errorData.contactPhoto.isValid && errorData.fullName.isValid && errorData.title.isValid && errorData.companyId.isValid && errorData.companyLogo.isValid && errorData.companyName.isValid && errorData.description.isValid && errorData.notes.isValid && errorData.healthScore.isValid && errorData.domain.isValid && errorData.accountTier.isValid && errorData.renewalDate.isValid && errorData.industry.isValid && errorData.email.isValid ) {
 
             const { newCompanyFlag, oldCompanyFlag, contactPhoto, fullName, title, agentDescription, address, email, alternateEmail, workPhone, mobilePhone, twitter, uniqueExternalId,
                 companyId, companyLogo, companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry } = this.state;
@@ -230,39 +229,39 @@ export class OpenNewAgentPopup extends React.Component<any, any> {
             if (!email) {
                 retData.email = {
                     isValid: false,
-                    message: "Atleast one of these fields is mandatory*"
+                    message: "Email is mandatory*"
                 };
             }
-            if (!alternateEmail) {
-                retData.alternateEmail = {
-                    isValid: false,
-                    message: "Atleast one of these fields is mandatory*"
-                };
-            }
-            if (!workPhone) {
-                retData.workPhone = {
-                    isValid: false,
-                    message: "Atleast one of these fields is mandatory*"
-                };
-            }
-            if (!mobilePhone) {
-                retData.mobilePhone = {
-                    isValid: false,
-                    message: "Atleast one of these fields is mandatory*"
-                };
-            }
-            if (!twitter) {
-                retData.twitter = {
-                    isValid: false,
-                    message: "Atleast one of these fields is mandatory*"
-                };
-            }
-            if (!uniqueExternalId) {
-                retData.uniqueExternalId = {
-                    isValid: false,
-                    message: "Atleast one of these fields is mandatory*"
-                };
-            }
+            // if (!alternateEmail) {
+            //     retData.alternateEmail = {
+            //         isValid: false,
+            //         message: "Atleast one of these fields is mandatory*"
+            //     };
+            // }
+            // if (!workPhone) {
+            //     retData.workPhone = {
+            //         isValid: false,
+            //         message: "Atleast one of these fields is mandatory*"
+            //     };
+            // }
+            // if (!mobilePhone) {
+            //     retData.mobilePhone = {
+            //         isValid: false,
+            //         message: "Atleast one of these fields is mandatory*"
+            //     };
+            // }
+            // if (!twitter) {
+            //     retData.twitter = {
+            //         isValid: false,
+            //         message: "Atleast one of these fields is mandatory*"
+            //     };
+            // }
+            // if (!uniqueExternalId) {
+            //     retData.uniqueExternalId = {
+            //         isValid: false,
+            //         message: "Atleast one of these fields is mandatory*"
+            //     };
+            // }
             if (oldCompanyFlag) {
                 if (!companyId) {
                     retData.companyId = {
@@ -449,6 +448,7 @@ export class OpenNewAgentPopup extends React.Component<any, any> {
                                     <div className="form-group">
                                         <label htmlFor="email">Email</label>
                                         <CustomTextbox containerClass="form-group-inner" inputClass="form-control" htmlFor="email" id="email" placeholder="Enter a phone email address" name="email" value={email} onChange={this.handleStateChange} />
+                                        <span style={{ color: "red" }}>{errorData.email.message}</span>
                                     </div>
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-12">
