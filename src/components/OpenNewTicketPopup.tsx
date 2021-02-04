@@ -132,7 +132,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         const errorData = this.validate(true);
         // console.log("Error Data : ",errorData);
         if (errorData.type.isValid && errorData.subjectText.isValid && errorData.priority.isValid && errorData.description.isValid && errorData.tags.isValid && errorData.requesterContact.isValid && errorData.assignType.isValid && (errorData.assignedAgent.isValid || errorData.assignedContact.isValid)) {
-            const { contact, subject, subjectText, priorityValue, assignValue, typeValue, description, tags, requesterContact, assignedAgent, assignType, assignedContact,contacts } = this.state;
+            const { contact, subject, subjectText, priorityValue, assignValue, typeValue, description, tags, requesterContact, assignedAgent, assignType, assignedContact, contacts } = this.state;
             let assignedToId;
             if (assignType == "contact") {
                 assignedToId = assignedContact;
@@ -148,7 +148,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             } else {
                 associatedEntityName = "alert";
                 associatedEntityId = this.props.guid;
-                alertName=this.props.alertName;
+                alertName = this.props.alertName;
             }
 
             let data = {
@@ -165,7 +165,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                 associatedEntityId: associatedEntityId,
                 alertName: alertName,
             }
-            
+
             let formData = new FormData()
             formData.append("type", typeValue);
             formData.append("subject", subjectText);
@@ -189,8 +189,8 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                             message: config.ADD_TICKET_SUCCESS,
                             isAlertOpen: true,
                         });
-                        if(this.props.refreshParm){
-                            let refreshMethod=this.props.refreshParm;
+                        if (this.props.refreshParm) {
+                            let refreshMethod = this.props.refreshParm;
                             refreshMethod();
                         }
                     } else {
@@ -411,17 +411,15 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
         const errorData = this.validate(isSubmitted);
         const state = this.state;
         return (
-            <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
+            <Modal isOpen={modal} toggle={this.toggle} className="modal-container servicdesk-modal-container">
                 <AlertMessage handleCloseAlert={this.handleCloseAlert} open={state.isAlertOpen} severity={state.severity} msg={state.message}></AlertMessage>
+                <button className="close-btn" onClick={this.handleClose}>X</button>
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
                     <div className="d-block width-100 contact-popup-container new-ticket-container">
                         <div className="d-block p-b-20 heading">
-                            <div className="d-inline-block width-75 v-a-top">
+                            <div className="d-block width-100">
                                 <h4 className="d-block">New Ticket</h4>
                                 <span className="d-block">The Contact will receive an Email about this Ticket</span>
-                            </div>
-                            <div className="d-inline-block width-25 text-right v-a-top">
-                                <button className="close-btn" onClick={this.handleClose}>X</button>
                             </div>
                         </div>
                         <div className="row">
@@ -430,10 +428,10 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                                     <label htmlFor="contact">Contact*(Requester)</label>
                                     {/* {this.displayContact()} */}
                                     <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="requesterContact" id="requesterContact" name="requesterContact" value={requesterContact} arrayData={contactNameAndEmailList} onChange={this.handleStateChange} isValid={errorData.requesterContact.isValid} message={errorData.requesterContact.message} />
-                                    <div className="d-block text-right p-t-5">
-                                        {/* <button className="add-conatct" onClick={() => this.addContact()}>Add a Conatct</button> */}
-                                        {/* <button className="add-conatct">Add a Conatct</button> */}
-                                    </div>
+                                    {/* <div className="d-block text-right p-t-5">
+                                        <button className="add-conatct" onClick={() => this.addContact()}>Add a Conatct</button>
+                                        <button className="add-conatct">Add a Conatct</button> 
+                                    </div>*/}
                                 </div>
                             </div>
                         </div>
@@ -470,18 +468,18 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
                             <div className="col-lg-12 col-md-12 col-sm-12">
                                 <div className="form-group">
                                     <div className="d-inline-block form-check create-author">
-                                        <input type="radio" name="assignType" value="contact" className="form-check-input contact_radio_button" onChange={this.handleStateChange} /><label className="form-check-label" htmlFor="Contact">Contact</label> 
+                                        <input type="radio" name="assignType" value="contact" className="form-check-input contact_radio_button" onChange={this.handleStateChange} /><label className="form-check-label" htmlFor="Contact">Contact</label>
                                         {assignType == "contact" && <div>
                                             <label htmlFor="assign">Assign to Contacts*</label>
                                             <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="assignedContact" id="assignedContact" name="assignedContact" value={assignedContact} arrayData={contactNameAndEmailList} onChange={this.handleStateChange} isValid={errorData.assignedContact.isValid} message={errorData.assignedContact.message} />
                                         </div>}
                                     </div>
                                     <div className="d-inline-block form-check create-author">
-                                    <input type="radio" name="assignType" value="agent" className="form-check-input contact_radio_button" onChange={this.handleStateChange} /><label className="form-check-label" htmlFor="Agent">Agent</label> 
-                                    {assignType == "agent" && <div>
-                                        <label htmlFor="assign">Assign to Agent*</label>
-                                        <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="assignedAgent" id="assignedAgent" name="assignedAgent" value={assignedAgent} arrayData={AgentNameList} onChange={this.handleStateChange} isValid={errorData.assignedAgent.isValid} message={errorData.assignedAgent.message} />
-                                    </div>}
+                                        <input type="radio" name="assignType" value="agent" className="form-check-input contact_radio_button" onChange={this.handleStateChange} /><label className="form-check-label" htmlFor="Agent">Agent</label>
+                                        {assignType == "agent" && <div>
+                                            <label htmlFor="assign">Assign to Agent*</label>
+                                            <Customselectbox containerClass="form-group-inner" inputClass="form-control" htmlFor="assignedAgent" id="assignedAgent" name="assignedAgent" value={assignedAgent} arrayData={AgentNameList} onChange={this.handleStateChange} isValid={errorData.assignedAgent.isValid} message={errorData.assignedAgent.message} />
+                                        </div>}
                                     </div>
                                     <span style={{ color: "red" }}>{errorData.assignType.message}</span>
                                 </div>

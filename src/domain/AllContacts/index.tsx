@@ -63,7 +63,7 @@ export class AllContacts extends React.Component<any, any> {
                     route: `/`
                 },
                 {
-                    label: "Tickets",
+                    label: "Tickets | Dashboard",
                     route: `${config.basePath}/dashboard`
                 },
                 {

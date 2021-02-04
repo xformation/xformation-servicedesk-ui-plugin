@@ -112,16 +112,14 @@ export class OpenNewScheduleReports extends React.Component<any, any> {
         const { modal, generateReport, day, time, email, subject, description, isSubmitted } = this.state;
         const errorData = this.validate(isSubmitted);
         return (
-            <Modal isOpen={modal} toggle={this.toggle} className="modal-container">
+            <Modal isOpen={modal} toggle={this.toggle} className="modal-container servicdesk-modal-container">
+                <button className="close-btn" onClick={this.handleClose}>X</button>
                 <ModalBody style={{ height: 'calc(75vh - 50px)', overflowY: 'auto', overflowX: "hidden" }}>
                     <div className="d-block width-100 contact-popup-container new-ticket-container">
                         <div className="d-block p-b-20 heading">
-                            <div className="d-inline-block width-75 v-a-top">
+                            <div className="d-block width-100">
                                 <h4 className="d-block">Schedule Reports</h4>
                                 <span className="d-block">Helpdesk In-Depth</span>
-                            </div>
-                            <div className="d-inline-block width-25 text-right v-a-top">
-                                <button className="close-btn" onClick={this.handleClose}>X</button>
                             </div>
                         </div>
                         <div className="row">
