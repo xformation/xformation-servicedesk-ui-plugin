@@ -69,7 +69,7 @@ export class CreateButtonComponent extends React.Component<any, any> {
 
             <div className="col-lg-4 col-md-4 col-sm-12 text-right">
                 <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-createbtn">
-                    <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-r-0 min-width-inherit width-auto create-btn">
+                    <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-b-0 m-r-0 min-width-inherit width-auto create-btn">
                         Create
                                     </a>
                 </Rbac>

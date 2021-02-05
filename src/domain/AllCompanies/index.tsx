@@ -80,7 +80,7 @@ export class AllCompanies extends React.Component<any, any> {
             <div className="servicedesk-dashboard-container" >
                 <Breadcrumbs breadcrumbs={this.breadCrumbs} pageTitle="TICKETING TOOL" />
                 <div className="servicedesk-page-container all-contacts-container">
-                    <div className="common-container p-b-0">
+                    <div className="common-container">
                         <div className="row">
                             <div className="col-lg-8 col-md-8 col-sm-12">
                                 <div className="page-heading">

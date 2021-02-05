@@ -334,8 +334,8 @@ a:hover {
 }
 .servicedesk-page-container .common-container {
   padding-top: 20px;
-  padding-left: 15px;
-  padding-right: 15px;
+  padding-left: 45px;
+  padding-right: 45px;
   padding-bottom: 15px;
   border-bottom: 1px solid #202226;
 }
@@ -2326,7 +2326,7 @@ a:hover {
 }
 
 .reports-page-container {
-  padding: 10px;
+  padding: 10px 45px;
 }
 .reports-page-container .reports-left {
   background-color: #f0f3f7;
@@ -2524,6 +2524,7 @@ a:hover {
   margin-right: 15px;
   margin-bottom: 0;
   background-color: transparent !important;
+  border: none !important;
 }
 .desk-depth-container .filters-buttons .white-button:hover {
   background-color: transparent !important;
