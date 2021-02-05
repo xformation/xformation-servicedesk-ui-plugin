@@ -1235,6 +1235,7 @@ a:hover {
 }
 .all-support-ticket-tabel .tickets-tabel .ticket-tabel tbody tr td {
   color: #323c47;
+  background-color: #f0f3f7;
   font-size: 12px;
   line-height: 32px;
   font-weight: 600;
@@ -1370,7 +1371,7 @@ a:hover {
   padding-left: 5px;
 }
 .all-contacts-tabel .contacts-tabel .contact-tabel tbody tr td {
-  background-color: #ffffff;
+  background-color: #f0f3f7;
   color: #323c47;
   font-size: 12px;
   line-height: 32px;
@@ -1466,7 +1467,7 @@ a:hover {
   padding-left: 5px;
 }
 .all-companies-tabel .companies-main-tabel .companies-tabel tbody tr td {
-  background-color: #ffffff;
+  background-color: #f0f3f7;
   color: #323c47;
   font-size: 12px;
   line-height: 32px;
@@ -1584,6 +1585,7 @@ a:hover {
 }
 .all-open-ticket-tabel .open-tickets-tabel .open-ticket-tabel tbody tr td {
   color: #323c47;
+  background-color: #f0f3f7;
   font-size: 12px;
   line-height: 32px;
   font-weight: 600;
