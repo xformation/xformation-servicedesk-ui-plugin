@@ -1,8 +1,5 @@
 import * as React from 'react';
 import './table.css';
-// import './bootstrap.css';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-// import { faSearch,faChevronDown } from '@fortawesome/free-solid-svg-icons'
 
 const sortEnum = {
     NONE: 0,
@@ -33,7 +30,7 @@ export class Table extends React.Component<any, any> {
     };
 
     tableBodyData() {
-        const { displayData, searchKey, perPageLimit, currentPage, columns, visibleCheckbox } = this.state;
+        const { displayData, perPageLimit, currentPage, columns, visibleCheckbox } = this.state;
         const retData = [];
         const length = displayData.length;
         const cLength = columns.length;
@@ -41,10 +38,10 @@ export class Table extends React.Component<any, any> {
             for (let i = 0; i < length; i++) {
                 if (i >= currentPage * perPageLimit && i <= (currentPage * perPageLimit + (perPageLimit - 1))) {
                     const tdJSX = [];
-                    if (visibleCheckbox == true) {
+                    if (visibleCheckbox === true) {
                         tdJSX.push(
                             <td>
-                                <input type="checkbox" checked={displayData[i].checkStatus} className="checkbox" onChange={(e) => { this.onChangeParentCheckbox(e, i) }} />
+                                <input type="checkbox" checked={displayData[i].checkStatus} className={`checkbox`} onChange={(e) => { this.onChangeParentCheckbox(e, i) }} />
                             </td>
                         );
                     }
@@ -64,7 +61,7 @@ export class Table extends React.Component<any, any> {
                             }
                         }
                     }
-                    retData.push(<tr key={i}>{tdJSX}</tr>);
+                    retData.push(<tr className={`${displayData[i].checkStatus ? 'checked-row' : ''}`} key={i}>{tdJSX}</tr>);
                 }
             }
         } else {
@@ -76,7 +73,6 @@ export class Table extends React.Component<any, any> {
     componentDidMount() {
         this.calculateTotalPages(this.state.data);
     }
-    
 
     componentDidUpdate(prevProps: any, prevState: any) {
         if (JSON.stringify(prevProps.valueFromData) !== JSON.stringify(this.props.valueFromData)) {
@@ -111,7 +107,7 @@ export class Table extends React.Component<any, any> {
         const { sortType, sortKey, columns, visibleCheckbox, displayData } = this.state;
         const length = columns.length;
         const retData = [];
-        if (visibleCheckbox == true && displayData.length > 0) {
+        if (visibleCheckbox === true && displayData.length > 0) {
             retData.push(<th><input type="checkbox" checked={this.state.isAllChecked} onChange={this.checkAllBoxes} className="checkbox" /></th>);
         }
         for (let i = 0; i < length; i++) {
@@ -157,13 +153,13 @@ export class Table extends React.Component<any, any> {
         let countCheckedCheckbox = 0;
         displayData[index].checkStatus = checked;
         for (let j = 0; j < displayData.length; j++) {
-            if (displayData[j].checkStatus == true) {
+            if (displayData[j].checkStatus === true) {
                 countCheckedCheckbox++;
             } else {
                 countCheckedCheckbox--;
             }
         }
-        if (countCheckedCheckbox == displayData.length) {
+        if (countCheckedCheckbox === displayData.length) {
             status = true;
         } else {
             status = false;
@@ -175,25 +171,25 @@ export class Table extends React.Component<any, any> {
     }
 
     peginationOfTable() {
-        const { currentPage, totalPages, displayData, perPageLimit } = this.state;
+        const { currentPage, totalPages, displayData } = this.state;
         let rows = [];
         if (displayData.length > 0) {
             for (let i = 0; i < totalPages; i++) {
                 rows.push(<li className="page-item" key={i}><a className={currentPage === i ? 'page-link active' : 'page-link deactive'} href="#" onClick={(e) => this.navigatePage('btn-click', e, i)}>{i + 1}</a></li >);
             }
             return (
-                <ul>
-                    <li className="page-item previous">
+                <div className="pagination">
+                    <div className="page-item previous">
                         <a className={currentPage === 0 ? 'page-link desable' : 'page-link enable'} href="#" onClick={(e) => this.navigatePage('pre', e, '')}>Previous</a>
-                    </li>
-                    <div ref={this.paginationRef}>
-                        {rows}
                     </div>
+                    <ul ref={this.paginationRef}>
+                        {rows}
+                    </ul>
                     {/* <li><a href="#">......</a></li> */}
-                    <li className="page-item next">
+                    <div className="page-item next">
                         <a className={currentPage === this.state.totalPages - 1 ? 'page-link desable' : 'page-link enable'} href="#" onClick={(e) => this.navigatePage('next', e, '')}>Next</a>
-                    </li>
-                </ul>
+                    </div>
+                </div>
             );
         }
     }
@@ -246,61 +242,41 @@ export class Table extends React.Component<any, any> {
             currentPage: 0
         });
     }
+
     onSearchChange = (e: any) => {
-        let { name,value } = e.target;
+        console.log(e.target.value);
+        const { value } = e.target;
         this.setState({
             searchKey: value,
             currentPage: 0,
             sortType: sortEnum.NONE,
             sortKey: '',
         });
-        const { data } = this.state;
-        /* old code for single key search */
-        // const { searchKey } = this.props;
-        // var queryResult = [];
-        // value = value ? value.toLowerCase() : "";
-        // for (let i = 0; i < data.length; i++) {
-        //     const searchKeyValue = data[i][searchKey];
-        //     if ((searchKeyValue && searchKeyValue.toLowerCase().indexOf(value) !== -1) || value === '') {
-        //         queryResult.push(data[i]);
-        //     }
-        // }
-        /* old code for single key search */
-        let result = [];
-        if (value !== "") {
-            if (data && data.length > 0) {
+        const { data, columns } = this.state;
+        var queryResult = [];
+        if (data.length > 0) {
+            if (value.trim()) {
                 for (let i = 0; i < data.length; i++) {
-                    let prm = data[i];
-                    let k;
-                    let name="";
-                    for(k in prm){
-                        name=name+" "+prm[k];
-                    }
-                    /* old code for single key search */
-                    // let name = prm.name + " " + prm.permission + " " + prm.description;
-                    /* old code for single key search */
-                    name = name.toLowerCase();
-                    if (name.indexOf(value.toLowerCase()) !== -1) {
-                        result.push(prm);
+                    let row = data[i];
+                    console.log(row);
+                    for (let j = 0; j < columns.length; j++) {
+                        let colData = columns[j].key;
+                        if (row[colData]) {
+                            if (row[colData].toLowerCase().indexOf(value) !== -1 || row[colData].indexOf(value) !== -1) {
+                                queryResult.push(data[i]);
+                                break;
+                            }
+                        }
                     }
                 }
-                this.setState({
-                    displayData: result
-                });
-                this.calculateTotalPages(result);        
+            } else {
+                queryResult = data;
             }
-        } else {
             this.setState({
-                displayData: data,
+                displayData: queryResult,
             });
-            
+            this.calculateTotalPages(queryResult);
         }
-        /* old code for single key search */
-        // this.setState({
-        //     displayData: queryResult,
-        // });
-        // this.calculateTotalPages(queryResult);
-        /* old code for single key search */
     }
 
     displayShowPageLimit() {
@@ -329,14 +305,14 @@ export class Table extends React.Component<any, any> {
         if (sortVal === sortEnum.ASCENDING) {
             data.sort((a: any, b: any) => {
                 if (a[sortkey] && b[sortkey]) {
-                    return a[sortkey].toString().localeCompare(b[sortkey].toString());
+                    return a[sortkey].localeCompare(b[sortkey]);
                 }
                 return 0;
             });
         } else if (sortVal === sortEnum.DESCENDING) {
             data.sort((a: any, b: any) => {
                 if (a[sortkey] && b[sortkey]) {
-                    return a[sortkey].toString().localeCompare(b[sortkey].toString());
+                    return a[sortkey].localeCompare(b[sortkey]);
                 }
                 return 0;
             }).reverse()
@@ -380,7 +356,7 @@ export class Table extends React.Component<any, any> {
 
     render() {
         const { displayData, perPageLimit, currentPage, showSelect } = this.state;
-        let { tableClasses, showingLine } = this.props;
+        let { tableClasses, showingLine, dark } = this.props;
         let startIndex = perPageLimit * currentPage + 1;
         let endIndex = perPageLimit * (currentPage + 1);
         if (endIndex > displayData.length) {
@@ -392,38 +368,31 @@ export class Table extends React.Component<any, any> {
             showingLine = showingLine.replace("%total%", displayData.length);
         }
         return (
-            <div className={`${tableClasses.parentClass} custom-table p-5`}>
-                <div className="row">
-                    <div className="col-sm-12">
-                        <div className="d-inline-block">{showingLine}</div>
-                        <div className="d-inline-block showby">
-                            <label className="d-inline-block">Show</label>
-                            <select onChange={this.handleChange} className="form-control">
-                                {this.displayShowPageLimit()}
-                            </select>
-                            <span className="d-inline-block">entries per page</span>
+            <div className={`${tableClasses.parentClass} custom-table ${dark ? 'dark' : ''}`}>
+                <div className="toolbar">
+                    <div className="showing">{showingLine}</div>
+                    <div className="showby">
+                        <label>Show</label>
+                        <select onChange={this.handleChange} className="form-control">
+                            {this.displayShowPageLimit()}
+                        </select>
+                        <span>entries per page</span>
+                    </div>
+                    <div className="multiselect">
+                        <div className="form-control select-label" onClick={this.toggleColumnSelect}>
+                            Select columns <i className="arrow down"></i>
                         </div>
-                        <div className="d-inline-block multiselect">
-                            <div className="form-control select-label" onClick={this.toggleColumnSelect}>
-                                Select columns 
-                                {/* <FontAwesomeIcon icon={faChevronDown} />  */}
-                                <i className="fa fa-chevron-down float-right"></i>
-                            </div>
-                            <div style={{ display: showSelect ? "" : "none" }} className="options">
-                                {this.renderColumns()}
-                            </div>
-                        </div>
-                        <div className="d-inline-block float-right form-group filter-search-control">
-                            <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey} />
-                            <button>
-                            <i className="fa fa-search float-right"></i>
-                            {/* <FontAwesomeIcon icon={faSearch} /> */}
-                            </button>
+                        <div style={{ display: showSelect ? "" : "none" }} className="border options">
+                            {this.renderColumns()}
                         </div>
                     </div>
+                    <div className="filter-search-control">
+                        <input type="text" className="input-group-text" onChange={this.onSearchChange} value={this.state.searchKey} />
+                        <button><span>Search</span></button>
+                    </div>
                 </div>
-                <div className={tableClasses.tableParent}>
-                    <table className={tableClasses.table}>
+                <div className={`${tableClasses.tableParent} data-table-parent`}>
+                    <table className={`${tableClasses.table} data-table`}>
                         <thead>
                             <tr>
                                 {this.tableHeader()}
@@ -435,7 +404,7 @@ export class Table extends React.Component<any, any> {
                         </tbody>
                     </table>
                 </div>
-                <div className="d-block width-100 p-t-15 text-right pagination">
+                <div className="d-block width-100 pt-3 text-right">
                     {this.peginationOfTable()}
                 </div>
             </div>

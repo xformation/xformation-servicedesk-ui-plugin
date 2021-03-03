@@ -416,6 +416,13 @@ export class OpenTickets extends React.Component<any, any> {
             }
         )
     }
+    isLightTheme() {
+        const w: any = window;
+        if (w.grafanaBootData && w.grafanaBootData.user) {
+            return w.grafanaBootData.user.lightTheme;
+        }
+        return false;
+    }
 
     render() {
         const { page_type, openCreateMenu, columns, ticketDataList, agentNameList, companyNameList, contactNameList, agent, created, dueBy, status, priority, type, tags, company, contact, filterCheckbox } = this.state;
@@ -603,7 +610,7 @@ export class OpenTickets extends React.Component<any, any> {
                     <div className="common-container border-bottom-0">
                         <div className="d-block all-open-ticket-tabel">
                             <Table valueFromData={{ columns: columns, data: tableData }} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
-                                tableClasses={{ table: "open-ticket-tabel", tableParent: "d-block p-t-5 open-tickets-tabel", parentClass: "all-open-ticket-tabel" }} searchKey="subject" showingLine="Showing %start% to %end% of %total% Tickets" />
+                                tableClasses={{ table: "open-ticket-tabel", tableParent: "d-block p-t-5 open-tickets-tabel", parentClass: "all-open-ticket-tabel" }} searchKey="subject" showingLine="Showing %start% to %end% of %total% Tickets" dark={!this.isLightTheme()} />
 
                         </div>
                     </div>

@@ -16,66 +16,6 @@
             padding-right: 15px;
         }
     }
-
-    .contacts-tabel{
-        overflow-x: scroll;
-        .contact-tabel{
-            thead{
-                tr{
-                    th{
-                        color: #A9B9C6;
-                        font-size: 12px;
-                        line-height: 16px;
-                        font-weight: 600;
-                        padding: 15px;
-                        &:nth-child(1){
-                            padding-right: 5px;
-                        }
-                        &:nth-child(2){
-                            padding-left: 5px;
-                        }
-                    }
-                }
-            }
-            tbody{
-                tr{
-                    td{
-                        background-color: #F0F3F7;
-                        color: #323C47;
-                        font-size: 12px;
-                        line-height: 32px;
-                        font-weight: 600;
-                        padding: 15px;
-                        &:nth-child(1){
-                            padding-right: 5px;
-                        }
-                        &:nth-child(2){
-                            padding-left: 5px;
-                        }
-                        &.there-no-data{
-                            font-size: 18px;
-                        }
-                        .checkbox{
-                            display: inline-block;
-                            vertical-align: middle;
-                        }
-                        .image{
-                            width: 32px;
-                            height: 32px;
-                            border-radius: 50%;
-                            overflow: hidden;
-                            background-color: #A9B9C6;
-                            margin-left: 0px;
-                            margin-right: 15px;
-                            display: inline-block;
-                            vertical-align: top;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 }
 
 @media (max-width: 992px){

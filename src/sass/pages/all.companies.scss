@@ -17,62 +17,6 @@
         }
     }
 
-    .companies-main-tabel{
-        overflow-x: scroll;
-        .companies-tabel{
-            width: 100%;
-            thead{
-                tr{
-                    th{
-                        color: #A9B9C6;
-                        font-size: 12px;
-                        line-height: 16px;
-                        font-weight: 600;
-                        padding: 15px;
-                        &:nth-child(1){
-                            padding-right: 5px;
-                        }
-                        &:nth-child(2){
-                            padding-left: 5px;
-                        }
-                    }
-                }
-            }
-            tbody{
-                tr{
-                    td{
-                        background-color: #F0F3F7;
-                        color: #323C47;
-                        font-size: 12px;
-                        line-height: 32px;
-                        font-weight: 600;
-                        padding: 15px;
-                        &:nth-child(1){
-                            padding-right: 5px;
-                        }
-                        &:nth-child(2){
-                            padding-left: 5px;
-                        }
-                        &.there-no-data{
-                            font-size: 18px;
-                        }
-                        .checkbox{
-                            display: inline-block;
-                            vertical-align: middle;
-                        }
-                        .image{
-                            width: 40px;
-                            height: 40px;
-                            margin-left: 15px;
-                            margin-right: 15px;
-                            display: inline-block;
-                            vertical-align: top;
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 @media (max-width: 992px){
@@ -83,13 +27,6 @@
         .create-button{
             float: left;
             margin-top: 0px;
-        }
-        .all-companies-tabel{
-            .companies-main-tabel{
-                .companies-tabel{
-                    width: 992px;
-                }
-            }
         }
     }
 }

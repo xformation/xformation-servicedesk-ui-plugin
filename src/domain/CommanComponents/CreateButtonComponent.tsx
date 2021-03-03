@@ -1,17 +1,10 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
 import { config } from '../../config';
-import { Breadcrumbs } from '../../components/Breadcrumbs';
-import ticketIconImage1 from '../../img/ticket-icon-img1.png';
-import { Line } from 'react-chartjs-2';
-import { Tickets } from '../Tickets';
-import Table from '../../components/table';
 import { OpenNewContactPopup } from '../../components/OpenNewContactPopup';
 import { OpenNewCompanyPopup } from '../../components/OpenNewCompanyPopup';
 import { OpenNewEmailPopup } from '../../components/OpenNewEmailPopup';
 import { OpenNewTicketPopup } from '../../components/OpenNewTicketPopup';
 import { OpenNewAgentPopup } from '../../components/OpenNewAgentPopup';
-import { RestService } from '../_service/RestService';
 import Rbac from '../Rbac/Rbac';
 export class CreateButtonComponent extends React.Component<any, any> {
     openNewContactRef: any;
@@ -71,33 +64,33 @@ export class CreateButtonComponent extends React.Component<any, any> {
                 <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-createbtn">
                     <a href="#" onClick={this.onClickOpenSubLink} className="blue-button m-b-0 m-r-0 min-width-inherit width-auto create-btn">
                         Create
-                                    </a>
+                    </a>
                 </Rbac>
                 {openCreateMenu == true && <div className="text-center open-create-menu">
                     <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-ticketbtn">
                         <a onClick={this.onClickOpenNewTicket}>
                             Ticket
-                                        </a>
+                        </a>
                     </Rbac>
                     <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-emailbtn">
                         <a onClick={this.onClickOpenNewEmail}>
                             Email
-                                        </a>
+                        </a>
                     </Rbac>
                     <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-contactbtn">
                         <a onClick={this.onClickOpenNewContact}>
                             Contact
-                                        </a>
+                        </a>
                     </Rbac>
                     <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-companytbtn">
                         <a onClick={this.onClickOpenNewCompany}>
                             Company
-                                        </a>
+                        </a>
                     </Rbac>
                     <Rbac parentName={config.PARENT_NAME} childName="commancomponent-createbuttoncomponent-agentbtn">
                         <a onClick={this.onClickOpenNewAgent}>
                             Agent
-                                        </a>
+                        </a>
                     </Rbac>
                 </div>
                 }

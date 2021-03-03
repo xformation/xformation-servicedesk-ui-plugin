@@ -4,7 +4,6 @@ import { config } from '../../config';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import ticketIconImage1 from '../../img/ticket-icon-img1.png';
 import { Line } from 'react-chartjs-2';
-import { Tickets } from './../Tickets';
 import Table from './../../components/table';
 import { RestService } from '../_service/RestService'; import Rbac from '../Rbac/Rbac';
 import { CreateButtonComponent } from "../CommanComponents/CreateButtonComponent";
@@ -297,6 +296,13 @@ export class Dashboard extends React.Component<any, any> {
         }
         return "";
     };
+    isLightTheme() {
+        const w: any = window;
+        if (w.grafanaBootData && w.grafanaBootData.user) {
+            return w.grafanaBootData.user.lightTheme;
+        }
+        return false;
+    }
 
     render() {
         const { openCreateMenu, ticketDataList, columns, LineChartData, selectedDate } = this.state;
@@ -426,7 +432,7 @@ export class Dashboard extends React.Component<any, any> {
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
                             <Table valueFromData={{ columns: columns, data: ticketDataList }} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
-                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="requesterName" showingLine="Showing %start% to %end% of %total% Tickets" />
+                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="requesterName" showingLine="Showing %start% to %end% of %total% Tickets" dark={!this.isLightTheme()} />
                         </div>
                     </div>
                 </div>

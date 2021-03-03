@@ -74,6 +74,14 @@ export class AllCompanies extends React.Component<any, any> {
         // console.log("companyNameList  : ", this.state.companyContactList);
     }
 
+    isLightTheme() {
+        const w: any = window;
+        if (w.grafanaBootData && w.grafanaBootData.user) {
+            return w.grafanaBootData.user.lightTheme;
+        }
+        return false;
+    }
+    
     render() {
         const { openCreateMenu, companyData, columns } = this.state;
         return (
@@ -95,7 +103,7 @@ export class AllCompanies extends React.Component<any, any> {
                     <div className="common-container border-bottom-0 p-t-0">
                         <div className="d-block p-t-20 all-companies-tabel">
                             <Table valueFromData={{ columns: columns, data: companyData }} perPageLimit={10} visiblecheckboxStatus={true}
-                                tableClasses={{ table: "companies-tabel", tableParent: "d-block  p-t-5 companies-main-tabel", parentClass: "d-block p-t-20 all-companies-tabel" }} searchKey="company" showingLine="Showing %start% to %end% of %total% Companies" />
+                                tableClasses={{ table: "companies-tabel", tableParent: "d-block  p-t-5 companies-main-tabel", parentClass: "d-block p-t-20 all-companies-tabel" }} searchKey="company" showingLine="Showing %start% to %end% of %total% Companies" dark={!this.isLightTheme()} />
                         </div>
                     </div>
                 </div>

@@ -291,6 +291,13 @@ export class Tickets extends React.Component<any, any> {
             }
         ]
     };
+    isLightTheme() {
+        const w: any = window;
+        if (w.grafanaBootData && w.grafanaBootData.user) {
+            return w.grafanaBootData.user.lightTheme;
+        }
+        return false;
+    }
 
     render() {
         const { openCreateMenu, quickStat, barChartData } = this.state;
@@ -545,7 +552,7 @@ export class Tickets extends React.Component<any, any> {
                                 <span className="d-block">List of ticket opened by Customer</span>
                             </div>
                             <Table valueFromData={this.tableValue} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue}
-                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="subject" showingLine="Showing %start% to %end% of %total% Tickets" />
+                                tableClasses={{ table: "ticket-tabel", tableParent: "d-block p-t-5 tickets-tabel", parentClass: "all-support-ticket-tabel" }} searchKey="subject" showingLine="Showing %start% to %end% of %total% Tickets" dark={!this.isLightTheme()} />
                         </div>
                     </div>
                 </div>

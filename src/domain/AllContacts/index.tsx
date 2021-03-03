@@ -93,6 +93,13 @@ export class AllContacts extends React.Component<any, any> {
             openCreateMenu: menu,
         });
     }
+    isLightTheme() {
+        const w: any = window;
+        if (w.grafanaBootData && w.grafanaBootData.user) {
+            return w.grafanaBootData.user.lightTheme;
+        }
+        return false;
+    }
 
     render() {
         const { openCreateMenu, columns, contactData } = this.state;
@@ -113,7 +120,7 @@ export class AllContacts extends React.Component<any, any> {
                         </div>
                     </div>
                     <div className="common-container border-bottom-0 p-t-0">
-                        <Table valueFromData={{ columns: columns, data: contactData }} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue} tableClasses={{ table: "contact-tabel", tableParent: "d-block p-t-5 contacts-tabel", parentClass: "d-block p-t-20 all-contacts-tabel" }} searchKey="contact" showingLine="Showing %start% to %end% of %total% Contacts" />
+                        <Table valueFromData={{ columns: columns, data: contactData }} perPageLimit={this.perPageLimit} visiblecheckboxStatus={this.checkboxValue} tableClasses={{ table: "contact-tabel", tableParent: "d-block p-t-5 contacts-tabel", parentClass: "d-block p-t-20 all-contacts-tabel" }} searchKey="contact" showingLine="Showing %start% to %end% of %total% Contacts" dark={!this.isLightTheme()} />
                     </div>
                 </div>
             </div>
