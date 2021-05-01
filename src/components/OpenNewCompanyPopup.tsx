@@ -45,10 +45,9 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
             isSubmitted: true
         });
         const errorData = this.validate(true);
-        if (errorData.companyLogo.isValid && errorData.companyName.isValid && errorData.description.isValid && errorData.notes.isValid && errorData.healthScore.isValid && errorData.domain.isValid && errorData.accountTier.isValid && errorData.renewalDate.isValid && errorData.industry.isValid) {
+        if (errorData.companyName.isValid && errorData.description.isValid && errorData.notes.isValid && errorData.healthScore.isValid && errorData.domain.isValid && errorData.accountTier.isValid && errorData.renewalDate.isValid && errorData.industry.isValid) {
             const { companyLogo, companyName, description, notes, domain, healthScore, accountTier, renewalDate, industry } = this.state;
             const sendData = {
-                companyLogo,
                 companyName,
                 description,
                 notes,
@@ -59,6 +58,7 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
                 industry,
             };
             console.log(sendData);
+            
             let formData = new FormData();
             formData.append("logo", companyLogo);
             formData.append("companyName", companyName);
@@ -69,16 +69,17 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
             formData.append("accountTier", accountTier);
             formData.append("renewalDate", renewalDate);
             formData.append("industry", industry);
-            const data = {
-                "companyName": companyName,
-                "description": description,
-                "notes": notes,
-                "domain": domain,
-                "healthScore": healthScore,
-                "accountTier": accountTier,
-                "renewalDate": renewalDate,
-                "industry": industry,
-            }
+            // const data = {
+            //     "logo": companyLogo,
+            //     "companyName": companyName,
+            //     "description": description,
+            //     "notes": notes,
+            //     "domain": domain,
+            //     "healthScore": healthScore,
+            //     "accountTier": accountTier,
+            //     "renewalDate": renewalDate,
+            //     "industry": industry,
+            // }
             axios.post(config.ADD_COMPANY_URL, formData, {
                 headers: {
                     'content-type': 'multipart/form-data'
@@ -120,12 +121,12 @@ export class OpenNewCompanyPopup extends React.Component<any, any> {
         };
         if (isSubmitted) {
             const { companyName,companyLogo, description, notes, domain, healthScore, accountTier, renewalDate, industry } = this.state;
-            if (!companyLogo) {
-                retData.companyLogo = {
-                    isValid: false,
-                    message: "Company Logo is required"
-                };
-            }
+            // if (!companyLogo) {
+            //     retData.companyLogo = {
+            //         isValid: false,
+            //         message: "Company Logo is required"
+            //     };
+            // }
             if (!companyName) {
                 retData.companyName = {
                     isValid: false,

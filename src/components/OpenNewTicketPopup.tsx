@@ -142,29 +142,35 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             let associatedEntityName;
             let associatedEntityId;
             let alertName;
+            let createdOn;
+            let alertState;
             if (this.props.guid == undefined) {
                 associatedEntityName = "";
                 associatedEntityId = null;
+                createdOn = null;
+                alertState = null;
             } else {
                 associatedEntityName = "alert";
                 associatedEntityId = this.props.guid;
                 alertName = this.props.alertName;
+                createdOn = this.props.createdOn;
+                alertState = this.props.alertState;
             }
 
-            let data = {
-                type: typeValue,
-                subject: subjectText,
-                priority: priorityValue,
-                description: description,
-                tag: tags,
-                assignedToUserType: assignType,
-                requesterUserType: "contact",
-                requesterId: requesterContact,
-                assignedToId: assignedToId,
-                associatedEntityName: associatedEntityName,
-                associatedEntityId: associatedEntityId,
-                alertName: alertName,
-            }
+            // let data = {
+            //     type: typeValue,
+            //     subject: subjectText,
+            //     priority: priorityValue,
+            //     description: description,
+            //     tag: tags,
+            //     assignedToUserType: assignType,
+            //     requesterUserType: "contact",
+            //     requesterId: requesterContact,
+            //     assignedToId: assignedToId,
+            //     associatedEntityName: associatedEntityName,
+            //     associatedEntityId: associatedEntityId,
+            //     alertName: alertName,
+            // }
 
             let formData = new FormData()
             formData.append("type", typeValue);
@@ -179,8 +185,10 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             formData.append("associatedEntityName", associatedEntityName);
             formData.append("associatedEntityId", associatedEntityId);
             formData.append("alertName", alertName);
+            formData.append("createdOn", createdOn);
+            formData.append("alertState", alertState);
 
-            console.log("Send Data : ", data);
+            // console.log("Send Data : ", data);
             axios.post(config.ADD_TICKET_URL, formData, {})
                 .then((response: any) => {
                     if (response.data != null) {
