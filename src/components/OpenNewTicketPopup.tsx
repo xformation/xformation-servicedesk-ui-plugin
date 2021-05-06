@@ -147,7 +147,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             if (this.props.guid == undefined) {
                 associatedEntityName = "";
                 associatedEntityId = null;
-                createdOn = null;
+                createdOn = 0;
                 alertState = null;
             } else {
                 associatedEntityName = "alert";
@@ -188,7 +188,7 @@ export class OpenNewTicketPopup extends React.Component<any, any> {
             formData.append("createdOn", createdOn);
             formData.append("alertState", alertState);
 
-            // console.log("Send Data : ", data);
+            console.log("Ticket object  : ", formData);
             axios.post(config.ADD_TICKET_URL, formData, {})
                 .then((response: any) => {
                     if (response.data != null) {
