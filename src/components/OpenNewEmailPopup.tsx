@@ -95,23 +95,26 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
             isSubmitted: true
         });
         const errorData = this.validate(true);
-        console.log("From emails length : ", this.state.fromEmails.length);
-        console.log("From To emails length : ", this.state.toEmails.length);
-        console.log("error : ", errorData);
+        // console.log("From emails length : ", this.state.fromEmails.length);
+        // console.log("From To emails length : ", this.state.toEmails.length);
+        // console.log("error : ", errorData);
         if (errorData.fromEmails.isValid && errorData.toEmails.isValid && errorData.subject.isValid && errorData.description.isValid && errorData.priority.isValid && errorData.status.isValid && errorData.tags.isValid) {
             const { fromEmails, toEmails, subject, description, priority, status, tags, ticketId } = this.state;
-            console.log(fromEmails);
-            console.log(toEmails);
+            // console.log("From Email before : ",fromEmails);
+            // console.log("TO Email before: ",toEmails);
             let from = [];
             let i;
             for (i in fromEmails) {
                 from.push(fromEmails[i].value);
             }
+            // console.log("From Email: after ",from);
             let to = [];
             let j;
             for (j in toEmails) {
                 to.push(toEmails[j].value)
             }
+            // console.log("TO Email after: ",to);
+            
             let priorityValue = "";
             if (priority == 0) {
                 priorityValue = "Low";
@@ -136,15 +139,16 @@ export class OpenNewEmailPopup extends React.Component<any, any> {
                 "tags": tags,
             }
             let formData = new FormData();
-            formData.append("mailFrom", from.toString());
-            formData.append("mailTo", to.toString());
+            formData.append("from", from.toString());
+            formData.append("to", to.toString());
             formData.append("subject", subject);
             formData.append("description", description);
             formData.append("priority", priorityValue);
             formData.append("status", statusValue);
             formData.append("tags", tags);
             formData.append("ticketId", ticketId);
-            console.log(formData);
+            console.log("Email Object ",formData);
+
             axios.post(config.SEND_EMAIL_URL, formData, {
             }).then((response: any) => {
                 if (response.data != null) {
