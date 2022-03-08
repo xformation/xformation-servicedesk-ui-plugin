@@ -3,8 +3,9 @@ const IP = "100.64.108.25";
 const ticketSrvUrl = `http://${IP}:7100/api`;
 
 export const config = {
-  basePath: "/plugins/xformation-servicedesk-ui-plugin/page",
-
+  basePath: "/a/xformation-servicedesk-ui-plugin",
+  USERID: "admin",
+  PASSWORD: "admin",
   SERVICEDESK_API_URL: "",
   ADD_COMPANY_URL: `${ticketSrvUrl}/addCompany`,
   GET_ALL_COMPANIES_URL: `${ticketSrvUrl}/listAllcompanies`,

@@ -1,20 +1,20 @@
 {
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
-  "name": "Service Desk",
+  "name": "Serviced Desk",
   "id": "xformation-servicedesk-ui-plugin",
   "info": {
-    "description": "Service Desk",
+    "description": "Serviced Desk",
     "author": {
-      "name": "Synectiks",
-      "url": "https://xformation.com"
+      "name": "Synectiks"
     },
-    "keywords": ["cms", "panel"],
-    "version": "1.0",
-    "updated": "2018-10-12",
     "logos": {
-      "small": "img/alert_logo.svg",
-      "large": "img/alert_logo.svg"
-    }
+      "small": "img/asset_logo.svg",
+      "large": "img/asset_logo.svg"
+    },
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
   },
   "includes": [
     {
@@ -22,67 +22,76 @@
       "name": "Dashboard",
       "addToNav": false,
       "defaultNav": false,
-      "component": "Dashboard"
+      "role": "Admin",
+      "path": "/a/%PLUGIN_ID%"
     },
     {
       "type": "page",
       "name": "Tickets",
       "addToNav": false,
       "defaultNav": false,
-      "component": "Tickets"
+      "role": "Admin",
+      "path": "/a/%PLUGIN_ID%?path=tickets"
     },
     {
       "type": "page",
       "name": "AllContacts",
       "addToNav": false,
       "defaultNav": false,
-      "component": "AllContacts"
+      "role": "Admin",
+      "path": "/a/%PLUGIN_ID%?path=allContacts"
     },
     {
       "type": "page",
       "name": "OpenTickets",
       "addToNav": false,
       "defaultNav": false,
-      "component": "OpenTickets"
+      "role": "Admin",
+      "path": "/a/%PLUGIN_ID%?path=opentickets"
     },
     {
       "type": "page",
       "name": "AllCompanies",
       "addToNav": false,
       "defaultNav": false,
-      "component": "AllCompanies"
+      "role": "Admin",
+      "path": "/a/%PLUGIN_ID%?path=allcompanies"
     },
     {
       "type": "page",
       "name": "TicketsDetails",
       "addToNav": false,
       "defaultNav": false,
-      "component": "TicketsDetails"
+      "role": "Admin",
+      "path": "/a/%PLUGIN_ID%?path=ticketsdetails"
     },
     {
       "type": "page",
       "name": "Reports",
       "addToNav": false,
       "defaultNav": false,
-      "component": "Reports"
+      "role": "Admin",
+      "path": "/a/%PLUGIN_ID%?path=reports"
     },
     {
       "type": "page",
       "name": "ReportHelpdesh",
       "addToNav": false,
       "defaultNav": false,
-      "component": "ReportHelpdesh"
+      "role": "Admin",
+      "path": "/a/%PLUGIN_ID%?path=reporthelpdesh"
     },
     {
       "type": "page",
       "name": "Charts",
       "addToNav": false,
       "defaultNav": false,
-      "component": "Charts"
+      "role": "Admin",
+      "path": "/a/%PLUGIN_ID%?path=charts"
     }
   ],
   "dependencies": {
-    "grafanaVersion": "3.x 4.x 5.x",
+    "grafanaDependency": ">=8.0.0",
     "plugins": []
   }
 }
